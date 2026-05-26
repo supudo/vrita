@@ -1,0 +1,72 @@
+# C++ objects and libs
+
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# QtCreator
+
+*.autosave
+imgui.ini
+
+#Cmake build
+cmake-build/
+build/
+
+#QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# Visual Studio
+*.tlog
+Vrita/*
+x64/*
+*.sdf
+.vs/*
+*.vcxproj.user
+*.aps
+
+
+# VSCode
+.vscode
+
+# Xcode
+.DS_Store
+*/build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+profile
+*.moved-aside
+DerivedData
+.idea/
+*.hmap
+xcuserdata/*

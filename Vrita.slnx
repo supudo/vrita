@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Vrita.vcxproj" Id="633f6ab1-e757-421b-94bc-0afd4921505d" />
+</Solution>

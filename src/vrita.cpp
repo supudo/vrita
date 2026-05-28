@@ -30,7 +30,7 @@ void ShowMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Exit"))
-                gDone = true;
+                vritaRunning = true;
 
             ImGui::EndMenu();
         }
@@ -116,15 +116,15 @@ int runVrita() {
 
     ImVec4 clear_color = ImVec4(188.0f / 255.0f, 190.0f / 255.0f, 194.0f / 255.0f, 1.00f);
 
-    while (!gDone) {
+    while (!vritaRunning) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT)
-                gDone = true;
+                vritaRunning = true;
             if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
                 event.window.windowID == SDL_GetWindowID(window)) {
-                gDone = true;
+                vritaRunning = true;
             }
         }
 

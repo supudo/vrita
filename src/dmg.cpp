@@ -72,21 +72,51 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
 }
 
 void DMG::run(bool* windowOpened) {
-    float imgW = (float)(DMG::WIDTH * windowScale);
+    float imgW = (float)(DMG::WIDTH  * windowScale);
     float imgH = (float)(DMG::HEIGHT * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
+    float padX   = style.WindowPadding.x * 2.0f;
+
     if (windowScale != lastWindowScale && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-        ImGui::SetNextWindowSize(ImVec2(imgW + style.WindowPadding.x * 2.0f, imgH + decorH), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(imgW + padX, imgH + decorH), ImGuiCond_Always);
         lastWindowScale = windowScale;
     }
 
-    ImGui::Begin("GameBoy (DMG)", windowOpened, ImGuiWindowFlags_NoResize);
+    struct ConstraintData { float aspect; float decorH; float padX; };
+    static ConstraintData cd;
+    cd = { (float)DMG::WIDTH / (float)DMG::HEIGHT, decorH, padX };
+
+    ImGui::SetNextWindowSizeConstraints(
+        ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),
+        ImVec2(FLT_MAX, FLT_MAX),
+        [](ImGuiSizeCallbackData* data) {
+            auto* c = (ConstraintData*)data->UserData;
+            float contentW = data->DesiredSize.x - c->padX;
+            data->DesiredSize.y = contentW / c->aspect + c->decorH;
+        },
+        &cd
+    );
+
+    ImGui::Begin("GameBoy (DMG)", windowOpened);
 
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
     ImGui::Separator();
-    ImGui::Image((ImTextureID)gTexture, ImVec2(imgW, imgH));
+
+    ImVec2 avail = ImGui::GetContentRegionAvail();
+    float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
+    float dispW = avail.x;
+    float dispH = dispW / aspect;
+    if (dispH > avail.y) {
+        dispH = avail.y;
+        dispW = dispH * aspect;
+    }
+    float offX = (avail.x - dispW) * 0.5f;
+    if (offX > 0.0f)
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
+
+    ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
     ImGui::End();
 }

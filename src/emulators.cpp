@@ -6,16 +6,23 @@
 #include <SDL3/SDL_gpu.h>
 
 #include "../include/dmg.hpp"
+#include "../include/agb.hpp"
 
 std::shared_ptr<DMG> emulatorDMG;
+std::shared_ptr<AGB> emulatorAGB;
 
 void Emulators::init() {
     emulatorDMG = std::make_shared<DMG>();
+    emulatorAGB = std::make_shared<AGB>();
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
     if (!emulatorDMG->createTexture(device)) {
         printf("[EMULATORS] Error: Cannot create DMG texture\n");
+        return false;
+    }
+    if (!emulatorAGB->createTexture(device)) {
+        printf("[EMULATORS] Error: Cannot create AGB texture\n");
         return false;
     }
     return true;
@@ -24,18 +31,25 @@ bool Emulators::createTexture(SDL_GPUDevice* device) {
 void Emulators::generateTestPattern(float time) {
     if (EMULATORS_SHOW_DMG)
         emulatorDMG->generateTestPattern(time);
+    if (EMULATORS_SHOW_AGB)
+        emulatorAGB->generateTestPattern(time);
 }
 
 void Emulators::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
     if (EMULATORS_SHOW_DMG)
         emulatorDMG->uploadFramebufferToTexture(device, commandBuffer);
+    if (EMULATORS_SHOW_AGB)
+        emulatorAGB->uploadFramebufferToTexture(device, commandBuffer);
 }
 
 void Emulators::run() {
     if (EMULATORS_SHOW_DMG)
-        emulatorDMG->run();
+        emulatorDMG->run(&EMULATORS_SHOW_DMG);
+    if (EMULATORS_SHOW_AGB)
+        emulatorAGB->run(&EMULATORS_SHOW_AGB);
 }
 
 void Emulators::release(SDL_GPUDevice* device) {
     emulatorDMG->release(device);
+    emulatorAGB->release(device);
 }

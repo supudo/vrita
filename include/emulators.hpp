@@ -9,6 +9,7 @@ public:
     ~Emulators() = default;
 
     bool EMULATORS_SHOW_DMG = false;
+    bool EMULATORS_SHOW_AGB = false;
 
     void init();
     bool createTexture(SDL_GPUDevice* device);

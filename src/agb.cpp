@@ -1,43 +1,43 @@
-#include "../include/dmg.hpp"
+#include "../include/agb.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
-void DMG::release(SDL_GPUDevice* device) {
+void AGB::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);
 }
 
-bool DMG::createTexture(SDL_GPUDevice* device) {
+bool AGB::createTexture(SDL_GPUDevice* device) {
     SDL_GPUTextureCreateInfo info = {};
     info.type = SDL_GPU_TEXTURETYPE_2D;
     info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-    info.width = DMG::WIDTH;
-    info.height = DMG::HEIGHT;
+    info.width = AGB::WIDTH;
+    info.height = AGB::HEIGHT;
     info.layer_count_or_depth = 1;
     info.num_levels = 1;
     info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
     gTexture = SDL_CreateGPUTexture(device, &info);
     if (!gTexture) {
-        printf("[DMG] Failed to create DMG texture: %s\n", SDL_GetError());
+        printf("[AGB] Failed to create AGB texture: %s\n", SDL_GetError());
         return false;
     }
     return true;
 }
 
-void DMG::generateTestPattern(float time) {
-    for (uint32_t y = 0; y < DMG::HEIGHT; y++) {
-        for (uint32_t x = 0; x < DMG::WIDTH; x++) {
+void AGB::generateTestPattern(float time) {
+    for (uint32_t y = 0; y < AGB::HEIGHT; y++) {
+        for (uint32_t x = 0; x < AGB::WIDTH; x++) {
             uint8_t r = (uint8_t)((x + (int)(time * 50.0f)) & 255);
             uint8_t g = (uint8_t)((y * 2) & 255);
             uint8_t b = (uint8_t)(128);
-            gFramebuffer[y * DMG::WIDTH + x] = (255 << 24) | (b << 16) | (g << 8) | (r);
+            gFramebuffer[y * AGB::WIDTH + x] = (255 << 24) | (b << 16) | (g << 8) | (r);
         }
     }
 }
 
-void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
-    uint32_t framebufferSize = DMG::WIDTH * DMG::HEIGHT * sizeof(uint32_t);
+void AGB::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
+    uint32_t framebufferSize = AGB::WIDTH * AGB::HEIGHT * sizeof(uint32_t);
 
     SDL_GPUTransferBufferCreateInfo transferInfo = {};
     transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
@@ -46,7 +46,7 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
     SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
 
     if (!transferBuffer) {
-        printf("[DMG] Failed to create transfer buffer\n");
+        printf("[AGB] Failed to create transfer buffer\n");
         return;
     }
 
@@ -62,8 +62,8 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
 
     SDL_GPUTextureRegion destination = {};
     destination.texture = gTexture;
-    destination.w = DMG::WIDTH;
-    destination.h = DMG::HEIGHT;
+    destination.w = AGB::WIDTH;
+    destination.h = AGB::HEIGHT;
     destination.d = 1;
 
     SDL_UploadToGPUTexture(copyPass, &source, &destination, false);
@@ -71,9 +71,9 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
     SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
 }
 
-void DMG::run(bool* windowOpened) {
-    float imgW = (float)(DMG::WIDTH * windowScale);
-    float imgH = (float)(DMG::HEIGHT * windowScale);
+void AGB::run(bool* windowOpened) {
+    float imgW = (float)(AGB::WIDTH  * windowScale);
+    float imgH = (float)(AGB::HEIGHT * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
@@ -82,7 +82,7 @@ void DMG::run(bool* windowOpened) {
         lastWindowScale = windowScale;
     }
 
-    ImGui::Begin("GameBoy (DMG)", windowOpened, ImGuiWindowFlags_NoResize);
+    ImGui::Begin("GameBoy Advance (AGB)", windowOpened, ImGuiWindowFlags_NoResize);
 
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
     ImGui::Separator();

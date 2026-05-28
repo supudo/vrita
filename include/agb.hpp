@@ -1,11 +1,11 @@
 /*
 
-GameBoy (DMG)
+GameBoy Advance (AGB)
 
 */
 
-#ifndef VRITA_DMG_INCLUDES
-#define VRITA_DMG_INCLUDES
+#ifndef VRITA_AGB_INCLUDES
+#define VRITA_AGB_INCLUDES
 
 #include "emulators.hpp"
 
@@ -14,17 +14,17 @@ GameBoy (DMG)
 #include <stdint.h>
 #include <iostream>
 
-class DMG {
+class AGB {
 public:
     bool createTexture(SDL_GPUDevice* device);
     void generateTestPattern(float time);
     void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);
-    void run(bool* windowOpened);
+    void run(bool *windowOpened);
     void release(SDL_GPUDevice* device);
 
 private:
-    static const uint32_t WIDTH = 160;
-    static const uint32_t HEIGHT = 144;
+    static const uint32_t WIDTH = 240;
+    static const uint32_t HEIGHT = 160;
     uint32_t gFramebuffer[WIDTH * HEIGHT];
     SDL_GPUTexture* gTexture = nullptr;
 

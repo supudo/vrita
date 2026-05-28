@@ -140,14 +140,17 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\agb.cpp" />
     <ClCompile Include="src\dmg.cpp" />
     <ClCompile Include="src\dots.cpp" />
     <ClCompile Include="src\emulators.cpp" />
     <ClCompile Include="src\vrita.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\agb.hpp" />
     <ClInclude Include="include\code.hpp" />
     <ClInclude Include="include\dmg.hpp" />
+    <ClInclude Include="include\dots.hpp" />
     <ClInclude Include="include\emulators.hpp" />
     <ClInclude Include="include\includes.hpp" />
   </ItemGroup>

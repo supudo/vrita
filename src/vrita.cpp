@@ -13,12 +13,17 @@
 #include <imgui_impl_sdlgpu3.h>
 
 #include "../include/emulators.hpp"
+#include "../include/dots.hpp"
 
 std::shared_ptr<Emulators> managerEmulators;
+std::shared_ptr<Dots> eyeCandy_Dots;
+bool SHOW_DOTS = false;
 
 void initEmulatorsManager() {
     managerEmulators = std::make_shared<Emulators>();
     managerEmulators->init();
+
+    eyeCandy_Dots = std::make_shared<Dots>();
 }
 
 void ShowMainMenu() {
@@ -32,6 +37,13 @@ void ShowMainMenu() {
         if (ImGui::BeginMenu("Emulators")) {
             if (ImGui::MenuItem("GameBoy (DMG)", NULL, managerEmulators->EMULATORS_SHOW_DMG))
                 managerEmulators->EMULATORS_SHOW_DMG = !managerEmulators->EMULATORS_SHOW_DMG;
+            if (ImGui::MenuItem("GameBoy Advance (AGB)", NULL, managerEmulators->EMULATORS_SHOW_AGB))
+                managerEmulators->EMULATORS_SHOW_AGB = !managerEmulators->EMULATORS_SHOW_AGB;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Eyecandy")) {
+            if (ImGui::MenuItem("Dots", NULL, SHOW_DOTS))
+                SHOW_DOTS = !SHOW_DOTS;
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
@@ -70,6 +82,10 @@ int runVrita() {
 
     if (!managerEmulators->createTexture(gpu_device)) {
         printf("Error: Cannot create emulator texture\n");
+        return 1;
+    }
+    if (!eyeCandy_Dots->createTexture(gpu_device)) {
+        printf("Error: Cannot create dots texture\n");
         return 1;
     }
 
@@ -128,13 +144,17 @@ int runVrita() {
         ShowMainMenu();
         
         managerEmulators->run();
+
+        if (SHOW_DOTS)
+            eyeCandy_Dots->run();
         
         ImGui::Render();
-        
+
         ImDrawData* draw_data = ImGui::GetDrawData();
         bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
         SDL_GPUCommandBuffer* command_buffer = SDL_AcquireGPUCommandBuffer(gpu_device);
         managerEmulators->uploadFramebufferToTexture(gpu_device, command_buffer);
+        eyeCandy_Dots->uploadFramebufferToTexture(gpu_device, command_buffer);
         SDL_GPUTexture* swapchain_texture;
         SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer, window, &swapchain_texture, nullptr, nullptr);
 
@@ -156,6 +176,7 @@ int runVrita() {
     SDL_WaitForGPUIdle(gpu_device);
 
     managerEmulators->release(gpu_device);
+    eyeCandy_Dots->release(gpu_device);
 
     ImGui_ImplSDL3_Shutdown();
     ImGui_ImplSDLGPU3_Shutdown();

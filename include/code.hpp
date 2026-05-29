@@ -12,6 +12,9 @@ inline constexpr int WINDOW_WIDTH = 1920 / 2;
 inline constexpr int WINDOW_HEIGHT = 1080 / 2;
 inline const char* AppTitle = "Vrita";
 
+void renderGUIComponents();
+void showFileBrowser(const char* emulatorType);
+void loadROM(const char* romFilePath);
 void initEmulatorsManager();
 int runVrita();
 

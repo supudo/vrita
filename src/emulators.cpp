@@ -13,6 +13,8 @@ std::shared_ptr<AGB> emulatorAGB;
 
 void Emulators::init() {
     emulatorDMG = std::make_shared<DMG>();
+    emulatorDMG->initialize();
+
     emulatorAGB = std::make_shared<AGB>();
 }
 
@@ -42,14 +44,22 @@ void Emulators::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommand
         emulatorAGB->uploadFramebufferToTexture(device, commandBuffer);
 }
 
-void Emulators::run() {
+void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
     if (EMULATORS_SHOW_DMG)
-        emulatorDMG->run(&EMULATORS_SHOW_DMG);
+        emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
     if (EMULATORS_SHOW_AGB)
-        emulatorAGB->run(&EMULATORS_SHOW_AGB);
+        emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
 }
 
 void Emulators::release(SDL_GPUDevice* device) {
     emulatorDMG->release(device);
     emulatorAGB->release(device);
+}
+
+std::string Emulators::loadROM(const char* romFilePath) {
+    if (EMULATORS_SHOW_DMG)
+        return emulatorDMG->loadROM(romFilePath);
+    if (EMULATORS_SHOW_AGB)
+        return emulatorAGB->loadROM(romFilePath);
+    return "";
 }

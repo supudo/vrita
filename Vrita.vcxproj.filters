@@ -17,6 +17,9 @@
     <ClCompile Include="src\agb.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\filebrowser.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -25,14 +28,8 @@
     <Filter Include="include">
       <UniqueIdentifier>{fa0587b0-2376-4653-ba53-7f5e4b3af35e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="gui">
-      <UniqueIdentifier>{60d7160b-68b1-4f93-86cc-71c6757fb1f6}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\includes.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\code.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -46,6 +43,15 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\agb.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filebrowser.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\files.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\datetimes.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

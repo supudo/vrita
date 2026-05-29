@@ -14,16 +14,25 @@
 
 #include "../include/emulators.hpp"
 #include "../include/dots.hpp"
+#include "../include/filebrowser.hpp"
 
 std::shared_ptr<Emulators> managerEmulators;
 std::shared_ptr<Dots> eyeCandy_Dots;
 bool SHOW_DOTS = false;
+
+std::shared_ptr<FileBrowser> guiFileBrowser;
+bool fileBrowserVisible = false;
+std::string emulatorType = "dmg";
+std::string romLoadError;
 
 void initEmulatorsManager() {
     managerEmulators = std::make_shared<Emulators>();
     managerEmulators->init();
 
     eyeCandy_Dots = std::make_shared<Dots>();
+
+    guiFileBrowser = std::make_shared<FileBrowser>();
+    guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 }
 
 void ShowMainMenu() {
@@ -142,8 +151,10 @@ int runVrita() {
         ImGui::NewFrame();
         
         ShowMainMenu();
+
+        renderGUIComponents();
         
-        managerEmulators->run();
+        managerEmulators->run(std::bind(&loadROM, std::placeholders::_1), std::bind(&showFileBrowser, std::placeholders::_1), [](const char* type) { emulatorType = type; });
 
         if (SHOW_DOTS)
             eyeCandy_Dots->run();
@@ -187,4 +198,37 @@ int runVrita() {
     SDL_Quit();
 
     return 0;
+}
+
+// ============
+// GUI
+// ============
+
+void showFileBrowser(const char* type) {
+    fileBrowserVisible = true;
+    emulatorType = type;
+}
+
+void renderGUIComponents() {
+    if (fileBrowserVisible)
+        guiFileBrowser->render(&fileBrowserVisible, emulatorType);
+}
+
+void loadROM(const char* romFilePath) {
+    fileBrowserVisible = false;
+    std::string errorMessage = managerEmulators->loadROM(romFilePath);
+    if (errorMessage != "") {
+        ImGui::OpenPopup("ROM Load Error");
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("ROM Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("%s", errorMessage.c_str());
+            ImGui::Separator();
+            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 120) * 0.5f);
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                errorMessage.clear();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
 }

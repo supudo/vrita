@@ -4,6 +4,10 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
+// ===============
+// rendering
+// ===============
+
 void AGB::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);
 }
@@ -71,13 +75,13 @@ void AGB::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
     SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
 }
 
-void AGB::run(bool* windowOpened) {
-    float imgW = (float)(AGB::WIDTH  * windowScale);
+void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
+    float imgW = (float)(AGB::WIDTH * windowScale);
     float imgH = (float)(AGB::HEIGHT * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
-    float padX   = style.WindowPadding.x * 2.0f;
+    float padX = style.WindowPadding.x * 2.0f;
 
     if (windowScale != lastWindowScale && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
         ImGui::SetNextWindowSize(ImVec2(imgW + padX, imgH + decorH), ImGuiCond_Always);
@@ -91,7 +95,7 @@ void AGB::run(bool* windowOpened) {
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + AGB::WIDTH, decorH + AGB::HEIGHT),
         ImVec2(FLT_MAX, FLT_MAX),
-        [](ImGuiSizeCallbackData* data) {
+        [] (ImGuiSizeCallbackData* data) {
             auto* c = (ConstraintData*)data->UserData;
             float contentW = data->DesiredSize.x - c->padX;
             data->DesiredSize.y = contentW / c->aspect + c->decorH;
@@ -100,8 +104,14 @@ void AGB::run(bool* windowOpened) {
     );
 
     ImGui::Begin("GameBoy Advance (AGB)", windowOpened);
+    if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
+        onFocused("agb");
 
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
+
+    if (ImGui::Button("Load ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        showFileBrowser("agb");
+
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
@@ -119,4 +129,19 @@ void AGB::run(bool* windowOpened) {
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
     ImGui::End();
+}
+
+// ===============
+// AGB
+// ===============
+
+bool AGB::initialize() {
+    return true;
+}
+
+std::string AGB::loadROM(const char* romFilePath) {
+    return "";
+}
+
+void AGB::stepCPU() {
 }

@@ -22,11 +22,11 @@ void Emulators::init(Logger& logger) {
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
     if (!emulatorDMG->createTexture(device)) {
-        printf("[EMULATORS] Error: Cannot create DMG texture\n");
+        this->logger->log("[EMULATORS] Error: Cannot create DMG texture");
         return false;
     }
     if (!emulatorAGB->createTexture(device)) {
-        printf("[EMULATORS] Error: Cannot create AGB texture\n");
+        this->logger->log("[EMULATORS] Error: Cannot create AGB texture");
         return false;
     }
     return true;

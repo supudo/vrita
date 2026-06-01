@@ -15,6 +15,7 @@ GameBoy (DMG)
 #include "../emulators.hpp"
 #include "../logger.hpp"
 
+#include "cartridge.hpp"
 #include "mmu.hpp"
 #include "cpu.hpp"
 #include "ppu.hpp"
@@ -36,6 +37,11 @@ public:
 
 private:
     Logger* logger = nullptr;
+    bool ROMFileLoaded = false;
+
+    // cartridge
+    std::shared_ptr<DMG_CARTRIDGE> cartridge;
+    void initializeCartridge(size_t romSize);
 
     void stepCPU();
     void stepPPU();

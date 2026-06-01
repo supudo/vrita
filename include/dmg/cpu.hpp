@@ -15,10 +15,12 @@ GameBoy (DMG)
 #include <stdint.h>
 #include <iostream>
 
+#include "cartridge.hpp"
+
 class DMG_CPU {
 public:
-    void initialize(Logger& logger);
-    void stepCPU(uint8_t *memory);
+    void initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge);
+    void stepCPU(bool ROMFileLoaded, uint8_t *memory);
 
     uint64_t cycles = 0;
     bool halted = false;
@@ -49,7 +51,7 @@ public:
 
     enum CpuFlags { // lower 8 buts of AF register
         FLAG_ZERO = 1 << 7, // zero falg
-        FLAG_SUBSTRACT = 1 << 6, // subsctraction flag (BCD)
+        FLAG_SUBTRACT = 1 << 6, // subsctraction flag (BCD)
         FLAG_HALF_CARRY = 1 << 5, // half carry flag (BCD)
         FLAG_CARRY = 1 << 4 // carry flag
     };
@@ -77,12 +79,58 @@ public:
     // 8-bit load instructions
     // 16-it load instructions
     // 8-bit arithmetic and logical instructions
+    void add_a_b(void);
+    void add_a_c(void);
+    void add_a_d(void);
+    void add_a_e(void);
+    void add_a_h(void);
+    void add_a_l(void);
+    void add_a_hl(void);
+    void add_a_a(void);
     // 16-bit arithmetic instructions
     // Rotate, shift, and bit operation instructions
     // Control flow instructions
 
 private:
     Logger* logger = nullptr;
+    void logCall(const char* op);
+
+    // instructions
+    void ret(bool condition);
+    void xor_(uint8_t value);
+    void inc(uint8_t* value);
+    void dec(uint8_t* value);
+    void add(uint8_t* destination, uint8_t value);
+    void add(uint16_t* destination, uint16_t value);
+    void add(uint16_t* destination, int8_t value);
+    void ldhl(int8_t value);
+    void adc(uint8_t value);
+    void sbc(uint8_t value);
+    void sub(uint8_t value);
+    void and_(uint8_t value);
+    void or_(uint8_t value);
+    void cp(uint8_t value);
+    void call(bool condition);
+    void jump(bool condition);
+    void jump_add(bool condition);
+    void cp_n(uint8_t value);
+
+    // extended instructions
+    void extended_execute(uint8_t opcode);
+    void bit(uint8_t bit, uint8_t value);
+    void res(uint8_t bit, uint8_t* rgst);
+    void set(uint8_t bit, uint8_t* rgst);
+    void rl(uint8_t* value);
+    void rlc(uint8_t* value);
+    void rr(uint8_t* value);
+    void rrc(uint8_t* value);
+    void rra();
+    void rla();
+    void rlca();
+    void sla(uint8_t* value);
+    void sra(uint8_t* value);
+    void srl(uint8_t* value);
+    void swap(uint8_t* value);
 };
 
 #endif

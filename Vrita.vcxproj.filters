@@ -93,5 +93,11 @@
     <ClInclude Include="include\logger.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dmg\mbc.hpp">
+      <Filter>include\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dmg\cartridge.hpp">
+      <Filter>include\dmg</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

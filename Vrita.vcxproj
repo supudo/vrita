@@ -156,8 +156,10 @@
     <ClInclude Include="include\code.hpp" />
     <ClInclude Include="include\datetimes.hpp" />
     <ClInclude Include="include\dmg\apu.hpp" />
+    <ClInclude Include="include\dmg\cartridge.hpp" />
     <ClInclude Include="include\dmg\cpu.hpp" />
     <ClInclude Include="include\dmg\dmg.hpp" />
+    <ClInclude Include="include\dmg\mbc.hpp" />
     <ClInclude Include="include\dmg\mmu.hpp" />
     <ClInclude Include="include\dmg\ppu.hpp" />
     <ClInclude Include="include\dots.hpp" />

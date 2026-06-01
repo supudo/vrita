@@ -1,6 +1,6 @@
 #include "../../include/dmg/cpu.hpp"
 
-void DMG_CPU::initialize(Logger& logger) {
+void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge) {
     this->logger = &logger;
 
     // initial register values
@@ -26,138 +26,284 @@ void DMG_CPU::initialize(Logger& logger) {
     InstructionsTable[0x10] = { "STOP", &DMG_CPU::STOP, 1, 4 };
     InstructionsTable[0xF3] = { "DI", &DMG_CPU::DI, 1, 4 };
     InstructionsTable[0xFB] = { "EI", &DMG_CPU::EI, 1, 4 };
+
+    InstructionsTable[0x80] = { "80", &DMG_CPU::add_a_a, 1, 1 };
 }
 
-void DMG_CPU::stepCPU(uint8_t *memory) {
+void DMG_CPU::stepCPU(bool ROMFileLoaded, uint8_t *memory) {
+    if (!ROMFileLoaded) return;
+
     // =========================
     // FETCH
     // =========================
     uint8_t opcode = memory[CpuRegisters.PC++];
     const DMG_CPU::Instruction& instr = InstructionsTable[opcode];
-    this->logger->log("[%02X] Executing %s", opcode, instr.name);
-    //(this->*instr.execute)();
-
-    // =========================
-    // DECODE + EXECUTE
-    // =========================
-    switch (opcode) {
-        // -------------------------
-        // NOP
-        // -------------------------
-        case 0x00:
-            cycles += 4;
-            break;
-
-        // -------------------------
-        // LD BC, d16
-        // -------------------------
-        case 0x01: {
-            uint8_t lo = memory[CpuRegisters.PC++];
-            uint8_t hi = memory[CpuRegisters.PC++];
-            CpuRegisters.setBC((hi << 8) | lo);
-            cycles += 12;
-            break;
-        }
-
-        // -------------------------
-        // LD (BC), A
-        // -------------------------
-        case 0x02:
-            memory[CpuRegisters.BC()] = CpuRegisters.A;
-            cycles += 8;
-            break;
-
-            // -------------------------
-            // INC BC
-            // -------------------------
-        case 0x03:
-            CpuRegisters.setBC(CpuRegisters.BC() + 1);
-            cycles += 8;
-            break;
-
-            // -------------------------
-            // INC B
-            // -------------------------
-        case 0x04:
-            CpuRegisters.B++;
-
-            // flags: Z=1 if result is 0
-            setFlag(FLAG_ZERO, CpuRegisters.B == 0);
-            setFlag(FLAG_SUBSTRACT, false);
-            setFlag(FLAG_HALF_CARRY, (CpuRegisters.B & 0x0F) == 0x00);
-
-            cycles += 4;
-            break;
-
-            // -------------------------
-            // STOP / HALT-like behavior (simplified)
-            // -------------------------
-        case 0x76:
-            halted = true;
-            cycles += 4;
-            break;
-
-            // =========================
-            // CB PREFIX (extended opcodes)
-            // =========================
-        case 0xCB: {
-            uint8_t cb = memory[CpuRegisters.PC++];
-
-            switch (cb) {
-                case 0x11: { // RL C (example)
-                    uint8_t carry = getFlag(FLAG_CARRY);
-                    uint8_t newCarry = (CpuRegisters.C & 0x80) >> 7;
-
-                    CpuRegisters.C = (CpuRegisters.C << 1) | carry;
-
-                    setFlag(FLAG_ZERO, CpuRegisters.C == 0);
-                    setFlag(FLAG_SUBSTRACT, false);
-                    setFlag(FLAG_HALF_CARRY, false);
-                    setFlag(FLAG_CARRY, newCarry);
-
-                    cycles += 8;
-                    break;
-                }
-
-                default:
-                    this->logger->log("Unimplemented CB opcode: 0x%X", (int)cb);
-                    //std::cerr << "Unimplemented CB opcode: " << std::hex << (int)cb << "\n";
-                    break;
-            }
-            break;
-        }
-
-        // =========================
-        // UNKNOWN OPCODE
-        // =========================
-        default:
-            this->logger->log("Unknown opcode: 0x%X", (int)opcode); 
-            //std::cerr << "Unknown opcode: " << std::hex << (int)opcode << "\n";
-            break;
+    if (instr.name != nullptr) {
+        (this->*instr.execute)();
+        cycles += instr.cycles;
     }
+    else
+        this->logger->log("[DMG_CPU] Unsupported opcode: %02X", opcode);
+
+    //// =========================
+    //// DECODE + EXECUTE
+    //// =========================
+    //switch (opcode) {
+    //    // -------------------------
+    //    // NOP
+    //    // -------------------------
+    //    case 0x00:
+    //        cycles += 4;
+    //        break;
+
+    //    // -------------------------
+    //    // LD BC, d16
+    //    // -------------------------
+    //    case 0x01: {
+    //        uint8_t lo = memory[CpuRegisters.PC++];
+    //        uint8_t hi = memory[CpuRegisters.PC++];
+    //        CpuRegisters.setBC((hi << 8) | lo);
+    //        cycles += 12;
+    //        break;
+    //    }
+
+    //    // -------------------------
+    //    // LD (BC), A
+    //    // -------------------------
+    //    case 0x02:
+    //        memory[CpuRegisters.BC()] = CpuRegisters.A;
+    //        cycles += 8;
+    //        break;
+
+    //        // -------------------------
+    //        // INC BC
+    //        // -------------------------
+    //    case 0x03:
+    //        CpuRegisters.setBC(CpuRegisters.BC() + 1);
+    //        cycles += 8;
+    //        break;
+
+    //    // -------------------------
+    //    // INC B
+    //    // -------------------------
+    //    case 0x04:
+    //        CpuRegisters.B++;
+
+    //        // flags: Z=1 if result is 0
+    //        setFlag(FLAG_ZERO, CpuRegisters.B == 0);
+    //        setFlag(FLAG_SUBSTRACT, false);
+    //        setFlag(FLAG_HALF_CARRY, (CpuRegisters.B & 0x0F) == 0x00);
+
+    //        cycles += 4;
+    //        break;
+
+    //    // -------------------------
+    //    // STOP / HALT-like behavior (simplified)
+    //    // -------------------------
+    //    case 0x76:
+    //        halted = true;
+    //        cycles += 4;
+    //        break;
+
+    //    // =========================
+    //    // CB PREFIX (extended opcodes)
+    //    // =========================
+    //    case 0xCB: {
+    //        uint8_t cb = memory[CpuRegisters.PC++];
+
+    //        switch (cb) {
+    //            case 0x11: { // RL C (example)
+    //                uint8_t carry = getFlag(FLAG_CARRY);
+    //                uint8_t newCarry = (CpuRegisters.C & 0x80) >> 7;
+
+    //                CpuRegisters.C = (CpuRegisters.C << 1) | carry;
+
+    //                setFlag(FLAG_ZERO, CpuRegisters.C == 0);
+    //                setFlag(FLAG_SUBSTRACT, false);
+    //                setFlag(FLAG_HALF_CARRY, false);
+    //                setFlag(FLAG_CARRY, newCarry);
+
+    //                cycles += 8;
+    //                break;
+    //            }
+
+    //            default:
+    //                this->logger->log("Unimplemented CB opcode: 0x%X", (int)cb);
+    //                //std::cerr << "Unimplemented CB opcode: " << std::hex << (int)cb << "\n";
+    //                break;
+    //        }
+    //        break;
+    //    }
+
+    //    // =========================
+    //    // UNKNOWN OPCODE
+    //    // =========================
+    //    default:
+    //        this->logger->log("Unknown opcode: 0x%X", (int)opcode);
+    //        //std::cerr << "Unknown opcode: " << std::hex << (int)opcode << "\n";
+    //        break;
+    //}
 }
 
 // BEGIN instruction functions
 // Miscelanious instructions
 void DMG_CPU::NOP() {
-    this->logger->log("NOP");
+    this->logCall("NOP");
 }
 
 void DMG_CPU::HALT() {
+    this->logCall("HALT");
     halted = true;
 }
 
 void DMG_CPU::STOP() {
+    this->logCall("STOP");
     halted = true;
 }
 
-void DMG_CPU::DI(void) {}
+void DMG_CPU::DI(void) {
+    this->logCall("DI");
+}
 
-void DMG_CPU::EI(void) {}
+void DMG_CPU::EI(void) {
+    this->logCall("EI");
+}
+
 // 8-bit load instructions
+
 // 16-it load instructions
+
 // 8-bit arithmetic and logical instructions
+void DMG_CPU::add_a_b(void) {
+    add(&CpuRegisters.A, CpuRegisters.B);
+}
+
+void DMG_CPU::add_a_c(void) {
+    add(&CpuRegisters.A, CpuRegisters.C);
+}
+
+void DMG_CPU::add_a_d(void) {
+    add(&CpuRegisters.A, CpuRegisters.D);
+}
+
+void DMG_CPU::add_a_e(void) {
+    add(&CpuRegisters.A, CpuRegisters.E);
+}
+
+void DMG_CPU::add_a_h(void) {
+    add(&CpuRegisters.A, CpuRegisters.H);
+}
+
+void DMG_CPU::add_a_l(void) {
+    add(&CpuRegisters.A, CpuRegisters.L);
+}
+
+void DMG_CPU::add_a_hl(void) {
+    //add(&CpuRegisters.A, CpuRegisters.HL);
+}
+
+void DMG_CPU::add_a_a(void) {
+    add(&CpuRegisters.A, CpuRegisters.A);
+}
+
 // 16-bit arithmetic instructions
+
 // Rotate, shift, and bit operation instructions
+
 // Control flow instructions
+
 // END instruction functions
+
+// instructions
+void DMG_CPU::ret(bool condition) {}
+
+void DMG_CPU::xor_(uint8_t value) {}
+
+void DMG_CPU::inc(uint8_t* value) {}
+
+void DMG_CPU::dec(uint8_t* value) {}
+
+void DMG_CPU::add(uint8_t* destination, uint8_t value) {
+    this->logger->log("[DMG_CPU] add (8-8) %02X", destination);
+    uint16_t result = *destination + value;
+    setFlag(FLAG_CARRY, result > 0xff);
+    setFlag(FLAG_HALF_CARRY, ((*destination & 0x0f) + (value & 0x0f)) > 0x0f);
+    *destination = result;
+    setFlag(FLAG_ZERO, !*destination);
+    setFlag(FLAG_SUBTRACT, false);
+}
+
+void DMG_CPU::add(uint16_t* destination, uint16_t value) {
+    this->logger->log("[DMG_CPU] add (16-16) %02X", destination);
+    uint32_t result = *destination + value;
+    setFlag(FLAG_CARRY, result > 0xffff);
+    setFlag(FLAG_HALF_CARRY, ((*destination & 0x0fff) + (value & 0x0fff)) > 0x0fff);
+    *destination = (uint16_t)result;
+    setFlag(FLAG_SUBTRACT, false);
+}
+
+void DMG_CPU::add(uint16_t* destination, int8_t value) {
+    this->logger->log("[DMG_CPU] add (16-8) %02X", destination);
+    uint16_t result = *destination + value;
+    setFlag(FLAG_CARRY, ((CpuRegisters.SP ^ value ^ (result & 0xFFFF)) & 0x100) == 0x100);
+    setFlag(FLAG_HALF_CARRY, ((CpuRegisters.SP ^ value ^ (result & 0xFFFF)) & 0x10) == 0x10);
+    *destination = result & 0xFFFF;
+    setFlag(FLAG_SUBTRACT | FLAG_ZERO, false);
+}
+
+void DMG_CPU::ldhl(int8_t value) {}
+
+void DMG_CPU::adc(uint8_t value) {}
+
+void DMG_CPU::sbc(uint8_t value) {}
+
+void DMG_CPU::sub(uint8_t value) {}
+
+void DMG_CPU::and_(uint8_t value) {}
+
+void DMG_CPU::or_(uint8_t value) {}
+
+void DMG_CPU::cp(uint8_t value) {}
+
+void DMG_CPU::call(bool condition) {}
+
+void DMG_CPU::jump(bool condition) {}
+
+void DMG_CPU::jump_add(bool condition) {}
+
+void DMG_CPU::cp_n(uint8_t value) {}
+
+// extended instructions
+void DMG_CPU::extended_execute(uint8_t opcode) {}
+
+void DMG_CPU::bit(uint8_t bit, uint8_t value) {}
+
+void DMG_CPU::res(uint8_t bit, uint8_t* rgst) {}
+
+void DMG_CPU::set(uint8_t bit, uint8_t* rgst) {}
+
+void DMG_CPU::rl(uint8_t* value) {}
+
+void DMG_CPU::rlc(uint8_t* value) {}
+
+void DMG_CPU::rr(uint8_t* value) {}
+
+void DMG_CPU::rrc(uint8_t* value) {}
+
+void DMG_CPU::rra() {}
+
+void DMG_CPU::rla() {}
+
+void DMG_CPU::rlca() {}
+
+void DMG_CPU::sla(uint8_t* value) {}
+
+void DMG_CPU::sra(uint8_t* value) {}
+
+void DMG_CPU::srl(uint8_t* value) {}
+
+void DMG_CPU::swap(uint8_t* value) {}
+
+void DMG_CPU::logCall(const char* op) {
+    this->logger->log("[DMG_CPU] CALL %s", op);
+}

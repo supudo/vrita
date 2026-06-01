@@ -13,6 +13,7 @@ bool DMG::initialize(Logger& logger) {
 
     ime = false;
 
+    // move from here to load rom !!!!!
     managerCPU = new DMG_CPU();
     managerCPU->halted = false;
     managerCPU->cycles = 0;
@@ -132,6 +133,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     if (ImGui::Button("Load ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         showFileBrowser("dmg");
+    if (ImGui::Button("Eject ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        ROMFileLoaded = false;
     
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
 
@@ -166,29 +169,34 @@ std::string DMG::loadROM(const char* path) {
     int errorStatus = 0;
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
+        this->logger->log("[DMG] WARNING: Failed to open ROM: %s", path);
         std::cerr << "Failed to open ROM: " << path << "\n";
         return "Failed to open ROM";
     }
     std::streamsize size = file.tellg();
     if (size <= 0 || size > 0x8000) {
-        std::cerr << "Invalid ROM size: " << size << " bytes\n";
+        this->logger->log("[DMG] WARNING: Invalid ROM size: %s", (int)size, " bytes");
         file.close();
         return "Invalid ROM size";
     }
     file.seekg(0, std::ios::beg);
-    std::vector<uint8_t> buffer(size);
-    if (!file.read(reinterpret_cast<char*>(buffer.data()), size)) {
-        std::cerr << "Failed to read ROM data.\n";
+    if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
+        this->logger->log("[DMG] WARNING: Failed to read ROM data!");
         file.close();
         return "Failed to read ROM data";
     }
     file.close();
     if (errorStatus == 0) {
-        for (std::streamsize i = 0; i < size; i++)
-            managerMMU->memory[i] = buffer[i];
+        ROMFileLoaded = true;
+        initializeCartridge(size);
         return "";
     }
     return "";
+}
+
+void DMG::initializeCartridge(size_t romSize) {
+    if (!ROMFileLoaded) return;
+    cartridge = std::make_shared<DMG_CARTRIDGE>(managerMMU->memory, romSize, logger);
 }
 
 // ===============
@@ -201,7 +209,7 @@ void DMG::stepCPU() {
         return;
     }
 
-    managerCPU->stepCPU(managerMMU->memory);
+    managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory, cartridge);
 }
 
 void DMG::stepAPU() {

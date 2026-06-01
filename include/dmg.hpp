@@ -27,6 +27,7 @@ public:
     bool initialize();
     std::string loadROM(const char* romFilePath);
     void stepCPU();
+    void stepFrame();
 
 private:
     // rendering
@@ -76,14 +77,43 @@ private:
     uint8_t memory[MEMORY_SIZE] = {};
 
     inline uint8_t read8(uint16_t address) const { return memory[address]; }
-    inline void write8(uint16_t address, uint8_t value) { memory[address] = value; }
+    inline void write8(uint16_t address, uint8_t value) {
+        if (address == 0xFF04) { memory[0xFF04] = 0; return; }   // writing DIV resets it
+        if (address == 0xFF44) { memory[0xFF44] = 0; return; }   // writing LY resets it
+        if (address == 0xFF46) {                                   // OAM DMA
+            uint16_t src = (uint16_t)value << 8;
+            for (int i = 0; i < 0xA0; i++) memory[0xFE00 + i] = memory[src + i];
+        }
+        memory[address] = value;
+    }
     inline uint16_t read16(uint16_t address) const { return memory[address] | (memory[address + 1] << 8); }
     inline void write16(uint16_t address, uint16_t value) { memory[address] = value & 0xFF; memory[address + 1] = value >> 8; }
 
     //cpu
     bool halted = false;
-    bool ime = false; // interrupt master enable
+    bool ime = false;
     uint64_t cycles = 0;
+
+    uint8_t  getR(uint8_t idx);
+    void     setR(uint8_t idx, uint8_t val);
+    void     push16(uint16_t val);
+    uint16_t pop16();
+    void     addHL(uint16_t val);
+    uint8_t  incR(uint8_t val);
+    uint8_t  decR(uint8_t val);
+    void     addA(uint8_t val);
+    void     adcA(uint8_t val);
+    void     subA(uint8_t val);
+    void     sbcA(uint8_t val);
+    void     andA(uint8_t val);
+    void     xorA(uint8_t val);
+    void     orA(uint8_t val);
+    void     cpA(uint8_t val);
+
+    // ppu
+    int ppuCycles = 0;
+    void stepPPU(int elapsed);
+    void renderScanline(uint8_t ly);
 };
 
 #endif

@@ -37,6 +37,13 @@ void Emulators::generateTestPattern(float time) {
         emulatorAGB->generateTestPattern(time);
 }
 
+void Emulators::stepFrame() {
+    if (EMULATORS_SHOW_DMG)
+        emulatorDMG->stepFrame();
+    if (EMULATORS_SHOW_AGB)
+        emulatorAGB->generateTestPattern((float)SDL_GetTicks() / 1000.0f);
+}
+
 void Emulators::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
     if (EMULATORS_SHOW_DMG)
         emulatorDMG->uploadFramebufferToTexture(device, commandBuffer);

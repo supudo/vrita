@@ -17,6 +17,7 @@ public:
     void init();
     bool createTexture(SDL_GPUDevice* device);
     void generateTestPattern(float time);
+    void stepFrame();
     void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);
     void run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
     void release(SDL_GPUDevice* device);

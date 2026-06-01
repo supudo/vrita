@@ -142,9 +142,7 @@ int runVrita() {
             continue;
         }
 
-        float emulatorTime = (float)SDL_GetTicks() / 1000.0f;
-
-        managerEmulators->generateTestPattern(emulatorTime);
+        managerEmulators->stepFrame();
 
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();

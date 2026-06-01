@@ -140,22 +140,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\agb.cpp" />
-    <ClCompile Include="src\dmg.cpp" />
+    <ClCompile Include="src\agb\agb.cpp" />
+    <ClCompile Include="src\dmg\apu.cpp" />
+    <ClCompile Include="src\dmg\cpu.cpp" />
+    <ClCompile Include="src\dmg\dmg.cpp" />
+    <ClCompile Include="src\dmg\mmu.cpp" />
+    <ClCompile Include="src\dmg\ppu.cpp" />
     <ClCompile Include="src\dots.cpp" />
     <ClCompile Include="src\emulators.cpp" />
     <ClCompile Include="src\filebrowser.cpp" />
     <ClCompile Include="src\vrita.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\agb.hpp" />
+    <ClInclude Include="include\agb\agb.hpp" />
     <ClInclude Include="include\code.hpp" />
     <ClInclude Include="include\datetimes.hpp" />
-    <ClInclude Include="include\dmg.hpp" />
+    <ClInclude Include="include\dmg\apu.hpp" />
+    <ClInclude Include="include\dmg\cpu.hpp" />
+    <ClInclude Include="include\dmg\dmg.hpp" />
+    <ClInclude Include="include\dmg\mmu.hpp" />
+    <ClInclude Include="include\dmg\ppu.hpp" />
     <ClInclude Include="include\dots.hpp" />
     <ClInclude Include="include\emulators.hpp" />
     <ClInclude Include="include\filebrowser.hpp" />
     <ClInclude Include="include\files.hpp" />
+    <ClInclude Include="include\logger.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

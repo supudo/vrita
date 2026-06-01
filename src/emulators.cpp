@@ -5,15 +5,17 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gpu.h>
 
-#include "../include/dmg.hpp"
-#include "../include/agb.hpp"
+#include "../include/dmg/dmg.hpp"
+#include "../include/agb/agb.hpp"
 
 std::shared_ptr<DMG> emulatorDMG;
 std::shared_ptr<AGB> emulatorAGB;
 
-void Emulators::init() {
+void Emulators::init(Logger& logger) {
+    this->logger = &logger;
+
     emulatorDMG = std::make_shared<DMG>();
-    emulatorDMG->initialize();
+    emulatorDMG->initialize(*this->logger);
 
     emulatorAGB = std::make_shared<AGB>();
 }

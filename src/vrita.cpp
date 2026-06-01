@@ -16,6 +16,8 @@
 #include "../include/dots.hpp"
 #include "../include/filebrowser.hpp"
 
+#include "../include/logger.hpp"
+
 std::shared_ptr<Emulators> managerEmulators;
 std::shared_ptr<Dots> eyeCandy_Dots;
 bool SHOW_DOTS = false;
@@ -25,9 +27,13 @@ bool fileBrowserVisible = false;
 std::string emulatorType = "dmg";
 std::string romLoadError;
 
+std::shared_ptr<Logger> logger;
+
 void initEmulatorsManager() {
+    logger = std::make_shared<Logger>();
+
     managerEmulators = std::make_shared<Emulators>();
-    managerEmulators->init();
+    managerEmulators->init(*logger);
 
     eyeCandy_Dots = std::make_shared<Dots>();
 

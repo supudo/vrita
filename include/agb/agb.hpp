@@ -7,7 +7,8 @@ GameBoy Advance (AGB)
 #ifndef VRITA_AGB_INCLUDES
 #define VRITA_AGB_INCLUDES
 
-#include "emulators.hpp"
+#include "../emulators.hpp"
+#include "../logger.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gpu.h>
@@ -17,6 +18,8 @@ GameBoy Advance (AGB)
 
 class AGB {
 public:
+    bool initialize(Logger& logger);
+
     // rendering
     bool createTexture(SDL_GPUDevice* device);
     void generateTestPattern(float time);
@@ -30,6 +33,8 @@ public:
     void stepCPU();
 
 private:
+    Logger* logger = nullptr;
+
     // rendering
     static const uint32_t WIDTH = 240;
     static const uint32_t HEIGHT = 160;

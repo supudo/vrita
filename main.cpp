@@ -95,7 +95,7 @@ void loadROM(const char* romFilePath) {
 
 int main(int argc, char** argv) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
-        printf("Error: SDL_Init(): %s\n", SDL_GetError());
+        printf("[VRITA] Error: SDL_Init(): %s\n", SDL_GetError());
         return 1;
     }
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
     SDL_Window* window = SDL_CreateWindow(AppTitle, (int)(WINDOW_WIDTH * main_scale), (int)(WINDOW_HEIGHT * main_scale), window_flags);
     if (window == nullptr) {
-        printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+        printf("[VRITA] Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return 1;
     }
     SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
@@ -112,12 +112,12 @@ int main(int argc, char** argv) {
     SDL_GPUDevice* gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_METALLIB, true, nullptr);
 
     if (gpu_device == nullptr) {
-        printf("Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
+        printf("[VRITA] Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
         return 1;
     }
 
     if (!SDL_ClaimWindowForGPUDevice(gpu_device, window)) {
-        printf("Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
+        printf("[VRITA] Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
         return 1;
     }
 
@@ -139,11 +139,11 @@ int main(int argc, char** argv) {
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 
     if (!managerEmulators->createTexture(gpu_device)) {
-        printf("Error: Cannot create emulator texture\n");
+        logger->log("[VRITA] Error: Cannot create emulator texture");
         return 1;
     }
     if (!eyeCandy_Dots->createTexture(gpu_device)) {
-        printf("Error: Cannot create dots texture\n");
+        logger->log("[VRITA] Error: Cannot create dots texture");
         return 1;
     }
 

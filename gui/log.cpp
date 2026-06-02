@@ -26,12 +26,12 @@ void Log::addToLog(const char* fmt, ...) {
 
 void Log::draw(const char* title, bool* p_opened) {
     if (this->width > 0 && this->height > 0)
-        ImGui::SetNextWindowSize(ImVec2(this->width, this->height), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2((float)this->width, (float)this->height), ImGuiCond_FirstUseEver);
     else
         ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_FirstUseEver);
 
     if (this->positionX > 0 && this->positionY > 0)
-        ImGui::SetNextWindowPos(ImVec2(this->positionX, this->positionY), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2((float)this->positionX, (float)this->positionY), ImGuiCond_FirstUseEver);
 
     ImGui::Begin(title, p_opened);
     if (ImGui::Button("Clear"))

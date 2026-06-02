@@ -15,11 +15,12 @@ GameBoy (DMG)
 #include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
 
-#include "cartridge.hpp"
-#include "mmu.hpp"
-#include "cpu.hpp"
-#include "ppu.hpp"
 #include "apu.hpp"
+#include "cartridge.hpp"
+#include "cpu.hpp"
+#include "interrupt.hpp"
+#include "mmu.hpp"
+#include "ppu.hpp"
 #include "timer.hpp"
 
 class DMG {
@@ -61,6 +62,7 @@ private:
     //cpu
     bool ime = false; // interrupt master enable
 
+    DMG_INTERRUPT* managerInterrupts = nullptr;
     DMG_CPU *managerCPU = nullptr;
     DMG_APU *managerAPU = nullptr;
     DMG_MMU *managerMMU = nullptr;

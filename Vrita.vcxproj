@@ -145,6 +145,9 @@
     <ClCompile Include="emulators\dmg\cartridge.cpp" />
     <ClCompile Include="emulators\dmg\cpu.cpp" />
     <ClCompile Include="emulators\dmg\dmg.cpp" />
+    <ClCompile Include="emulators\dmg\instructions_16bit.cpp" />
+    <ClCompile Include="emulators\dmg\instructions_8bit.cpp" />
+    <ClCompile Include="emulators\dmg\interrupt.cpp" />
     <ClCompile Include="emulators\dmg\mmu.cpp" />
     <ClCompile Include="emulators\dmg\ppu.cpp" />
     <ClCompile Include="emulators\dmg\timer.cpp" />
@@ -160,6 +163,7 @@
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />
     <ClInclude Include="emulators\dmg\dmg.hpp" />
+    <ClInclude Include="emulators\dmg\interrupt.hpp" />
     <ClInclude Include="emulators\dmg\mbc.hpp" />
     <ClInclude Include="emulators\dmg\mmu.hpp" />
     <ClInclude Include="emulators\dmg\ppu.hpp" />

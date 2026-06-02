@@ -12,11 +12,8 @@ GameBoy (DMG)
 
 class DMG_MBC {
 public:
-    DMG_MBC(uint8_t* rom, size_t romSize, std::vector<uint8_t>& ram)
-        : rom(rom), romSize(romSize), ram(ram) {}
-
+    DMG_MBC(uint8_t* rom, size_t romSize, std::vector<uint8_t>& ram) : rom(rom), romSize(romSize), ram(ram) {}
     virtual ~DMG_MBC() = default;
-
     virtual uint8_t read(uint16_t addr) = 0;
     virtual void write(uint16_t addr, uint8_t value) = 0;
 

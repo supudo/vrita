@@ -13,16 +13,17 @@ bool DMG::initialize(Logger& logger) {
 
     ime = false;
 
-    // move from here to load rom !!!!!
+    managerInterrupts = new DMG_INTERRUPT();
+
+    managerMMU = new DMG_MMU();
+    managerMMU->initialize();
+
     managerCPU = new DMG_CPU();
-    managerCPU->initialize(logger, nullptr);
+    managerCPU->initialize(logger, managerMMU, nullptr, managerInterrupts);
     managerCPU->halted = false;
     managerCPU->cycles = 0;
 
     managerAPU = new DMG_APU();
-    
-    managerMMU = new DMG_MMU();
-    managerMMU->initialize();
 
     managerPPU = new DMG_PPU();
 
@@ -220,7 +221,7 @@ uint32_t DMG::stepCPU() {
     if (managerCPU->halted)
         managerCPU->cycles += 4;
     else
-        managerCPU->stepCPU(ROMFileLoaded, *managerMMU);
+        managerCPU->stepCPU(ROMFileLoaded);
     return (uint32_t)(managerCPU->cycles - before);
 }
 

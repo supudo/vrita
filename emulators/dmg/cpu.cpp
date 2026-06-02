@@ -1,149 +1,62 @@
 #include "cpu.hpp"
 
-void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge) {
+void DMG_CPU::initialize(Logger& logger, DMG_MMU* mmu, std::shared_ptr<DMG_CARTRIDGE> cartridge, DMG_INTERRUPT* interrupts) {
     this->logger = &logger;
-
+    this->mmu = mmu;
+    this->interrupts = interrupts;
     clearResources();
-
-    // instructions =================
-
-    // Miscelanious
-    InstructionsTable[0x00] = { "NOP", &DMG_CPU::NOP, 1, 4 };
-    InstructionsTable[0x76] = { "HALT", &DMG_CPU::HALT, 1, 4 };
-    InstructionsTable[0x10] = { "STOP", &DMG_CPU::STOP, 1, 4 };
-    InstructionsTable[0xF3] = { "DI", &DMG_CPU::DI, 1, 4 };
-    InstructionsTable[0xFB] = { "EI", &DMG_CPU::EI, 1, 4 };
-
-    // 8-bit load instructions
-    InstructionsTable[0x01] = { "LD BC, d16", &DMG_CPU::NOP, 3, 3 };
-    InstructionsTable[0x02] = { "LD (BC), A", &DMG_CPU::NOP, 1, 2 };
-
-    // 8-bit arithmetic and logical instructions
-    InstructionsTable[0x80] = { "ADD A,B", &DMG_CPU::add_a_a, 1, 4 };
-
-    // Rotate, shift, and bit operation instructions
-    InstructionsTable[0xFF] = { "FF", &DMG_CPU::set_7_a, 2, 2 };
 }
 
 void DMG_CPU::clearResources() {
     halted = false;
     cycles = 0;
-    CpuRegisters.A = 0x01;
-    CpuRegisters.F = 0xB0;
-    CpuRegisters.B = 0x00;
-    CpuRegisters.C = 0x13;
-    CpuRegisters.D = 0x00;
-    CpuRegisters.E = 0xD8;
-    CpuRegisters.H = 0x01;
-    CpuRegisters.L = 0x4D;
-    CpuRegisters.SP = 0xFFFE;
-    CpuRegisters.PC = 0x0100;
+    Registers.A = 0x01;
+    Registers.F = 0xB0;
+    Registers.B = 0x00;
+    Registers.C = 0x13;
+    Registers.D = 0x00;
+    Registers.E = 0xD8;
+    Registers.H = 0x01;
+    Registers.L = 0x4D;
+    Registers.SP = 0xFFFE;
+    Registers.PC = 0x0100;
 }
 
-void DMG_CPU::stepCPU(bool ROMFileLoaded, DMG_MMU &mmu) {
+void DMG_CPU::stepCPU(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
 
-    uint8_t opcode = mmu.memory[CpuRegisters.PC++];
-    const DMG_CPU::Instruction& instruction = InstructionsTable[opcode];
-    if (instruction.name != nullptr) {
-        (this->*instruction.execute)();
-        cycles += instruction.cycles;
-    }
-    else
-        this->logger->log("[DMG_CPU] Unsupported opcode: %02X", opcode);
+    uint8_t opcode = mmu->memory[Registers.PC++];
+    executeInstruction8bit(ROMFileLoaded, opcode);
 }
-
-// BEGIN instruction functions
-// Miscelanious instructions
-void DMG_CPU::NOP() {
-    this->logCall("NOP");
-}
-
-void DMG_CPU::HALT() {
-    this->logCall("HALT");
-    halted = true;
-}
-
-void DMG_CPU::STOP() {
-    this->logCall("STOP");
-    halted = true;
-}
-
-void DMG_CPU::DI(void) {
-    this->logCall("DI");
-}
-
-void DMG_CPU::EI(void) {
-    this->logCall("EI");
-}
-
-// 8-bit load instructions
-
-// 0x01
-void DMG_CPU::ld_bc_nn(unsigned short operand) { 
-    CpuRegisters.setBC(operand);
-}
-
-// 0x02
-void DMG_CPU::ld_bcp_a(void) {
-    mmu->write8(CpuRegisters.BC(), CpuRegisters.A);
-}
-
-// 16-it load instructions
-
-// 8-bit arithmetic and logical instructions
-void DMG_CPU::add_a_b(void) {
-    add(&CpuRegisters.A, CpuRegisters.B);
-}
-
-void DMG_CPU::add_a_c(void) {
-    add(&CpuRegisters.A, CpuRegisters.C);
-}
-
-void DMG_CPU::add_a_d(void) {
-    add(&CpuRegisters.A, CpuRegisters.D);
-}
-
-void DMG_CPU::add_a_e(void) {
-    add(&CpuRegisters.A, CpuRegisters.E);
-}
-
-void DMG_CPU::add_a_h(void) {
-    add(&CpuRegisters.A, CpuRegisters.H);
-}
-
-void DMG_CPU::add_a_l(void) {
-    add(&CpuRegisters.A, CpuRegisters.L);
-}
-
-void DMG_CPU::add_a_hl(void) {
-    //add(&CpuRegisters.A, CpuRegisters.HL);
-}
-
-void DMG_CPU::add_a_a(void) {
-    add(&CpuRegisters.A, CpuRegisters.A);
-}
-
-// 16-bit arithmetic instructions
-
-// Rotate, shift, and bit operation instructions
-
-// Control flow instructions
-
-void DMG_CPU::set_7_a(void) {
-    set(1 << 7, &CpuRegisters.A);
-}
-
-// END instruction functions
 
 // instructions
-void DMG_CPU::ret(bool condition) {}
+void DMG_CPU::ret(bool condition) {
+    cycles += 4;
+    if (condition) {
+        Registers.PC = mmu->read_stack(&Registers.SP);
+        //mmu->tick_cycles(4);
+    }
+}
 
-void DMG_CPU::xor_(uint8_t value) {}
+void DMG_CPU::xor_(uint8_t value) {
+    Registers.A ^= value;
+    setFlag(FLAG_ZERO, !Registers.A);
+    setFlag(FLAG_CARRY | FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::inc(uint8_t* value) {}
+void DMG_CPU::inc(uint8_t* value) {
+    setFlag(FLAG_HALF_CARRY, (*value & 0x0f) == 0x0f);
+    *value += 1;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT, false);
+}
 
-void DMG_CPU::dec(uint8_t* value) {}
+void DMG_CPU::dec(uint8_t* value) {
+    setFlag(FLAG_HALF_CARRY, !(*value & 0x0f));
+    *value -= 1;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT, true);
+}
 
 void DMG_CPU::add(uint8_t* destination, uint8_t value) {
     this->logger->log("[DMG_CPU] add (8-8) %02X", destination);
@@ -167,67 +80,183 @@ void DMG_CPU::add(uint16_t* destination, uint16_t value) {
 void DMG_CPU::add(uint16_t* destination, int8_t value) {
     this->logger->log("[DMG_CPU] add (16-8) %02X", destination);
     uint16_t result = *destination + value;
-    setFlag(FLAG_CARRY, ((CpuRegisters.SP ^ value ^ (result & 0xFFFF)) & 0x100) == 0x100);
-    setFlag(FLAG_HALF_CARRY, ((CpuRegisters.SP ^ value ^ (result & 0xFFFF)) & 0x10) == 0x10);
+    setFlag(FLAG_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x100) == 0x100);
+    setFlag(FLAG_HALF_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x10) == 0x10);
     *destination = result & 0xFFFF;
     setFlag(FLAG_SUBTRACT | FLAG_ZERO, false);
 }
 
-void DMG_CPU::ldhl(int8_t value) {}
+void DMG_CPU::ldhl(int8_t value) {
+    uint16_t result = Registers.SP + value;
+    setFlag(FLAG_CARRY, ((Registers.SP ^ value ^ result) & 0x100) == 0x100);
+    setFlag(FLAG_HALF_CARRY, ((Registers.SP ^ value ^ result) & 0x10) == 0x10);
+    Registers.HL = result;
+    setFlag(FLAG_SUBTRACT | FLAG_ZERO, false);
+}
 
-void DMG_CPU::adc(uint8_t value) {}
+void DMG_CPU::adc(uint8_t value) {
+    int carry = getFlag(FLAG_CARRY) ? 1 : 0;
+    int result = Registers.A + value + carry;
+    setFlag(FLAG_ZERO, !(int8_t)result);
+    setFlag(FLAG_CARRY, result > 0xff);
+    setFlag(FLAG_HALF_CARRY, ((Registers.A & 0x0F) + (value & 0x0f) + carry) > 0x0F);
+    setFlag(FLAG_SUBTRACT, false);
+    Registers.A = (int8_t)(result & 0xff);
+}
 
-void DMG_CPU::sbc(uint8_t value) {}
+void DMG_CPU::sbc(uint8_t value) {
+    bool is_carry = getFlag(FLAG_CARRY);
+    setFlag(FLAG_CARRY, (value + is_carry) > Registers.A);
+    setFlag(FLAG_HALF_CARRY, ((value & 0x0f) + is_carry) > (Registers.A & 0x0f));
+    Registers.A -= (value + is_carry);
+    setFlag(FLAG_ZERO, !Registers.A);
+    setFlag(FLAG_SUBTRACT, true);
+}
 
-void DMG_CPU::sub(uint8_t value) {}
+void DMG_CPU::sub(uint8_t value) {
+    setFlag(FLAG_CARRY, value > Registers.A);
+    setFlag(FLAG_HALF_CARRY, (value & 0x0f) > (Registers.A & 0x0f));
+    Registers.A -= value;
+    setFlag(FLAG_ZERO, !Registers.A);
+    setFlag(FLAG_SUBTRACT, true);
+}
 
-void DMG_CPU::and_(uint8_t value) {}
+void DMG_CPU::and_(uint8_t value) {
+    Registers.A = Registers.A & value;
+    setFlag(FLAG_ZERO, !Registers.A);
+    setFlag(FLAG_HALF_CARRY, true);
+    setFlag(FLAG_SUBTRACT | FLAG_CARRY, false);
+}
 
-void DMG_CPU::or_(uint8_t value) {}
+void DMG_CPU::or_(uint8_t value) {
+    Registers.A |= value;
+    setFlag(FLAG_ZERO, !Registers.A);
+    setFlag(FLAG_CARRY | FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::cp(uint8_t value) {}
+void DMG_CPU::cp(uint8_t value) {
+    uint8_t temp_val = Registers.A;
+    setFlag(FLAG_CARRY, value > temp_val);
+    setFlag(FLAG_HALF_CARRY, (value & 0x0f) > (temp_val & 0x0f));
+    temp_val -= value;
+    setFlag(FLAG_ZERO, !temp_val);
+    setFlag(FLAG_SUBTRACT, true);
+}
 
-void DMG_CPU::call(bool condition) {}
+void DMG_CPU::call(bool condition) {
+    uint16_t operand = mmu->read16(Registers.PC);
+    Registers.PC += 2;
+    if (condition) {
+        cycles += 4;
+        mmu->write_stack(&Registers.SP, Registers.PC);
+        Registers.PC = operand;
+    }
+}
 
-void DMG_CPU::jump(bool condition) {}
+void DMG_CPU::jump(bool condition) {
+    uint16_t addr = mmu->read16(Registers.PC);
+    if (condition) {
+        Registers.PC = addr;
+        cycles += 4;
+    }
+    else
+        Registers.PC += 2;
+}
 
-void DMG_CPU::jump_add(bool condition) {}
+void DMG_CPU::jump_add(bool condition) {
+    int8_t offset = (int8_t)mmu->read8(Registers.PC++);
+    if (condition) {
+        Registers.PC += offset;
+        cycles += 4;
+    }
+}
 
-void DMG_CPU::cp_n(uint8_t value) {}
+void DMG_CPU::cp_n(uint8_t value) {
+    setFlag(FLAG_SUBTRACT, true);
+    setFlag(FLAG_ZERO, Registers.A == value);
+    setFlag(FLAG_CARRY, value > Registers.A);
+    setFlag(FLAG_HALF_CARRY, (value & 0x0f) > (Registers.A & 0x0f));
+}
 
+// ================================================
 // extended instructions
-void DMG_CPU::extended_execute(uint8_t opcode) {}
 
-void DMG_CPU::bit(uint8_t bit, uint8_t value) {}
+void DMG_CPU::bit(uint8_t bit, uint8_t value) {
+    setFlag(FLAG_ZERO, !(value & bit));
+    setFlag(FLAG_HALF_CARRY, true);
+    setFlag(FLAG_SUBTRACT, false);
+}
 
-void DMG_CPU::res(uint8_t bit, uint8_t* rgst) {}
+void DMG_CPU::res(uint8_t bit, uint8_t* rgst) {
+    *rgst &= ~(bit);
+}
 
 void DMG_CPU::set(uint8_t bit, uint8_t* rgst) {
     *rgst |= bit;
 }
 
-void DMG_CPU::rl(uint8_t* value) {}
+void DMG_CPU::rl(uint8_t* value) {
+    int carry = getFlag(FLAG_CARRY);
+    setFlag(FLAG_CARRY, *value & (1 << 7));
+    *value <<= 1;
+    *value += carry;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rlc(uint8_t* value) {}
+void DMG_CPU::rlc(uint8_t* value) {
+    int carry = (*value >> 7) & 0x01;
+    setFlag(FLAG_CARRY, *value & (1 << 7));
+    *value <<= 1;
+    *value += carry;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rr(uint8_t* value) {}
+void DMG_CPU::rr(uint8_t* value) {
+    int carry = getFlag(FLAG_CARRY);
+    setFlag(FLAG_CARRY, *value & 0x01);
+    *value >>= 1;
+    *value |= (carry << 7);
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rrc(uint8_t* value) {}
+void DMG_CPU::rrc(uint8_t* value) {
+    int carry = *value & 0x01;
+    setFlag(FLAG_CARRY, carry);
+    *value >>= 1;
+    *value |= (carry << 7);
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rra() {}
+void DMG_CPU::sla(uint8_t* value) {
+    setFlag(FLAG_CARRY, *value & (1 << 7));
+    *value <<= 1;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rla() {}
+void DMG_CPU::sra(uint8_t* value) {
+    setFlag(FLAG_CARRY, *value & 0x01);
+    int msb = *value & (1 << 7);
+    *value >>= 1;
+    *value |= msb;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::rlca() {}
+void DMG_CPU::srl(uint8_t* value) {
+    setFlag(FLAG_CARRY, *value & 0x01);
+    *value >>= 1;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
+}
 
-void DMG_CPU::sla(uint8_t* value) {}
-
-void DMG_CPU::sra(uint8_t* value) {}
-
-void DMG_CPU::srl(uint8_t* value) {}
-
-void DMG_CPU::swap(uint8_t* value) {}
-
-void DMG_CPU::logCall(const char* op) {
-    this->logger->log("[DMG_CPU] CALL %s", op);
+void DMG_CPU::swap(uint8_t* value) {
+    uint8_t lower = *value << 4;
+    *value = (*value >> 4) | lower;
+    setFlag(FLAG_ZERO, !*value);
+    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY | FLAG_CARRY, false);
 }

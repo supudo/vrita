@@ -16,19 +16,20 @@ GameBoy (DMG)
 #include <iostream>
 
 #include "cartridge.hpp"
+#include "interrupt.hpp"
 #include "mmu.hpp"
 
 class DMG_CPU {
 public:
-    void initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge);
-    void stepCPU(bool ROMFileLoaded, DMG_MMU& mmu);
+    void initialize(Logger& logger, DMG_MMU* mmu, std::shared_ptr<DMG_CARTRIDGE> cartridge, DMG_INTERRUPT *interrupts);
+    void stepCPU(bool ROMFileLoaded);
     void clearResources();
 
     uint64_t cycles = 0;
     bool halted = false;
 
     // registers
-    struct CpuRegisters {
+    struct Registers {
         uint8_t A, F;
         uint8_t B, C;
         uint8_t D, E;
@@ -38,18 +39,35 @@ public:
         uint16_t PC = 0; // program counter/pointer
 
         // 16-bit registers combos
-        uint16_t AF() const { return (A << 8) | F; } // accumulation & flags
-        void setAF(uint16_t val) { A = val >> 8; F = val & 0xF0; } // F lower nibble is always 0
+        union {
+            struct { uint8_t F; uint8_t A; };
+            uint16_t AF;
+        };
 
-        uint16_t BC() const { return (B << 8) | C; } // BC
-        void setBC(uint16_t val) { B = val >> 8; C = val & 0xFF; }
+        union {
+            struct { uint8_t C; uint8_t B; };
+            uint16_t BC;
+        };
 
-        uint16_t DE() const { return (D << 8) | E; } // DE
-        void setDE(uint16_t val) { D = val >> 8; E = val & 0xFF; }
+        union {
+            struct { uint8_t E; uint8_t D; };
+            uint16_t DE;
+        };
 
-        uint16_t HL() const { return (H << 8) | L; } // HL
-        void setHL(uint16_t val) { H = val >> 8; L = val & 0xFF; }
-    } CpuRegisters;
+        union {
+            struct { uint8_t L; uint8_t H; };
+            uint16_t HL;
+        };
+    } Registers;
+
+    inline void printRegisters() {
+        logger->log("A: 0x%02X, F: 0x%02X", +Registers.A, +Registers.F);
+        logger->log("B: 0x%02X, C: 0x%02X", +Registers.B, +Registers.C);
+        logger->log("D: 0x%02X, E: 0x%02X", +Registers.D, +Registers.E);
+        logger->log("H: 0x%02X, L: 0x%02X", +Registers.H, +Registers.L);
+        logger->log("PC: 0x%04X", +Registers.PC);
+        logger->log("SP: 0x%04X", +Registers.SP);
+    }
 
     enum CpuFlags { // lower 8 buts of AF register
         FLAG_ZERO = 1 << 7, // zero falg
@@ -58,49 +76,19 @@ public:
         FLAG_CARRY = 1 << 4 // carry flag
     };
 
-    inline void setFlag(uint8_t flag, bool enabled) { if (enabled) CpuRegisters.F |= flag; else CpuRegisters.F &= ~flag; CpuRegisters.F &= 0xF0; }
-    inline bool getFlag(uint8_t flag) const { return (CpuRegisters.F & flag) != 0; }
-    inline bool isFlagSet(uint8_t flag) const { return CpuRegisters.F & (flag); }
-
-    // operands
-    struct Instruction {
-        const char* name;
-        void (DMG_CPU::* execute)();
-        uint8_t bytes;
-        uint8_t cycles;
-    };
-
-    Instruction InstructionsTable[256];
-
-    // Miscelanious instructions
-    void NOP();
-    void HALT(void);
-    void STOP(void);
-    void DI(void);
-    void EI(void);
-    // 8-bit load instructions
-    void ld_bc_nn(unsigned short operand);
-    void ld_bcp_a(void);
-    // 16-it load instructions
-    // 8-bit arithmetic and logical instructions
-    void add_a_b(void);
-    void add_a_c(void);
-    void add_a_d(void);
-    void add_a_e(void);
-    void add_a_h(void);
-    void add_a_l(void);
-    void add_a_hl(void);
-    void add_a_a(void);
-    // 16-bit arithmetic instructions
-    // Rotate, shift, and bit operation instructions
-    void set_7_a(void);
-    // Control flow instructions
+    inline void setFlag(uint8_t flag, bool enabled) { if (enabled) Registers.F |= flag; else Registers.F &= ~flag; Registers.F &= 0xF0; }
+    inline bool getFlag(uint8_t flag) const { return (Registers.F & flag) != 0; }
+    inline bool isFlagSet(uint8_t flag) const { return Registers.F & (flag); }
+    inline void printFlags() { logger->log("Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
 
 private:
     Logger* logger = nullptr;
-    void logCall(const char* op);
 
     DMG_MMU* mmu = nullptr;
+    DMG_INTERRUPT* interrupts = nullptr;
+
+    void executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode);
+    void executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode);
 
     // instructions
     void ret(bool condition);
@@ -123,7 +111,6 @@ private:
     void cp_n(uint8_t value);
 
     // extended instructions
-    void extended_execute(uint8_t opcode);
     void bit(uint8_t bit, uint8_t value);
     void res(uint8_t bit, uint8_t* rgst);
     void set(uint8_t bit, uint8_t* rgst);
@@ -131,9 +118,6 @@ private:
     void rlc(uint8_t* value);
     void rr(uint8_t* value);
     void rrc(uint8_t* value);
-    void rra();
-    void rla();
-    void rlca();
     void sla(uint8_t* value);
     void sra(uint8_t* value);
     void srl(uint8_t* value);

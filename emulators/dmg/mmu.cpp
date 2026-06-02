@@ -1,4 +1,4 @@
-#include "../../include/dmg/mmu.hpp"
+#include "mmu.hpp"
 
 void DMG_MMU::initialize() {
     this->clearMemory();

@@ -1,4 +1,4 @@
-#include "../../include/agb/agb.hpp"
+#include "agb.hpp"
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>

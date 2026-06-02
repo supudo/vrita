@@ -1,12 +1,12 @@
-#include "../include/emulators.hpp"
+#include "emulators.hpp"
 
 #include <memory>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gpu.h>
 
-#include "../include/dmg/dmg.hpp"
-#include "../include/agb/agb.hpp"
+#include "dmg/dmg.hpp"
+#include "agb/agb.hpp"
 
 std::shared_ptr<DMG> emulatorDMG;
 std::shared_ptr<AGB> emulatorAGB;

@@ -1,4 +1,4 @@
-#include "../../include/gui/filebrowser.hpp"
+#include "filebrowser.hpp"
 
 #include <algorithm>
 #include <imgui.h>

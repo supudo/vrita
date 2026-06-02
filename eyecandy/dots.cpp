@@ -1,4 +1,4 @@
-#include "../include/dots.hpp"
+#include "dots.hpp"
 
 #include <algorithm>
 #include <imgui.h>

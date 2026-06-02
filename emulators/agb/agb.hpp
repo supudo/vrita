@@ -8,7 +8,7 @@ GameBoy Advance (AGB)
 #define VRITA_AGB_INCLUDES
 
 #include "../emulators.hpp"
-#include "../logger.hpp"
+#include "../../utilities/logger.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gpu.h>

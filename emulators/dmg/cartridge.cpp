@@ -1,4 +1,4 @@
-#include "../../include/dmg/cartridge.hpp"
+#include "cartridge.hpp"
 
 DMG_CARTRIDGE::DMG_CARTRIDGE(uint8_t* rom, size_t romSize, Logger* logger) : ram(0x8000, 0) {
     this->logger = logger;

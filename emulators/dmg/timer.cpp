@@ -1,4 +1,4 @@
-#include "../../include/dmg/timer.hpp"
+#include "timer.hpp"
 
 void DMGTimer::reset() {
     perfFreq = SDL_GetPerformanceFrequency();

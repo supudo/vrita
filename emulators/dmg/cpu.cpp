@@ -1,4 +1,4 @@
-#include "../../include/dmg/cpu.hpp"
+#include "cpu.hpp"
 
 void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge) {
     this->logger = &logger;

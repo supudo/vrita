@@ -139,39 +139,38 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="emulators\agb\agb.cpp" />
+    <ClCompile Include="emulators\dmg\apu.cpp" />
+    <ClCompile Include="emulators\dmg\cartridge.cpp" />
+    <ClCompile Include="emulators\dmg\cpu.cpp" />
+    <ClCompile Include="emulators\dmg\dmg.cpp" />
+    <ClCompile Include="emulators\dmg\mmu.cpp" />
+    <ClCompile Include="emulators\dmg\ppu.cpp" />
+    <ClCompile Include="emulators\dmg\timer.cpp" />
+    <ClCompile Include="emulators\emulators.cpp" />
+    <ClCompile Include="eyecandy\dots.cpp" />
+    <ClCompile Include="gui\filebrowser.cpp" />
+    <ClCompile Include="gui\log.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\agb\agb.cpp" />
-    <ClCompile Include="src\dmg\apu.cpp" />
-    <ClCompile Include="src\dmg\cartridge.cpp" />
-    <ClCompile Include="src\dmg\cpu.cpp" />
-    <ClCompile Include="src\dmg\timer.cpp" />
-    <ClCompile Include="src\dmg\dmg.cpp" />
-    <ClCompile Include="src\dmg\mmu.cpp" />
-    <ClCompile Include="src\dmg\ppu.cpp" />
-    <ClCompile Include="src\dots.cpp" />
-    <ClCompile Include="src\emulators.cpp" />
-    <ClCompile Include="src\gui\filebrowser.cpp" />
-    <ClCompile Include="src\gui\log.cpp" />
-    <ClCompile Include="src\vrita.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\agb\agb.hpp" />
-    <ClInclude Include="include\code.hpp" />
-    <ClInclude Include="include\datetimes.hpp" />
-    <ClInclude Include="include\dmg\apu.hpp" />
-    <ClInclude Include="include\dmg\cartridge.hpp" />
-    <ClInclude Include="include\dmg\cpu.hpp" />
-    <ClInclude Include="include\dmg\dmg.hpp" />
-    <ClInclude Include="include\dmg\mbc.hpp" />
-    <ClInclude Include="include\dmg\mmu.hpp" />
-    <ClInclude Include="include\dmg\ppu.hpp" />
-    <ClInclude Include="include\dmg\timer.hpp" />
-    <ClInclude Include="include\dots.hpp" />
-    <ClInclude Include="include\emulators.hpp" />
-    <ClInclude Include="include\files.hpp" />
-    <ClInclude Include="include\gui\filebrowser.hpp" />
-    <ClInclude Include="include\gui\log.hpp" />
-    <ClInclude Include="include\logger.hpp" />
+    <ClInclude Include="emulators\agb\agb.hpp" />
+    <ClInclude Include="emulators\dmg\apu.hpp" />
+    <ClInclude Include="emulators\dmg\cartridge.hpp" />
+    <ClInclude Include="emulators\dmg\cpu.hpp" />
+    <ClInclude Include="emulators\dmg\dmg.hpp" />
+    <ClInclude Include="emulators\dmg\mbc.hpp" />
+    <ClInclude Include="emulators\dmg\mmu.hpp" />
+    <ClInclude Include="emulators\dmg\ppu.hpp" />
+    <ClInclude Include="emulators\dmg\timer.hpp" />
+    <ClInclude Include="emulators\emulators.hpp" />
+    <ClInclude Include="eyecandy\dots.hpp" />
+    <ClInclude Include="gui\filebrowser.hpp" />
+    <ClInclude Include="gui\log.hpp" />
+    <ClInclude Include="utilities\settings.hpp" />
+    <ClInclude Include="utilities\datetimes.hpp" />
+    <ClInclude Include="utilities\files.hpp" />
+    <ClInclude Include="utilities\logger.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -7,8 +7,6 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
-#include "../files.hpp"
-
 class Log {
 public:
     void init(int positionX, int positionY, int width, int height);

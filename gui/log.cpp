@@ -1,6 +1,4 @@
-#include "../../include/gui/log.hpp"
-
-#include <map>
+#include "log.hpp"
 
 void Log::init(int positionX, int positionY, int width, int height) {
     this->positionX = positionX;

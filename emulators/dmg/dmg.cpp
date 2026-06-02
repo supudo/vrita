@@ -1,4 +1,4 @@
-#include "../../include/dmg/dmg.hpp"
+#include "dmg.hpp"
 
 #include <fstream>
 #include <vector>

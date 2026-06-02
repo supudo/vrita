@@ -7,7 +7,7 @@
 #include <functional>
 #include <string>
 
-#include "logger.hpp"
+#include "../utilities/logger.hpp"
 
 class Emulators {
 public:

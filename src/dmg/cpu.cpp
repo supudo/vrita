@@ -38,9 +38,6 @@ void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridg
 void DMG_CPU::stepCPU(bool ROMFileLoaded, uint8_t *memory) {
     if (!ROMFileLoaded) return;
 
-    // =========================
-    // FETCH
-    // =========================
     uint8_t opcode = memory[CpuRegisters.PC++];
     const DMG_CPU::Instruction& instruction = InstructionsTable[opcode];
     if (instruction.name != nullptr) {

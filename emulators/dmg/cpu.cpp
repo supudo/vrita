@@ -3,21 +3,7 @@
 void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge) {
     this->logger = &logger;
 
-    // initial register values
-    CpuRegisters.A = 0x01;
-    CpuRegisters.F = 0xB0;
-
-    CpuRegisters.B = 0x00;
-    CpuRegisters.C = 0x13;
-
-    CpuRegisters.D = 0x00;
-    CpuRegisters.E = 0xD8;
-
-    CpuRegisters.H = 0x01;
-    CpuRegisters.L = 0x4D;
-
-    CpuRegisters.SP = 0xFFFE;
-    CpuRegisters.PC = 0x0100;
+    clearResources();
 
     // instructions =================
 
@@ -28,6 +14,10 @@ void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridg
     InstructionsTable[0xF3] = { "DI", &DMG_CPU::DI, 1, 4 };
     InstructionsTable[0xFB] = { "EI", &DMG_CPU::EI, 1, 4 };
 
+    // 8-bit load instructions
+    InstructionsTable[0x01] = { "LD BC, d16", &DMG_CPU::NOP, 3, 3 };
+    InstructionsTable[0x02] = { "LD (BC), A", &DMG_CPU::NOP, 1, 2 };
+
     // 8-bit arithmetic and logical instructions
     InstructionsTable[0x80] = { "ADD A,B", &DMG_CPU::add_a_a, 1, 4 };
 
@@ -35,10 +25,25 @@ void DMG_CPU::initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridg
     InstructionsTable[0xFF] = { "FF", &DMG_CPU::set_7_a, 2, 2 };
 }
 
-void DMG_CPU::stepCPU(bool ROMFileLoaded, uint8_t *memory) {
+void DMG_CPU::clearResources() {
+    halted = false;
+    cycles = 0;
+    CpuRegisters.A = 0x01;
+    CpuRegisters.F = 0xB0;
+    CpuRegisters.B = 0x00;
+    CpuRegisters.C = 0x13;
+    CpuRegisters.D = 0x00;
+    CpuRegisters.E = 0xD8;
+    CpuRegisters.H = 0x01;
+    CpuRegisters.L = 0x4D;
+    CpuRegisters.SP = 0xFFFE;
+    CpuRegisters.PC = 0x0100;
+}
+
+void DMG_CPU::stepCPU(bool ROMFileLoaded, DMG_MMU &mmu) {
     if (!ROMFileLoaded) return;
 
-    uint8_t opcode = memory[CpuRegisters.PC++];
+    uint8_t opcode = mmu.memory[CpuRegisters.PC++];
     const DMG_CPU::Instruction& instruction = InstructionsTable[opcode];
     if (instruction.name != nullptr) {
         (this->*instruction.execute)();
@@ -73,6 +78,16 @@ void DMG_CPU::EI(void) {
 }
 
 // 8-bit load instructions
+
+// 0x01
+void DMG_CPU::ld_bc_nn(unsigned short operand) { 
+    CpuRegisters.setBC(operand);
+}
+
+// 0x02
+void DMG_CPU::ld_bcp_a(void) {
+    mmu->write8(CpuRegisters.BC(), CpuRegisters.A);
+}
 
 // 16-it load instructions
 
@@ -135,7 +150,7 @@ void DMG_CPU::add(uint8_t* destination, uint8_t value) {
     uint16_t result = *destination + value;
     setFlag(FLAG_CARRY, result > 0xff);
     setFlag(FLAG_HALF_CARRY, ((*destination & 0x0f) + (value & 0x0f)) > 0x0f);
-    *destination = result;
+    *destination = static_cast<uint8_t>(result);
     setFlag(FLAG_ZERO, !*destination);
     setFlag(FLAG_SUBTRACT, false);
 }

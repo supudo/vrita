@@ -16,11 +16,13 @@ GameBoy (DMG)
 #include <iostream>
 
 #include "cartridge.hpp"
+#include "mmu.hpp"
 
 class DMG_CPU {
 public:
     void initialize(Logger& logger, std::shared_ptr<DMG_CARTRIDGE> cartridge);
-    void stepCPU(bool ROMFileLoaded, uint8_t *memory);
+    void stepCPU(bool ROMFileLoaded, DMG_MMU& mmu);
+    void clearResources();
 
     uint64_t cycles = 0;
     bool halted = false;
@@ -77,6 +79,8 @@ public:
     void DI(void);
     void EI(void);
     // 8-bit load instructions
+    void ld_bc_nn(unsigned short operand);
+    void ld_bcp_a(void);
     // 16-it load instructions
     // 8-bit arithmetic and logical instructions
     void add_a_b(void);
@@ -95,6 +99,8 @@ public:
 private:
     Logger* logger = nullptr;
     void logCall(const char* op);
+
+    DMG_MMU* mmu = nullptr;
 
     // instructions
     void ret(bool condition);

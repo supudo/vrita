@@ -4,6 +4,10 @@ void DMG_MMU::initialize() {
     this->clearMemory();
 }
 
+void DMG_MMU::clearResources() {
+    this->clearMemory();
+}
+
 void DMG_MMU::clearMemory() {
     for (uint32_t i = 0; i < MEMORY_SIZE; i++) {
         memory[i] = 0;

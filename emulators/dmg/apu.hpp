@@ -10,6 +10,7 @@ GameBoy (DMG)
 class DMG_APU {
 public:
     void stepAPU(bool ROMFileLoaded);
+    void clearResources();
 };
 
 #endif

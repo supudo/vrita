@@ -179,19 +179,18 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 // ===============
 
 std::string DMG::loadROM(const char* path) {
-    int errorStatus = 0;
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
         this->logger->log("[DMG] WARNING: Failed to open ROM: %s", path);
-        std::cerr << "Failed to open ROM: " << path << "\n";
         return "Failed to open ROM";
     }
     std::streamsize size = file.tellg();
     if (size <= 0 || size > 0x8000) {
-        this->logger->log("[DMG] WARNING: Invalid ROM size: %s", (int)size, " bytes");
+        this->logger->log("[DMG] WARNING: Invalid ROM size: %i", (int)size, " bytes");
         file.close();
         return "Invalid ROM size";
     }
+    resetROM();
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
         this->logger->log("[DMG] WARNING: Failed to read ROM data!");
@@ -199,12 +198,17 @@ std::string DMG::loadROM(const char* path) {
         return "Failed to read ROM data";
     }
     file.close();
-    if (errorStatus == 0) {
-        ROMFileLoaded = true;
-        cartridge = std::make_shared<DMG_CARTRIDGE>(managerMMU->memory, size, logger);
-        return "";
-    }
+    ROMFileLoaded = true;
+    cartridge = std::make_shared<DMG_CARTRIDGE>(managerMMU->memory, size, logger);
     return "";
+}
+
+void DMG::resetROM() {
+    ROMFileLoaded = false;
+    managerCPU->clearResources();
+    managerMMU->clearResources();
+    managerPPU->clearResources();
+    managerAPU->clearResources();
 }
 
 // ===============
@@ -213,11 +217,10 @@ std::string DMG::loadROM(const char* path) {
 
 uint32_t DMG::stepCPU() {
     uint64_t before = managerCPU->cycles;
-    if (managerCPU->halted) {
+    if (managerCPU->halted)
         managerCPU->cycles += 4;
-    } else {
-        managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory);
-    }
+    else
+        managerCPU->stepCPU(ROMFileLoaded, *managerMMU);
     return (uint32_t)(managerCPU->cycles - before);
 }
 

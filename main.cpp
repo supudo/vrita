@@ -20,10 +20,6 @@
 
 #include "utilities/logger.hpp"
 
-void renderGUIComponents();
-void showFileBrowser(const char* emulatorType);
-void loadROM(const char* romFilePath);
-
 std::shared_ptr<Dots> eyeCandy_Dots;
 bool SHOW_DOTS = false;
 
@@ -38,23 +34,6 @@ bool guiFileBrowserVisible = false;
 
 std::shared_ptr<Log> guiLog;
 bool guiLogVisible = false;
-
-void initEmulatorsManager() {
-    guiLog = std::make_shared<Log>();
-    guiLog->init(40, 40, 400, 200);
-
-    logger = std::make_shared<Logger>([] (const char* msg) {
-        guiLog->addToLog("%s\n", msg);
-    });
-
-    managerEmulators = std::make_shared<Emulators>();
-    managerEmulators->init(*logger);
-
-    eyeCandy_Dots = std::make_shared<Dots>();
-
-    guiFileBrowser = std::make_shared<FileBrowser>();
-    guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
-}
 
 void ShowMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
@@ -83,7 +62,38 @@ void ShowMainMenu() {
     }
 }
 
-int runVrita() {
+void showFileBrowser(const char* type) {
+    guiFileBrowserVisible = true;
+    emulatorType = type;
+}
+
+void renderGUIComponents() {
+    if (guiFileBrowserVisible)
+        guiFileBrowser->render(&guiFileBrowserVisible, emulatorType);
+    if (guiLogVisible)
+        guiLog->draw("Log");
+}
+
+void loadROM(const char* romFilePath) {
+    guiFileBrowserVisible = false;
+    std::string errorMessage = managerEmulators->loadROM(romFilePath);
+    if (errorMessage != "") {
+        ImGui::OpenPopup("ROM Load Error");
+        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("ROM Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("%s", errorMessage.c_str());
+            ImGui::Separator();
+            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 120) * 0.5f);
+            if (ImGui::Button("OK", ImVec2(120, 0))) {
+                errorMessage.clear();
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+}
+
+int main(int argc, char** argv) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         printf("Error: SDL_Init(): %s\n", SDL_GetError());
         return 1;
@@ -112,6 +122,21 @@ int runVrita() {
     }
 
     SDL_SetGPUSwapchainParameters(gpu_device, window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
+
+    guiLog = std::make_shared<Log>();
+    guiLog->init(40, 40, 400, 200);
+
+    logger = std::make_shared<Logger>([] (const char* msg) {
+        guiLog->addToLog("%s\n", msg);
+    });
+
+    managerEmulators = std::make_shared<Emulators>();
+    managerEmulators->init(*logger);
+
+    eyeCandy_Dots = std::make_shared<Dots>();
+
+    guiFileBrowser = std::make_shared<FileBrowser>();
+    guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 
     if (!managerEmulators->createTexture(gpu_device)) {
         printf("Error: Cannot create emulator texture\n");
@@ -222,44 +247,4 @@ int runVrita() {
     SDL_Quit();
 
     return 0;
-}
-
-// ============
-// GUI
-// ============
-
-void showFileBrowser(const char* type) {
-    guiFileBrowserVisible = true;
-    emulatorType = type;
-}
-
-void renderGUIComponents() {
-    if (guiFileBrowserVisible)
-        guiFileBrowser->render(&guiFileBrowserVisible, emulatorType);
-    if (guiLogVisible)
-        guiLog->draw("Log");
-}
-
-void loadROM(const char* romFilePath) {
-    guiFileBrowserVisible = false;
-    std::string errorMessage = managerEmulators->loadROM(romFilePath);
-    if (errorMessage != "") {
-        ImGui::OpenPopup("ROM Load Error");
-        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::BeginPopupModal("ROM Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("%s", errorMessage.c_str());
-            ImGui::Separator();
-            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 120) * 0.5f);
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
-                errorMessage.clear();
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-    }
-}
-
-int main(int argc, char** argv) {
-    initEmulatorsManager();
-    return runVrita();
 }

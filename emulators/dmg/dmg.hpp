@@ -12,8 +12,8 @@ GameBoy (DMG)
 #include <stdint.h>
 #include <iostream>
 
-#include "../emulators.hpp"
-#include "../../utilities/logger.hpp"
+#include "emulators/emulators.hpp"
+#include "utilities/logger.hpp"
 
 #include "cartridge.hpp"
 #include "mmu.hpp"

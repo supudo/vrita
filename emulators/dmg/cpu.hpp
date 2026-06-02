@@ -7,8 +7,8 @@ GameBoy (DMG)
 #ifndef VRITA_DMG_CPU_INCLUDES
 #define VRITA_DMG_CPU_INCLUDES
 
-#include "../emulators.hpp"
-#include "../../utilities/logger.hpp"
+#include "emulators/emulators.hpp"
+#include "utilities/logger.hpp"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_gpu.h>

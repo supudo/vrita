@@ -8,7 +8,7 @@ GameBoy (DMG)
 #define VRITA_DMG_CARTRIDGE_INCLUDES
 
 #include "mbc.hpp"
-#include "../../utilities/logger.hpp"
+#include "utilities/logger.hpp"
 
 class DMG_CARTRIDGE {
 public:

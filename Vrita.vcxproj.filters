@@ -32,6 +32,9 @@
     <ClCompile Include="src\dmg\mmu.cpp">
       <Filter>src\dmg</Filter>
     </ClCompile>
+    <ClCompile Include="src\dmg\cartridge.cpp">
+      <Filter>src\dmg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">

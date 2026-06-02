@@ -89,6 +89,7 @@ public:
     void add_a_a(void);
     // 16-bit arithmetic instructions
     // Rotate, shift, and bit operation instructions
+    void set_7_a(void);
     // Control flow instructions
 
 private:

@@ -41,7 +41,6 @@ private:
 
     // cartridge
     std::shared_ptr<DMG_CARTRIDGE> cartridge;
-    void initializeCartridge(size_t romSize);
 
     void stepCPU();
     void stepPPU();

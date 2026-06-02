@@ -142,6 +142,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\agb\agb.cpp" />
     <ClCompile Include="src\dmg\apu.cpp" />
+    <ClCompile Include="src\dmg\cartridge.cpp" />
     <ClCompile Include="src\dmg\cpu.cpp" />
     <ClCompile Include="src\dmg\dmg.cpp" />
     <ClCompile Include="src\dmg\mmu.cpp" />

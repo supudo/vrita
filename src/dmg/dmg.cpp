@@ -15,6 +15,7 @@ bool DMG::initialize(Logger& logger) {
 
     // move from here to load rom !!!!!
     managerCPU = new DMG_CPU();
+    managerCPU->initialize(logger, nullptr);
     managerCPU->halted = false;
     managerCPU->cycles = 0;
 
@@ -188,15 +189,10 @@ std::string DMG::loadROM(const char* path) {
     file.close();
     if (errorStatus == 0) {
         ROMFileLoaded = true;
-        initializeCartridge(size);
+        cartridge = std::make_shared<DMG_CARTRIDGE>(managerMMU->memory, size, logger);
         return "";
     }
     return "";
-}
-
-void DMG::initializeCartridge(size_t romSize) {
-    if (!ROMFileLoaded) return;
-    cartridge = std::make_shared<DMG_CARTRIDGE>(managerMMU->memory, romSize, logger);
 }
 
 // ===============
@@ -209,7 +205,7 @@ void DMG::stepCPU() {
         return;
     }
 
-    managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory, cartridge);
+    managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory);
 }
 
 void DMG::stepAPU() {

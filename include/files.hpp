@@ -3,6 +3,7 @@
 
 #include "datetimes.hpp"
 #include <filesystem>
+#include <map>
 #include <string>
 
 namespace VritaUtils {

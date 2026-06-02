@@ -150,7 +150,8 @@
     <ClCompile Include="src\dmg\ppu.cpp" />
     <ClCompile Include="src\dots.cpp" />
     <ClCompile Include="src\emulators.cpp" />
-    <ClCompile Include="src\filebrowser.cpp" />
+    <ClCompile Include="src\gui\filebrowser.cpp" />
+    <ClCompile Include="src\gui\log.cpp" />
     <ClCompile Include="src\vrita.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -167,8 +168,9 @@
     <ClInclude Include="include\dmg\timer.hpp" />
     <ClInclude Include="include\dots.hpp" />
     <ClInclude Include="include\emulators.hpp" />
-    <ClInclude Include="include\filebrowser.hpp" />
     <ClInclude Include="include\files.hpp" />
+    <ClInclude Include="include\gui\filebrowser.hpp" />
+    <ClInclude Include="include\gui\log.hpp" />
     <ClInclude Include="include\logger.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

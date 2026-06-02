@@ -14,23 +14,33 @@
 
 #include "../include/emulators.hpp"
 #include "../include/dots.hpp"
-#include "../include/filebrowser.hpp"
+#include "../include/gui/filebrowser.hpp"
+#include "../include/gui/log.hpp"
 
 #include "../include/logger.hpp"
 
-std::shared_ptr<Emulators> managerEmulators;
 std::shared_ptr<Dots> eyeCandy_Dots;
 bool SHOW_DOTS = false;
 
-std::shared_ptr<FileBrowser> guiFileBrowser;
-bool fileBrowserVisible = false;
+std::shared_ptr<Logger> logger;
+
+std::shared_ptr<Emulators> managerEmulators;
 std::string emulatorType = "dmg";
 std::string romLoadError;
 
-std::shared_ptr<Logger> logger;
+std::shared_ptr<FileBrowser> guiFileBrowser;
+bool guiFileBrowserVisible = false;
+
+std::shared_ptr<Log> guiLog;
+bool guiLogVisible = false;
 
 void initEmulatorsManager() {
-    logger = std::make_shared<Logger>();
+    guiLog = std::make_shared<Log>();
+    guiLog->init(40, 40, 400, 200);
+
+    logger = std::make_shared<Logger>([](const char* msg) {
+        guiLog->addToLog("%s\n", msg);
+    });
 
     managerEmulators = std::make_shared<Emulators>();
     managerEmulators->init(*logger);
@@ -44,6 +54,9 @@ void initEmulatorsManager() {
 void ShowMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
+            if (ImGui::MenuItem("Show Log"))
+                guiLogVisible = !guiLogVisible;
+            ImGui::Separator();
             if (ImGui::MenuItem("Exit"))
                 vritaRunning = true;
 
@@ -211,17 +224,19 @@ int runVrita() {
 // ============
 
 void showFileBrowser(const char* type) {
-    fileBrowserVisible = true;
+    guiFileBrowserVisible = true;
     emulatorType = type;
 }
 
 void renderGUIComponents() {
-    if (fileBrowserVisible)
-        guiFileBrowser->render(&fileBrowserVisible, emulatorType);
+    if (guiFileBrowserVisible)
+        guiFileBrowser->render(&guiFileBrowserVisible, emulatorType);
+    if (guiLogVisible)
+        guiLog->draw("Log");
 }
 
 void loadROM(const char* romFilePath) {
-    fileBrowserVisible = false;
+    guiFileBrowserVisible = false;
     std::string errorMessage = managerEmulators->loadROM(romFilePath);
     if (errorMessage != "") {
         ImGui::OpenPopup("ROM Load Error");

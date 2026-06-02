@@ -7,17 +7,25 @@
 #include <string>
 #include <iomanip>
 #include <sstream>
+#include <functional>
 
 class Logger {
 public:
+    std::function<void(const char*)> guiCallback;
+
+    Logger() = default;
+    explicit Logger(std::function<void(const char*)> cb) : guiCallback(std::move(cb)) {}
+
     void logMessage(const std::string& message) {
         std::cout << "[" << currentTime() << "] " << message << std::endl;
+        if (guiCallback) guiCallback(message.c_str());
     }
 
     void log(const char* fmt, va_list args) {
         char buf[8192];
         vsnprintf(buf, 8192, fmt, args);
-        std::cout << "[" << currentTime() << "] " << std::string(buf) << std::endl;
+        std::cout << "[" << currentTime() << "] " << buf << std::endl;
+        if (guiCallback) guiCallback(buf);
     }
 
     void log(const char* fmt, ...)  {
@@ -26,7 +34,8 @@ public:
         va_start(args, fmt);
         vsnprintf(buf, 8192, fmt, args);
         va_end(args);
-        std::cout << "[" << currentTime() << "] " << std::string(buf) << std::endl;
+        std::cout << "[" << currentTime() << "] " << buf << std::endl;
+        if (guiCallback) guiCallback(buf);
     }
 
     auto str_format(const char* fmt, va_list args) -> std::string {

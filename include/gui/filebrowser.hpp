@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "files.hpp"
+#include "../files.hpp"
 
 class FileBrowser {
 public:

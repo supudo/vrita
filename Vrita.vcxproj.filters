@@ -35,6 +35,9 @@
     <ClCompile Include="src\dmg\cartridge.cpp">
       <Filter>src\dmg</Filter>
     </ClCompile>
+    <ClCompile Include="src\dmg\timer.cpp">
+      <Filter>src\dmg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -91,6 +94,9 @@
       <Filter>include\dmg</Filter>
     </ClInclude>
     <ClInclude Include="include\dmg\mmu.hpp">
+      <Filter>include\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dmg\timer.hpp">
       <Filter>include\dmg</Filter>
     </ClInclude>
     <ClInclude Include="include\logger.hpp">

@@ -26,6 +26,8 @@ bool DMG::initialize(Logger& logger) {
 
     managerPPU = new DMG_PPU();
 
+    timer.reset();
+
     return true;
 }
 
@@ -153,9 +155,19 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    stepPPU();
-    stepAPU();
-    stepCPU();
+    if (ROMFileLoaded) {
+        uint32_t budget = timer.tickFrame();
+        uint32_t executed = 0;
+        while (executed < budget) {
+            uint32_t cycles = stepCPU();
+            if (cycles == 0) break; // unsupported opcode
+            stepPPU(cycles);
+            stepAPU(cycles);
+            executed += cycles;
+        }
+    }
+    else
+        timer.tickFrame();
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
@@ -199,17 +211,18 @@ std::string DMG::loadROM(const char* path) {
 // internals
 // ===============
 
-void DMG::stepCPU() {
+uint32_t DMG::stepCPU() {
+    uint64_t before = managerCPU->cycles;
     if (managerCPU->halted) {
         managerCPU->cycles += 4;
-        return;
+    } else {
+        managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory);
     }
-
-    managerCPU->stepCPU(ROMFileLoaded, managerMMU->memory);
+    return (uint32_t)(managerCPU->cycles - before);
 }
 
-void DMG::stepAPU() {
+void DMG::stepAPU(uint32_t cycles) {
 }
 
-void DMG::stepPPU() {
+void DMG::stepPPU(uint32_t cycles) {
 }

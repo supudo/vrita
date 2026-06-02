@@ -20,6 +20,7 @@ GameBoy (DMG)
 #include "cpu.hpp"
 #include "ppu.hpp"
 #include "apu.hpp"
+#include "timer.hpp"
 
 class DMG {
 public:
@@ -42,9 +43,9 @@ private:
     // cartridge
     std::shared_ptr<DMG_CARTRIDGE> cartridge;
 
-    void stepCPU();
-    void stepPPU();
-    void stepAPU();
+    uint32_t stepCPU();
+    void stepPPU(uint32_t cycles);
+    void stepAPU(uint32_t cycles);
 
     // rendering
     static const uint32_t WIDTH = 160;
@@ -53,6 +54,8 @@ private:
     SDL_GPUTexture* gTexture = nullptr;
     int windowScale = 1;
     int lastWindowScale = -1;
+
+    DMGTimer timer;
 
     //cpu
     bool ime = false; // interrupt master enable

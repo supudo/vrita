@@ -144,6 +144,7 @@
     <ClCompile Include="src\dmg\apu.cpp" />
     <ClCompile Include="src\dmg\cartridge.cpp" />
     <ClCompile Include="src\dmg\cpu.cpp" />
+    <ClCompile Include="src\dmg\timer.cpp" />
     <ClCompile Include="src\dmg\dmg.cpp" />
     <ClCompile Include="src\dmg\mmu.cpp" />
     <ClCompile Include="src\dmg\ppu.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="include\dmg\mbc.hpp" />
     <ClInclude Include="include\dmg\mmu.hpp" />
     <ClInclude Include="include\dmg\ppu.hpp" />
+    <ClInclude Include="include\dmg\timer.hpp" />
     <ClInclude Include="include\dots.hpp" />
     <ClInclude Include="include\emulators.hpp" />
     <ClInclude Include="include\filebrowser.hpp" />

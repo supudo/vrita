@@ -26,10 +26,75 @@ bool DMG::initialize() {
     return true;
 }
 
-// ===============
-// rendering
-// ===============
+void DMG::stepAll() {
+    if (ROMFileLoaded) {
+        uint32_t budget = managerTimer->tickFrame();
+        uint32_t executed = 0;
+        while (executed < budget) {
+            uint32_t cycles = 0;
+            if (!managerInterrupts->checkForInterrupts()) {
+                cycles = stepCPU();
+                if (cycles == 0) break; // unsupported opcode
+            }
+            stepPPU(cycles);
+            stepAPU(cycles);
+            executed += cycles;
+        }
+    }
+    else
+        managerTimer->tickFrame();
+}
 
+std::string DMG::loadROM(const char* path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
+    if (!file.is_open()) {
+        logger.log("[DMG] WARNING: Failed to open ROM: %s", path);
+        return "Failed to open ROM";
+    }
+    std::streamsize size = file.tellg();
+    if (size <= 0 || size > 0x8000) {
+        logger.log("[DMG] WARNING: Invalid ROM size: %i", (int)size, " bytes");
+        file.close();
+        return "Invalid ROM size";
+    }
+    resetROM();
+    for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
+        gFramebuffer[i] = 0xFF9BBC0F;
+    file.seekg(0, std::ios::beg);
+    if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
+        logger.log("[DMG] WARNING: Failed to read ROM data!");
+        file.close();
+        return "Failed to read ROM data";
+    }
+    file.close();
+    ROMFileLoaded = true;
+    managerCartridge->loadROM(size);
+    return "";
+}
+
+void DMG::resetROM() {
+    ROMFileLoaded = false;
+    managerCPU->clearResources();
+    managerMMU->clearResources();
+    managerPPU->clearResources();
+    managerAPU->clearResources();
+}
+
+uint32_t DMG::stepCPU() {
+    uint64_t before = managerCPU->cycles;
+    if (managerCPU->halted)
+        managerCPU->cycles += 4;
+    else
+        managerCPU->stepCPU(ROMFileLoaded);
+    return (uint32_t)(managerCPU->cycles - before);
+}
+
+void DMG::stepPPU(uint32_t cycles) {}
+
+void DMG::stepAPU(uint32_t cycles) {
+}
+
+#pragma region Rendering
 void DMG::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);
 }
@@ -118,11 +183,11 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),
         ImVec2(FLT_MAX, FLT_MAX),
-        [](ImGuiSizeCallbackData* data) {
-            auto* c = (ConstraintData*)data->UserData;
-            float contentW = data->DesiredSize.x - c->padX;
-            data->DesiredSize.y = contentW / c->aspect + c->decorH;
-        },
+        [] (ImGuiSizeCallbackData* data) {
+        auto* c = (ConstraintData*)data->UserData;
+        float contentW = data->DesiredSize.x - c->padX;
+        data->DesiredSize.y = contentW / c->aspect + c->decorH;
+    },
         &cd
     );
 
@@ -134,7 +199,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         showFileBrowser("dmg");
     if (ImGui::Button("Eject ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         ROMFileLoaded = false;
-    
+
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
 
     ImGui::Separator();
@@ -157,80 +222,4 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::End();
 }
-
-// ===============
-// DMG
-// ===============
-
-void DMG::stepAll() {
-    if (ROMFileLoaded) {
-        uint32_t budget = managerTimer->tickFrame();
-        uint32_t executed = 0;
-        while (executed < budget) {
-            uint32_t cycles = 0;
-            if (!managerInterrupts->checkForInterrupts()) {
-                cycles = stepCPU();
-                if (cycles == 0) break; // unsupported opcode
-            }
-            stepPPU(cycles);
-            stepAPU(cycles);
-            executed += cycles;
-        }
-    }
-    else
-        managerTimer->tickFrame();
-}
-
-std::string DMG::loadROM(const char* path) {
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
-    if (!file.is_open()) {
-        logger.log("[DMG] WARNING: Failed to open ROM: %s", path);
-        return "Failed to open ROM";
-    }
-    std::streamsize size = file.tellg();
-    if (size <= 0 || size > 0x8000) {
-        logger.log("[DMG] WARNING: Invalid ROM size: %i", (int)size, " bytes");
-        file.close();
-        return "Invalid ROM size";
-    }
-    resetROM();
-    for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
-        gFramebuffer[i] = 0xFF9BBC0F;
-    file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
-        logger.log("[DMG] WARNING: Failed to read ROM data!");
-        file.close();
-        return "Failed to read ROM data";
-    }
-    file.close();
-    ROMFileLoaded = true;
-    managerCartridge->loadROM(size);
-    return "";
-}
-
-void DMG::resetROM() {
-    ROMFileLoaded = false;
-    managerCPU->clearResources();
-    managerMMU->clearResources();
-    managerPPU->clearResources();
-    managerAPU->clearResources();
-}
-
-// ===============
-// internals
-// ===============
-
-uint32_t DMG::stepCPU() {
-    uint64_t before = managerCPU->cycles;
-    if (managerCPU->halted)
-        managerCPU->cycles += 4;
-    else
-        managerCPU->stepCPU(ROMFileLoaded);
-    return (uint32_t)(managerCPU->cycles - before);
-}
-
-void DMG::stepAPU(uint32_t cycles) {
-}
-
-void DMG::stepPPU(uint32_t cycles) {
-}
+#pragma endregion

@@ -17,7 +17,6 @@ void DMG_CPU::clearResources() {
 
 void DMG_CPU::stepCPU(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
-
     uint8_t opcode = mmu.memory[Registers.PC++];
     executeInstruction8bit(ROMFileLoaded, opcode);
 }
@@ -52,7 +51,6 @@ void DMG_CPU::dec(uint8_t* value) {
 }
 
 void DMG_CPU::add(uint8_t* destination, uint8_t value) {
-    logger.log("[DMG_CPU] add (8-8) %02X", destination);
     uint16_t result = *destination + value;
     setFlag(FLAG_CARRY, result > 0xff);
     setFlag(FLAG_HALF_CARRY, ((*destination & 0x0f) + (value & 0x0f)) > 0x0f);
@@ -62,7 +60,6 @@ void DMG_CPU::add(uint8_t* destination, uint8_t value) {
 }
 
 void DMG_CPU::add(uint16_t* destination, uint16_t value) {
-    logger.log("[DMG_CPU] add (16-16) %02X", destination);
     uint32_t result = *destination + value;
     setFlag(FLAG_CARRY, result > 0xffff);
     setFlag(FLAG_HALF_CARRY, ((*destination & 0x0fff) + (value & 0x0fff)) > 0x0fff);
@@ -71,7 +68,6 @@ void DMG_CPU::add(uint16_t* destination, uint16_t value) {
 }
 
 void DMG_CPU::add(uint16_t* destination, int8_t value) {
-    logger.log("[DMG_CPU] add (16-8) %02X", destination);
     uint16_t result = *destination + value;
     setFlag(FLAG_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x100) == 0x100);
     setFlag(FLAG_HALF_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x10) == 0x10);
@@ -122,6 +118,7 @@ void DMG_CPU::and_(uint8_t value) {
 }
 
 void DMG_CPU::or_(uint8_t value) {
+    logger.log("[DMG_CPU] or_ (8) %02X", value);
     Registers.A |= value;
     setFlag(FLAG_ZERO, !Registers.A);
     setFlag(FLAG_CARRY | FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
@@ -253,3 +250,4 @@ void DMG_CPU::swap(uint8_t* value) {
     setFlag(FLAG_ZERO, !*value);
     setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY | FLAG_CARRY, false);
 }
+

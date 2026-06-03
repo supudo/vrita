@@ -162,6 +162,7 @@
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />
+    <ClInclude Include="emulators\dmg\cpu_registers.hpp" />
     <ClInclude Include="emulators\dmg\dmg.hpp" />
     <ClInclude Include="emulators\dmg\interrupt.hpp" />
     <ClInclude Include="emulators\dmg\mbc.hpp" />

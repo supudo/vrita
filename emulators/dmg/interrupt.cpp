@@ -8,12 +8,23 @@ bool DMG_INTERRUPT::isInterruptFlagSet(uint8_t flag) {
     return mmu.memory[addressInterruptFlag] & flag;
 }
 
+void DMG_INTERRUPT::setInterruptFlag(uint8_t flag) {
+    mmu.memory[addressInterruptFlag] |= flag;
+}
+
+void DMG_INTERRUPT::unsetInterruptFlag(uint8_t flag) {
+    mmu.memory[addressInterruptFlag] &= ~flag;
+}
+
 void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
+    mmu.write_stack(&Registers.SP, Registers.PC);
+    Registers.PC = jump_pc;
+    setIME(false);
+    unsetInterruptFlag(interrupt);
 }
 
 bool DMG_INTERRUPT::checkForInterrupts() {
     if (mmu.memory[addressInterruptEnabled] & mmu.memory[addressInterruptFlag] & 0x0F) {
-
     }
 
     if (!getIME())

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "mmu.hpp"
+#include "cpu_registers.hpp"
 
 enum Interrupts { // IF
     INTERRUPT_VBLANK = (1 << 0),
@@ -18,6 +19,8 @@ class DMG_INTERRUPT {
 public:
     DMG_INTERRUPT(DMG_MMU& mmu) : mmu(mmu) {}
 
+    bool IME;
+
     bool checkForInterrupts();
     bool isInterruptEnabled(uint8_t flag); // if IE - 0xFFFF is set
     bool isInterruptFlagSet(uint8_t flag); // if IF - 0xFF0F is set
@@ -29,10 +32,14 @@ public:
 private:
     DMG_MMU& mmu;
 
-    bool IME;
+    DMGCpuRegisters Registers;
+
 
     uint16_t addressInterruptEnabled = 0xFFFF; // IE
     uint16_t addressInterruptFlag = 0xFF0F; // IF
+
+    void setInterruptFlag(uint8_t flag);
+    void unsetInterruptFlag(uint8_t flag);
 };
 
 #endif

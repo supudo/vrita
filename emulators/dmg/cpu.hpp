@@ -16,6 +16,7 @@ GameBoy (DMG)
 #include <iostream>
 
 #include "cartridge.hpp"
+#include "cpu_registers.hpp"
 #include "interrupt.hpp"
 #include "mmu.hpp"
 
@@ -28,37 +29,7 @@ public:
     uint64_t cycles = 0;
     bool halted = false;
 
-    // registers
-    struct Registers {
-        uint8_t A, F;
-        uint8_t B, C;
-        uint8_t D, E;
-        uint8_t H, L;
-
-        uint16_t SP = 0; // stack pointer
-        uint16_t PC = 0; // program counter/pointer
-
-        // 16-bit registers combos
-        union {
-            struct { uint8_t F; uint8_t A; };
-            uint16_t AF;
-        };
-
-        union {
-            struct { uint8_t C; uint8_t B; };
-            uint16_t BC;
-        };
-
-        union {
-            struct { uint8_t E; uint8_t D; };
-            uint16_t DE;
-        };
-
-        union {
-            struct { uint8_t L; uint8_t H; };
-            uint16_t HL;
-        };
-    } Registers;
+    DMGCpuRegisters Registers;
 
     inline void printRegisters() {
         logger.log("A: 0x%02X, F: 0x%02X", +Registers.A, +Registers.F);
@@ -68,13 +39,6 @@ public:
         logger.log("PC: 0x%04X", +Registers.PC);
         logger.log("SP: 0x%04X", +Registers.SP);
     }
-
-    enum CpuFlags { // lower 8 buts of AF register
-        FLAG_ZERO = 1 << 7, // zero falg
-        FLAG_SUBTRACT = 1 << 6, // subsctraction flag (BCD)
-        FLAG_HALF_CARRY = 1 << 5, // half carry flag (BCD)
-        FLAG_CARRY = 1 << 4 // carry flag
-    };
 
     inline void setFlag(uint8_t flag, bool enabled) { if (enabled) Registers.F |= flag; else Registers.F &= ~flag; Registers.F &= 0xF0; }
     inline bool getFlag(uint8_t flag) const { return (Registers.F & flag) != 0; }

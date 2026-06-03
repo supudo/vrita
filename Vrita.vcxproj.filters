@@ -103,6 +103,9 @@
     <ClInclude Include="eyecandy\dots.hpp">
       <Filter>eyecandy</Filter>
     </ClInclude>
+    <ClInclude Include="emulators\dmg\cpu_registers.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

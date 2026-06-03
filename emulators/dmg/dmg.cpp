@@ -12,8 +12,8 @@ bool DMG::initialize() {
     managerMMU = std::make_shared<DMG_MMU>();
     managerMMU->clearResources();
 
-    managerTimer = std::make_shared<DMG_TIMER>();
     managerInterrupts = std::make_shared<DMG_INTERRUPT>(*managerMMU);
+    managerTimer = std::make_shared<DMG_TIMER>(*managerInterrupts);
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts, false, 0);
     managerPPU = std::make_shared<DMG_PPU>(*managerMMU);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
@@ -28,21 +28,16 @@ bool DMG::initialize() {
 
 void DMG::stepAll() {
     if (ROMFileLoaded) {
-        uint32_t budget = managerTimer->tickFrame();
-        uint32_t executed = 0;
-        while (executed < budget) {
-            uint32_t cycles = 0;
-            if (!managerInterrupts->checkForInterrupts()) {
-                cycles = stepCPU();
-                if (cycles == 0) break; // unsupported opcode
-            }
-            stepPPU(cycles);
-            stepAPU(cycles);
-            executed += cycles;
+        uint32_t cycles = 0;
+        if (!managerInterrupts->checkForInterrupts()) {
+            cycles = stepCPU();
+            if (cycles == 0) return; // unsupported opcode
         }
+        stepPPU(cycles);
+        stepAPU(cycles);
     }
-    else
-        managerTimer->tickFrame();
+    //else
+    //    managerTimer->tick();
 }
 
 std::string DMG::loadROM(const char* path) {
@@ -89,10 +84,13 @@ uint32_t DMG::stepCPU() {
     return (uint32_t)(managerCPU->cycles - before);
 }
 
+void DMG::stepMMU(uint32_t cycles) {
+    managerMMU->tick(cycles);
+}
+
 void DMG::stepPPU(uint32_t cycles) {}
 
-void DMG::stepAPU(uint32_t cycles) {
-}
+void DMG::stepAPU(uint32_t cycles) {}
 
 #pragma region Rendering
 void DMG::release(SDL_GPUDevice* device) {

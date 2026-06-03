@@ -1,5 +1,8 @@
 #include "mmu.hpp"
 
+void DMG_MMU::tick(uint32_t cycles) {
+}
+
 void DMG_MMU::setUnits(DMG_CARTRIDGE* cartridge, DMG_CPU* cpu, DMG_TIMER* timer, DMG_INTERRUPT* interrupts, DMG_PPU* ppu, DMG_APU* apu) {
     managerCartridge = cartridge;
     managerCPU = cpu;
@@ -23,10 +26,10 @@ void DMG_MMU::clearMemory() {
     memory[0xFF01] = 0x00; // SB
     memory[0xFF02] = 0x7E; // SC
 
-    memory[0xFF04] = 0xAB; // DIV
-    memory[0xFF05] = 0x00; // TIMA
-    memory[0xFF06] = 0x00; // TMA
-    memory[0xFF07] = 0xF8; // TAC
+    memory[0xFF04] = 0xAB; // DIV - divider register
+    memory[0xFF05] = 0x00; // TIMA - timer counter
+    memory[0xFF06] = 0x00; // TMA - timer modulo
+    memory[0xFF07] = 0xF8; // TAC - timer control
 
     memory[0xFF0F] = 0xE1; // IF - interrupt flag
 

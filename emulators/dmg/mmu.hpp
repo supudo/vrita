@@ -15,9 +15,13 @@ public:
     void setUnits(DMG_CARTRIDGE* cartridge, DMG_CPU* cpu, DMG_TIMER* timer, DMG_INTERRUPT* interrupts, DMG_PPU* ppu, DMG_APU* apu);
     void clearMemory();
     void clearResources();
+    void tick(uint32_t cycles);
 
     static const uint32_t MEMORY_SIZE = 0x10000; // 64 KB
     uint8_t memory[MEMORY_SIZE] = {};
+
+    bool is_halted = false;
+    bool trigger_halt_bug = false;
 
     inline uint8_t read8(uint16_t address) const { return memory[address]; }
     inline void write8(uint16_t address, uint8_t value) { memory[address] = value; }

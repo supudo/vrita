@@ -29,6 +29,9 @@ public:
     inline void setIME(bool state) { IME = int(state) << 0; }
     inline bool getIME() { return IME & 1U; }
 
+    void setInterruptFlag(uint8_t flag);
+    void unsetInterruptFlag(uint8_t flag);
+
 private:
     DMG_MMU& mmu;
 
@@ -37,9 +40,6 @@ private:
 
     uint16_t addressInterruptEnabled = 0xFFFF; // IE
     uint16_t addressInterruptFlag = 0xFF0F; // IF
-
-    void setInterruptFlag(uint8_t flag);
-    void unsetInterruptFlag(uint8_t flag);
 };
 
 #endif

@@ -16,7 +16,8 @@ enum Interrupts { // IF
 
 class DMG_INTERRUPT {
 public:
-    void initialize(DMG_MMU* mmu);
+    DMG_INTERRUPT(DMG_MMU& mmu) : mmu(mmu) {}
+
     bool checkForInterrupts();
     bool isInterruptEnabled(uint8_t flag); // if IE - 0xFFFF is set
     bool isInterruptFlagSet(uint8_t flag); // if IF - 0xFF0F is set
@@ -26,9 +27,12 @@ public:
     inline bool getIME() { return IME & 1U; }
 
 private:
+    DMG_MMU& mmu;
+
     bool IME;
 
-    DMG_MMU* mmu = nullptr;
+    uint16_t addressInterruptEnabled = 0xFFFF; // IE
+    uint16_t addressInterruptFlag = 0xFF0F; // IF
 };
 
 #endif

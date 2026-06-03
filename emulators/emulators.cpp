@@ -11,22 +11,18 @@
 std::shared_ptr<DMG> emulatorDMG;
 std::shared_ptr<AGB> emulatorAGB;
 
-void Emulators::init(Logger& logger) {
-    this->logger = &logger;
-
-    emulatorDMG = std::make_shared<DMG>();
-    emulatorDMG->initialize(*this->logger);
-
+void Emulators::init() {
+    emulatorDMG = std::make_shared<DMG>(logger);
     emulatorAGB = std::make_shared<AGB>();
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
     if (!emulatorDMG->createTexture(device)) {
-        this->logger->log("[EMULATORS] Error: Cannot create DMG texture");
+        logger.log("[EMULATORS] Error: Cannot create DMG texture");
         return false;
     }
     if (!emulatorAGB->createTexture(device)) {
-        this->logger->log("[EMULATORS] Error: Cannot create AGB texture");
+        logger.log("[EMULATORS] Error: Cannot create AGB texture");
         return false;
     }
     return true;

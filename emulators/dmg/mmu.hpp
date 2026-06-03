@@ -5,7 +5,6 @@
 
 class DMG_MMU {
 public:
-    void initialize();
     void clearMemory();
     void clearResources();
 

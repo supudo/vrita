@@ -1,22 +1,18 @@
 #include "interrupt.hpp"
 
-void DMG_INTERRUPT::initialize(DMG_MMU* mmu) {
-    this->mmu = mmu;
-}
-
 bool DMG_INTERRUPT::isInterruptEnabled(uint8_t flag) {
-    return mmu->memory[0xFFFF] & flag;
+    return mmu.memory[addressInterruptEnabled] & flag;
 }
 
 bool DMG_INTERRUPT::isInterruptFlagSet(uint8_t flag) {
-    return mmu->memory[0xFF0F] & flag;
+    return mmu.memory[addressInterruptFlag] & flag;
 }
 
 void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
 }
 
 bool DMG_INTERRUPT::checkForInterrupts() {
-    if (mmu->memory[0xFFFF] & mmu->memory[0xFF0F] & 0x0F) {
+    if (mmu.memory[addressInterruptEnabled] & mmu.memory[addressInterruptFlag] & 0x0F) {
 
     }
 

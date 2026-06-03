@@ -130,8 +130,7 @@ int main(int argc, char** argv) {
         guiLog->addToLog("%s\n", msg);
     });
 
-    managerEmulators = std::make_shared<Emulators>();
-    managerEmulators->init(*logger);
+    managerEmulators = std::make_shared<Emulators>(*logger);
 
     eyeCandy_Dots = std::make_shared<Dots>();
 

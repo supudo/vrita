@@ -1,9 +1,5 @@
 #include "mmu.hpp"
 
-void DMG_MMU::initialize() {
-    this->clearMemory();
-}
-
 void DMG_MMU::clearResources() {
     this->clearMemory();
 }

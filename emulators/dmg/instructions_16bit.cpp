@@ -24,9 +24,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x06: // RLC (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 rlc(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x07: // RLC A
@@ -52,9 +52,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x0E: // RRC (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 rrc(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x0F: // RRC A
@@ -80,9 +80,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x16: // RL (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 rl(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x17: // RL A
@@ -108,9 +108,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x1E: // RR (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 rr(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x1F: // RR A
@@ -136,9 +136,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x26: // SLA (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 sla(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x27: // SRA A
@@ -164,9 +164,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x2E: // SRA (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 sra(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x2F: // SRA A
@@ -192,9 +192,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x36: // SWAP (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 swap(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x37: // SWAP A
@@ -220,9 +220,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x3E: // SRL (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 srl(&value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x3F: // SRL A
@@ -247,7 +247,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 0, Registers.L);
             break;
         case 0x46: // BIT 0, (HL)
-            bit(1 << 0, mmu->read8(Registers.HL));
+            bit(1 << 0, mmu.read8(Registers.HL));
             break;
         case 0x47: // BIT 0, A
             bit(1 << 0, Registers.A);
@@ -271,7 +271,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 1, Registers.L);
             break;
         case 0x4E: // BIT 1, (HL)
-            bit(1 << 1, mmu->read8(Registers.HL));
+            bit(1 << 1, mmu.read8(Registers.HL));
             break;
         case 0x4F: // BIT 1, A
             bit(1 << 1, Registers.A);
@@ -295,7 +295,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 2, Registers.L);
             break;
         case 0x56: // BIT 2, (HL)
-            bit(1 << 2, mmu->read8(Registers.HL));
+            bit(1 << 2, mmu.read8(Registers.HL));
             break;
         case 0x57: // BIT 2, A
             bit(1 << 2, Registers.A);
@@ -319,7 +319,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 3, Registers.L);
             break;
         case 0x5E: // BIT 3, (HL)
-            bit(1 << 3, mmu->read8(Registers.HL));
+            bit(1 << 3, mmu.read8(Registers.HL));
             break;
         case 0x5F: // BIT 3, A
             bit(1 << 3, Registers.A);
@@ -343,7 +343,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 4, Registers.L);
             break;
         case 0x66: // BIT 4, (HL)
-            bit(1 << 4, mmu->read8(Registers.HL));
+            bit(1 << 4, mmu.read8(Registers.HL));
             break;
         case 0x67: // BIT 4, A
             bit(1 << 4, Registers.A);
@@ -367,7 +367,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 5, Registers.L);
             break;
         case 0x6E: // BIT 5, (HL)
-            bit(1 << 5, mmu->read8(Registers.HL));
+            bit(1 << 5, mmu.read8(Registers.HL));
             break;
         case 0x6F: // BIT 5, A
             bit(1 << 5, Registers.A);
@@ -391,7 +391,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 6, Registers.L);
             break;
         case 0x76: // BIT 6, (HL)
-            bit(1 << 6, mmu->read8(Registers.HL));
+            bit(1 << 6, mmu.read8(Registers.HL));
             break;
         case 0x77: // BIT 6, A
             bit(1 << 6, Registers.A);
@@ -415,7 +415,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             bit(1 << 7, Registers.L);
             break;
         case 0x7E: // BIT 7, (HL)
-            bit(1 << 7, mmu->read8(Registers.HL));
+            bit(1 << 7, mmu.read8(Registers.HL));
             break;
         case 0x7F: // BIT 7, A
             bit(1 << 7, Registers.A);
@@ -440,9 +440,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x86: // RES 0, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 0, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x87: // RES 0, A
@@ -469,9 +469,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x8E: // RES 1, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 1, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x8F: // RES 1, A
@@ -497,9 +497,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x96: // RES 2, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 2, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x97: // RES 2, A
@@ -525,9 +525,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0x9E: // RES 3, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 3, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0x9F: // RES 3, A
@@ -553,9 +553,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xA6: // RES 4, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 4, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xa7: // RES 4, A
@@ -581,9 +581,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xAE: // RES 5, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 5, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xAF: // RES 5, A
@@ -609,9 +609,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xB6: // RES 6, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 6, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xb7: // RES 6, A
@@ -637,9 +637,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xBE: // RES 7, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 res(1 << 7, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xBF: // RES 7, A
@@ -665,9 +665,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xC6: // SET 0, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 0, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xc7: // SET 0, A
@@ -693,9 +693,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xCE: // SET 1, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 1, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xCF: // SET 1, A
@@ -721,9 +721,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xD6: // SET 2, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 2, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xD7: // SET 2, A
@@ -749,9 +749,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xDE: // SET 3, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 3, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xDF: // SET 3, A
@@ -777,9 +777,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xE6: // SET 4, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 4, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xE7: // SET 4, A
@@ -805,9 +805,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xEE: // SET 5, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 5, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xEF: // SET 5, A
@@ -833,9 +833,9 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xF6: // SET 6, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 6, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xF7: // SET 6, A
@@ -861,18 +861,18 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xFE: // SET 7, (HL)
             {
-                uint8_t value = mmu->read8(Registers.HL);
+                uint8_t value = mmu.read8(Registers.HL);
                 set(1 << 7, &value);
-                mmu->write8(Registers.HL, value);
+                mmu.write8(Registers.HL, value);
             }
             break;
         case 0xFF: // SET 7, A
             set(1 << 7, &Registers.A);
             break;
         default:
-            this->logger->log("[DMG_CPU] ==================================================");
-            this->logger->log("[DMG_CPU] [EXTENDED] Unsupported opcode: 0x%02X at 0x%04X", opcode, Registers.PC);
-            this->logger->log("[DMG_CPU] ==================================================");
+            logger.log("[DMG_CPU] ==================================================");
+            logger.log("[DMG_CPU] [EXTENDED] Unsupported opcode: 0x%02X at 0x%04X", opcode, Registers.PC);
+            logger.log("[DMG_CPU] ==================================================");
             return;
             break;
     }

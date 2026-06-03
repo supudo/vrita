@@ -21,7 +21,7 @@ GameBoy (DMG)
 
 class DMG_CPU {
 public:
-    void initialize(Logger& logger, DMG_MMU* mmu, std::shared_ptr<DMG_CARTRIDGE> cartridge, DMG_INTERRUPT *interrupts);
+    DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts, bool halted, uint64_t cycles) : logger(logger), mmu(mmu), interrupts(interrupts), halted(halted), cycles(cycles) {}
     void stepCPU(bool ROMFileLoaded);
     void clearResources();
 
@@ -61,12 +61,12 @@ public:
     } Registers;
 
     inline void printRegisters() {
-        logger->log("A: 0x%02X, F: 0x%02X", +Registers.A, +Registers.F);
-        logger->log("B: 0x%02X, C: 0x%02X", +Registers.B, +Registers.C);
-        logger->log("D: 0x%02X, E: 0x%02X", +Registers.D, +Registers.E);
-        logger->log("H: 0x%02X, L: 0x%02X", +Registers.H, +Registers.L);
-        logger->log("PC: 0x%04X", +Registers.PC);
-        logger->log("SP: 0x%04X", +Registers.SP);
+        logger.log("A: 0x%02X, F: 0x%02X", +Registers.A, +Registers.F);
+        logger.log("B: 0x%02X, C: 0x%02X", +Registers.B, +Registers.C);
+        logger.log("D: 0x%02X, E: 0x%02X", +Registers.D, +Registers.E);
+        logger.log("H: 0x%02X, L: 0x%02X", +Registers.H, +Registers.L);
+        logger.log("PC: 0x%04X", +Registers.PC);
+        logger.log("SP: 0x%04X", +Registers.SP);
     }
 
     enum CpuFlags { // lower 8 buts of AF register
@@ -79,13 +79,12 @@ public:
     inline void setFlag(uint8_t flag, bool enabled) { if (enabled) Registers.F |= flag; else Registers.F &= ~flag; Registers.F &= 0xF0; }
     inline bool getFlag(uint8_t flag) const { return (Registers.F & flag) != 0; }
     inline bool isFlagSet(uint8_t flag) const { return Registers.F & (flag); }
-    inline void printFlags() { logger->log("Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
+    inline void printFlags() { logger.log("Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
 
 private:
-    Logger* logger = nullptr;
-
-    DMG_MMU* mmu = nullptr;
-    DMG_INTERRUPT* interrupts = nullptr;
+    Logger& logger;
+    DMG_MMU& mmu;
+    DMG_INTERRUPT& interrupts;
 
     void executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode);
     void executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode);

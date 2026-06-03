@@ -25,7 +25,9 @@ GameBoy (DMG)
 
 class DMG {
 public:
-    bool initialize(Logger& logger);
+    DMG(Logger& logger) : logger(logger) {}
+
+    bool initialize();
 
     // rendering
     bool createTexture(SDL_GPUDevice* device);
@@ -38,13 +40,10 @@ public:
     std::string loadROM(const char* romFilePath);
 
 private:
-    Logger* logger = nullptr;
+    Logger& logger;
     bool ROMFileLoaded = false;
     void resetROM();
     void stepAll();
-
-    // cartridge
-    std::shared_ptr<DMG_CARTRIDGE> cartridge;
 
     uint32_t stepCPU();
     void stepPPU(uint32_t cycles);
@@ -58,16 +57,13 @@ private:
     int windowScale = 1;
     int lastWindowScale = -1;
 
-    DMGTimer timer;
-
-    //cpu
-    bool ime = false; // interrupt master enable
-
-    DMG_INTERRUPT* managerInterrupts = nullptr;
-    DMG_CPU *managerCPU = nullptr;
-    DMG_APU *managerAPU = nullptr;
-    DMG_MMU *managerMMU = nullptr;
-    DMG_PPU *managerPPU = nullptr;
+    std::shared_ptr<DMG_TIMER> managerTimer;
+    std::shared_ptr<DMG_INTERRUPT> managerInterrupts;
+    std::shared_ptr<DMG_CARTRIDGE> cartridge;
+    std::shared_ptr<DMG_CPU> managerCPU;
+    std::shared_ptr<DMG_APU> managerAPU;
+    std::shared_ptr<DMG_MMU> managerMMU;
+    std::shared_ptr<DMG_PPU> managerPPU;
 };
 
 #endif

@@ -1,12 +1,12 @@
 #include "timer.hpp"
 
-void DMGTimer::reset() {
+void DMG_TIMER::reset() {
     perfFreq = SDL_GetPerformanceFrequency();
     lastTime = SDL_GetPerformanceCounter();
     accumulator = 0.0;
 }
 
-uint32_t DMGTimer::tickFrame() {
+uint32_t DMG_TIMER::tickFrame() {
     uint64_t now = SDL_GetPerformanceCounter();
     double elapsed = (double)(now - lastTime) / (double)perfFreq;
     lastTime = now;

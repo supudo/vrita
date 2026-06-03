@@ -59,7 +59,7 @@ private:
 
     std::shared_ptr<DMG_TIMER> managerTimer;
     std::shared_ptr<DMG_INTERRUPT> managerInterrupts;
-    std::shared_ptr<DMG_CARTRIDGE> cartridge;
+    std::shared_ptr<DMG_CARTRIDGE> managerCartridge;
     std::shared_ptr<DMG_CPU> managerCPU;
     std::shared_ptr<DMG_APU> managerAPU;
     std::shared_ptr<DMG_MMU> managerMMU;

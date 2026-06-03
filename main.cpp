@@ -131,6 +131,7 @@ int main(int argc, char** argv) {
     });
 
     managerEmulators = std::make_shared<Emulators>(*logger);
+    managerEmulators->init();
 
     eyeCandy_Dots = std::make_shared<Dots>();
 

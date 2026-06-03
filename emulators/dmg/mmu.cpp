@@ -1,7 +1,16 @@
 #include "mmu.hpp"
 
+void DMG_MMU::setUnits(DMG_CARTRIDGE* cartridge, DMG_CPU* cpu, DMG_TIMER* timer, DMG_INTERRUPT* interrupts, DMG_PPU* ppu, DMG_APU* apu) {
+    managerCartridge = cartridge;
+    managerCPU = cpu;
+    managerTimer = timer;
+    managerInterrupts = interrupts;
+    managerPPU = ppu;
+    managerAPU = apu;
+}
+
 void DMG_MMU::clearResources() {
-    this->clearMemory();
+    clearMemory();
 }
 
 void DMG_MMU::clearMemory() {

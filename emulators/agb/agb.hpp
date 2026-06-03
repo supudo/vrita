@@ -18,7 +18,7 @@ GameBoy Advance (AGB)
 
 class AGB {
 public:
-    bool initialize(Logger& logger);
+    AGB(Logger& logger) : logger(logger) {}
 
     // rendering
     bool createTexture(SDL_GPUDevice* device);
@@ -33,7 +33,7 @@ public:
     void stepCPU();
 
 private:
-    Logger* logger = nullptr;
+    Logger& logger;
 
     // rendering
     static const uint32_t WIDTH = 240;

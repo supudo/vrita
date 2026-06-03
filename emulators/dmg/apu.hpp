@@ -4,10 +4,10 @@ GameBoy (DMG)
 
 */
 
-#include "mmu.hpp"
-
 #ifndef VRITA_DMG_APU_INCLUDES
 #define VRITA_DMG_APU_INCLUDES
+
+#include "mmu.hpp"
 
 class DMG_APU {
 public:

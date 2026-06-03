@@ -13,7 +13,9 @@ std::shared_ptr<AGB> emulatorAGB;
 
 void Emulators::init() {
     emulatorDMG = std::make_shared<DMG>(logger);
-    emulatorAGB = std::make_shared<AGB>();
+    emulatorDMG->initialize();
+    emulatorAGB = std::make_shared<AGB>(logger);
+    emulatorAGB->initialize();
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {

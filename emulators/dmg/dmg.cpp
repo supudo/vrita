@@ -17,9 +17,11 @@ bool DMG::initialize() {
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts, false, 0);
     managerPPU = std::make_shared<DMG_PPU>(*managerMMU);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
-    cartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
-
+    managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
+    
     managerTimer->reset();
+
+    managerMMU->setUnits(managerCartridge.get(), managerCPU.get(), managerTimer.get(), managerInterrupts.get(), managerPPU.get(), managerAPU.get());
 
     return true;
 }
@@ -202,7 +204,7 @@ std::string DMG::loadROM(const char* path) {
     }
     file.close();
     ROMFileLoaded = true;
-    cartridge->loadROM(size);
+    managerCartridge->loadROM(size);
     return "";
 }
 

@@ -31,7 +31,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
             mbc = std::make_unique<DMG_MBC5>(mmu.memory, size, ram);
             break;
         default:
-            logger.log("[CARTRIDGE] Unsupported cartridge type");
+            logger.log("[CARTRIDGE] Unsupported cartridge type 0x2%", type);
     }
     rom_banks_count = (int)(size / 0x4000);
     ram_banks_count = get_ram_banks_count(mmu.memory[0x149]);
@@ -53,22 +53,16 @@ int DMG_CARTRIDGE::get_ram_banks_count(uint8_t type) {
     switch (type) {
         case 0x00:
             return 0;
-            break;
         case 0x01:
             return 0;
-            break;
         case 0x02:
             return 1;
-            break;
         case 0x03:
             return 4;
-            break;
         case 0x04:
             return 16;
-            break;
         case 0x05:
             return 8;
-            break;
         default:
             logger.log("Incorrect RAM type:  %i", type);
             exit(1);

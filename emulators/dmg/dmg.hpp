@@ -41,6 +41,7 @@ private:
     Logger* logger = nullptr;
     bool ROMFileLoaded = false;
     void resetROM();
+    void stepAll();
 
     // cartridge
     std::shared_ptr<DMG_CARTRIDGE> cartridge;

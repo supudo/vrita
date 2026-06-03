@@ -23,7 +23,7 @@ void DMG_MMU::clearMemory() {
     memory[0xFF06] = 0x00; // TMA
     memory[0xFF07] = 0xF8; // TAC
 
-    memory[0xFF0F] = 0xE1; // IF
+    memory[0xFF0F] = 0xE1; // IF - interrupt flag
 
     memory[0xFF10] = 0x80;
     memory[0xFF11] = 0xBF;

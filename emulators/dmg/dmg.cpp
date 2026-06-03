@@ -13,10 +13,11 @@ bool DMG::initialize(Logger& logger) {
 
     ime = false;
 
-    managerInterrupts = new DMG_INTERRUPT();
-
     managerMMU = new DMG_MMU();
     managerMMU->initialize();
+
+    managerInterrupts = new DMG_INTERRUPT();
+    managerInterrupts->initialize(managerMMU);
 
     managerCPU = new DMG_CPU();
     managerCPU->initialize(logger, managerMMU, nullptr, managerInterrupts);
@@ -58,6 +59,7 @@ bool DMG::createTexture(SDL_GPUDevice* device) {
 }
 
 void DMG::generateTestPattern(float time) {
+    if (ROMFileLoaded) return;
     for (uint32_t y = 0; y < DMG::HEIGHT; y++) {
         for (uint32_t x = 0; x < DMG::WIDTH; x++) {
             uint8_t r = (uint8_t)((x + (int)(time * 50.0f)) & 255);
@@ -156,19 +158,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    if (ROMFileLoaded) {
-        uint32_t budget = timer.tickFrame();
-        uint32_t executed = 0;
-        while (executed < budget) {
-            uint32_t cycles = stepCPU();
-            if (cycles == 0) break; // unsupported opcode
-            stepPPU(cycles);
-            stepAPU(cycles);
-            executed += cycles;
-        }
-    }
-    else
-        timer.tickFrame();
+    stepAll();
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
@@ -178,6 +168,25 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 // ===============
 // DMG
 // ===============
+
+void DMG::stepAll() {
+    if (ROMFileLoaded) {
+        uint32_t budget = timer.tickFrame();
+        uint32_t executed = 0;
+        while (executed < budget) {
+            uint32_t cycles = 0;
+            if (!managerInterrupts->checkForInterrupts()) {
+                cycles = stepCPU();
+                if (cycles == 0) break; // unsupported opcode
+            }
+            stepPPU(cycles);
+            stepAPU(cycles);
+            executed += cycles;
+        }
+    }
+    else
+        timer.tickFrame();
+}
 
 std::string DMG::loadROM(const char* path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -192,6 +201,8 @@ std::string DMG::loadROM(const char* path) {
         return "Invalid ROM size";
     }
     resetROM();
+    for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
+        gFramebuffer[i] = 0xFF9BBC0F;
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
         this->logger->log("[DMG] WARNING: Failed to read ROM data!");

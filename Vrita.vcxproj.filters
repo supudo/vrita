@@ -2,111 +2,126 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\vrita.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="emulators\emulators.cpp">
+      <Filter>emulators</Filter>
     </ClCompile>
-    <ClCompile Include="src\dots.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="emulators\agb\agb.cpp">
+      <Filter>emulators\agb</Filter>
     </ClCompile>
-    <ClCompile Include="src\emulators.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="emulators\dmg\apu.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\filebrowser.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="emulators\dmg\cartridge.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\agb\agb.cpp">
-      <Filter>src\agb</Filter>
+    <ClCompile Include="emulators\dmg\cpu.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\dmg.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\dmg.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\apu.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\instructions_8bit.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\cpu.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\instructions_16bit.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\ppu.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\interrupt.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\mmu.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\mmu.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\cartridge.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\ppu.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="src\dmg\timer.cpp">
-      <Filter>src\dmg</Filter>
+    <ClCompile Include="emulators\dmg\timer.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\log.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="gui\filebrowser.cpp">
+      <Filter>gui</Filter>
+    </ClCompile>
+    <ClCompile Include="eyecandy\dots.cpp">
+      <Filter>eyecandy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{662dcd79-ab4b-443e-893c-bfa1e87490f6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include">
-      <UniqueIdentifier>{fa0587b0-2376-4653-ba53-7f5e4b3af35e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\agb">
-      <UniqueIdentifier>{ce524556-f929-48e4-a7e0-b87a0cf3569f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\dmg">
-      <UniqueIdentifier>{f2cdac0d-25f9-4062-8d5d-5c929c7e1652}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\agb">
-      <UniqueIdentifier>{20535d3c-46d5-4a42-87b3-c612cf2cd1d2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\dmg">
-      <UniqueIdentifier>{e3b3b4c7-0173-4eee-851a-996f115c146e}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="emulators\emulators.hpp">
+      <Filter>emulators</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\agb\agb.hpp">
+      <Filter>emulators\agb</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\apu.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\cartridge.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\cpu.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\dmg.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\interrupt.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\mbc.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\mmu.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\ppu.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\timer.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\log.hpp">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="gui\filebrowser.hpp">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\settings.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\logger.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\files.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\datetimes.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="eyecandy\dots.hpp">
+      <Filter>eyecandy</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\code.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\emulators.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dots.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\filebrowser.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\files.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\datetimes.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\dmg.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\agb\agb.hpp">
-      <Filter>include\agb</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\apu.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\cpu.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\ppu.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\mmu.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\timer.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\logger.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\mbc.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dmg\cartridge.hpp">
-      <Filter>include\dmg</Filter>
-    </ClInclude>
+    <Filter Include="emulators">
+      <UniqueIdentifier>{57b606b1-b790-4c6b-9cee-bfcfea7e0b5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="emulators\agb">
+      <UniqueIdentifier>{5dabc0ac-416b-4bde-85c2-7da4ad8bf84d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="emulators\dmg">
+      <UniqueIdentifier>{f352ae5c-6552-4c8c-8e93-e33b06212dbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{1c88dc28-ef37-4180-9844-54d0f3d42bd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utilities">
+      <UniqueIdentifier>{22bc1059-aab0-41af-beed-534260e01054}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="eyecandy">
+      <UniqueIdentifier>{65eb6884-3c42-42da-84be-f77ab17950e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

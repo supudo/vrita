@@ -155,7 +155,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
                     if (isFlagSet(FLAG_HALF_CARRY) || (value & 0xF) > 0x9)
                         value += 0x6;
                 }
-                Registers.A = value;
+                Registers.A = (uint8_t)(value & 0xFF);
                 setFlag(FLAG_ZERO, !Registers.A);
                 setFlag(FLAG_HALF_CARRY, false);
             }
@@ -406,7 +406,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             mmu->write8(Registers.HL, Registers.L);
             break;
         case 0x76: // HALT
-            if (!interrupts->areInterruptsEnabled() && (mmu->memory[0xFF0F] & mmu->memory[0xFFFF] & 0x1F))
+            if (!interrupts->getIME() && (mmu->memory[0xFF0F] & mmu->memory[0xFFFF] & 0x1F))
                 halted = false;
             else
                 halted = true;
@@ -717,7 +717,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             ret(isFlagSet(FLAG_CARRY));
             break;
         case 0xD9: // RETI
-            interrupts->setInterruptsEnabled(true);
+            interrupts->setIME(true);
             Registers.PC = mmu->read_stack(&Registers.SP);
             cycles += 4;
             break;
@@ -786,7 +786,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.A = mmu->read8(0xff00 + Registers.C);
             break;
         case 0xF3: // DI
-            interrupts->setInterruptsEnabled(false);
+            interrupts->setIME(false);
             break;
         case 0xF5: // PUSH AF
             cycles += 4;
@@ -813,7 +813,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.PC += 2;
             break;
         case 0xFB: // NI
-            interrupts->setInterruptsEnabled(true);
+            interrupts->setIME(true);
             break;
         case 0xFE: // CP n
             cp_n(mmu->read8(Registers.PC++));

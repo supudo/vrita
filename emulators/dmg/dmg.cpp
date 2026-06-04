@@ -72,7 +72,7 @@ void DMG::resetROM() {
 }
 
 void DMG::stepCPU() {
-    if (managerMMU->is_halted) {
+    if (managerMMU->isHalted) {
         managerMMU->tick(4);
         return;
     }
@@ -213,7 +213,12 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    stepAll();
+    if (ROMFileLoaded) {
+        static const uint64_t CYCLES_PER_FRAME = 70224; // 154 lines * 456 dots @ 4.194304 MHz / 59.7275 fps
+        uint64_t frameStart = managerMMU->totalCycles;
+        while ((managerMMU->totalCycles - frameStart) < CYCLES_PER_FRAME)
+            stepAll();
+    }
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 

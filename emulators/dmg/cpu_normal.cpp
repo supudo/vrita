@@ -500,9 +500,9 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
         case 0x76: // HALT
             logCall(true, "0x76 HALT");
             if (!interrupts.getIME() && (mmu.memory[0xFF0F] & mmu.memory[0xFFFF] & 0x1F))
-                mmu.is_halted = false;
+                mmu.isHalted = false;
             else
-                mmu.is_halted = true;
+                mmu.isHalted = true;
             break;
         case 0x77: // LD (HL), A
             logCall(true, "0x77 LD (HL), A");

@@ -22,13 +22,13 @@ void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
     Registers.PC = jump_pc;
     setIME(false);
     unsetInterruptFlag(interrupt);
-    mmu.is_halted = false;
+    mmu.isHalted = false;
     mmu.tick(4);
 }
 
 bool DMG_INTERRUPT::checkForInterrupts() {
     if (mmu.memory[addressInterruptEnabled] & mmu.memory[addressInterruptFlag] & 0x0F)
-        mmu.is_halted = false;
+        mmu.isHalted = false;
 
     if (!getIME())
         return false;

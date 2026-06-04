@@ -9,6 +9,7 @@
 #include "apu.hpp"
 
 void DMG_MMU::tick(uint32_t cycles) {
+    totalCycles += cycles;
     managerTimer->tick(cycles);
 }
 
@@ -23,6 +24,7 @@ void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_
 }
 
 void DMG_MMU::clearResources() {
+    totalCycles = 0;
     clearMemory();
 }
 

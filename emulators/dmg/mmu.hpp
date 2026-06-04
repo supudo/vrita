@@ -21,8 +21,9 @@ public:
     static const uint32_t MEMORY_SIZE = 0x10000; // 64 KB
     uint8_t memory[MEMORY_SIZE] = {};
 
-    bool is_halted = false;
-    bool trigger_halt_bug = false;
+    bool isHalted = false;
+    bool triggerHaltBug = false;
+    uint64_t totalCycles = 0;
 
     inline uint8_t read8(uint16_t address) const { return memory[address]; }
     inline void write8(uint16_t address, uint8_t value) { memory[address] = value; }

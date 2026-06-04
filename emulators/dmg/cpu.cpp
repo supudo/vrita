@@ -20,9 +20,9 @@ void DMG_CPU::step(bool ROMFileLoaded) {
 
     uint8_t opcode = mmu.memory[Registers.PC];
 
-    if (!mmu.trigger_halt_bug)
+    if (!mmu.triggerHaltBug)
         Registers.PC++;
-    mmu.trigger_halt_bug = false;
+    mmu.triggerHaltBug = false;
 
     if (opcode == 0xCB)
         executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
@@ -289,5 +289,9 @@ void DMG_CPU::swap(const char* logMessage, uint8_t* value) {
 #pragma endregion
 
 void DMG_CPU::logCall(bool isNormal, std::string msg) {
+    // TODO: add instruction filter for debugging
+    //static const char* suppress[] = { "0x05", "0x20", "0x32" };
+    //for (const char* s : suppress)
+    //    if (msg.rfind(s, 0) == 0) return;
     logger.log("[DMG-CPU] CALL %s %s", msg.c_str(), (isNormal ? "" : "(extended)"));
 }

@@ -9,6 +9,9 @@
 #include <imgui_impl_sdlgpu3.h>
 
 bool DMG::initialize() {
+    gameIsPaused = false;
+    gameStateLabel = "Pause game";
+
     managerMMU = std::make_shared<DMG_MMU>();
     managerMMU->clearResources();
 
@@ -59,6 +62,8 @@ std::string DMG::loadROM(const char* path) {
     }
     file.close();
     ROMFileLoaded = true;
+    gameIsPaused = false;
+    gameStateLabel = "Pause game";
     managerCartridge->loadROM(size);
     return "";
 }
@@ -89,6 +94,11 @@ void DMG::stepPPU(uint32_t cycles) {
 
 void DMG::stepAPU(uint32_t cycles) {
     managerAPU->step(ROMFileLoaded);
+}
+
+void DMG::toggleGameState() {
+    gameIsPaused = !gameIsPaused;
+    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
 }
 
 #pragma region Rendering
@@ -181,24 +191,24 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),
         ImVec2(FLT_MAX, FLT_MAX),
         [] (ImGuiSizeCallbackData* data) {
-        auto* c = (ConstraintData*)data->UserData;
-        float contentW = data->DesiredSize.x - c->padX;
-        data->DesiredSize.y = contentW / c->aspect + c->decorH;
-    },
+            auto* c = (ConstraintData*)data->UserData;
+            float contentW = data->DesiredSize.x - c->padX;
+            data->DesiredSize.y = contentW / c->aspect + c->decorH;
+        },
         &cd
     );
 
     ImGui::Begin("GameBoy (DMG)", windowOpened);
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
-
     if (ImGui::Button("Load ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         showFileBrowser("dmg");
     if (ImGui::Button("Eject ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         ROMFileLoaded = false;
-
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
-
+    ImGui::Separator();
+    if (ImGui::Button(gameStateLabel.c_str(), ImVec2(60, 0)))
+        toggleGameState();
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
@@ -213,7 +223,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    if (ROMFileLoaded) {
+    if (ROMFileLoaded && !gameIsPaused) {
         static const uint64_t CYCLES_PER_FRAME = 70224; // 154 lines * 456 dots @ 4.194304 MHz / 59.7275 fps
         uint64_t frameStart = managerMMU->totalCycles;
         while ((managerMMU->totalCycles - frameStart) < CYCLES_PER_FRAME)

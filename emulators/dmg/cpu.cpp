@@ -293,5 +293,6 @@ void DMG_CPU::logCall(bool isNormal, std::string msg) {
     //static const char* suppress[] = { "0x05", "0x20", "0x32" };
     //for (const char* s : suppress)
     //    if (msg.rfind(s, 0) == 0) return;
-    logger.log("[DMG-CPU] CALL %s %s", msg.c_str(), (isNormal ? "" : "(extended)"));
+    if (mmu.totalCycles % 10000 == 0)
+        logger.log("[DMG-CPU] CALL %s %s", msg.c_str(), (isNormal ? "" : "(extended)"));
 }

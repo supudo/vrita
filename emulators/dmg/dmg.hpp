@@ -45,6 +45,10 @@ private:
     void resetROM();
     void stepAll();
 
+    void toggleGameState();
+    std::string gameStateLabel = "Pause game";
+    bool gameIsPaused = false;
+
     void stepCPU();
     void stepMMU(uint32_t cycles);
     void stepPPU(uint32_t cycles);

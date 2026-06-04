@@ -145,8 +145,8 @@
     <ClCompile Include="emulators\dmg\cartridge.cpp" />
     <ClCompile Include="emulators\dmg\cpu.cpp" />
     <ClCompile Include="emulators\dmg\dmg.cpp" />
-    <ClCompile Include="emulators\dmg\instructions_16bit.cpp" />
-    <ClCompile Include="emulators\dmg\instructions_8bit.cpp" />
+    <ClCompile Include="emulators\dmg\cpu_extended.cpp" />
+    <ClCompile Include="emulators\dmg\cpu_normal.cpp" />
     <ClCompile Include="emulators\dmg\interrupt.cpp" />
     <ClCompile Include="emulators\dmg\mmu.cpp" />
     <ClCompile Include="emulators\dmg\ppu.cpp" />
@@ -177,6 +177,7 @@
     <ClInclude Include="utilities\datetimes.hpp" />
     <ClInclude Include="utilities\files.hpp" />
     <ClInclude Include="utilities\logger.hpp" />
+    <ClInclude Include="utilities\strings.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -20,12 +20,6 @@
     <ClCompile Include="emulators\dmg\dmg.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\dmg\instructions_8bit.cpp">
-      <Filter>emulators\dmg</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\dmg\instructions_16bit.cpp">
-      <Filter>emulators\dmg</Filter>
-    </ClCompile>
     <ClCompile Include="emulators\dmg\interrupt.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
@@ -46,6 +40,12 @@
     </ClCompile>
     <ClCompile Include="eyecandy\dots.cpp">
       <Filter>eyecandy</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\cpu_normal.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\cpu_extended.cpp">
+      <Filter>emulators\dmg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +105,9 @@
     </ClInclude>
     <ClInclude Include="emulators\dmg\cpu_registers.hpp">
       <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities\strings.hpp">
+      <Filter>utilities</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

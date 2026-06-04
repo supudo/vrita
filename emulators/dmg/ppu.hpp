@@ -4,20 +4,29 @@ GameBoy (DMG)
 
 */
 
-#include "mmu.hpp"
-
 #ifndef VRITA_DMG_PPU_INCLUDES
 #define VRITA_DMG_PPU_INCLUDES
 
+#include "mmu.hpp"
+#include "cpu_registers.hpp"
+
+class Logger;
+class DMG_MMU;
+class DMG_INTERRUPT;
+
 class DMG_PPU {
 public:
-    DMG_PPU(DMG_MMU& mmu) : mmu(mmu) {}
+    DMG_PPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts) : logger(logger), mmu(mmu), interrupts(interrupts){}
 
     void step(bool ROMFileLoaded);
     void clearResources();
 
 private:
+    Logger& logger;
     DMG_MMU& mmu;
+    DMG_INTERRUPT& interrupts;
+
+    DMGCpuRegisters Registers;
 };
 
 #endif

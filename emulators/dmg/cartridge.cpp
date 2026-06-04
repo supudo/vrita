@@ -31,7 +31,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
             mbc = std::make_unique<DMG_MBC5>(mmu.memory, size, ram);
             break;
         default:
-            logger.log("[CARTRIDGE] Unsupported cartridge type 0x2%", type);
+            logger.log("[DMG-CARTRIDGE] Unsupported cartridge type 0x2%", type);
     }
     rom_banks_count = (int)(size / 0x4000);
     ram_banks_count = get_ram_banks_count(mmu.memory[0x149]);
@@ -64,15 +64,15 @@ int DMG_CARTRIDGE::get_ram_banks_count(uint8_t type) {
         case 0x05:
             return 8;
         default:
-            logger.log("Incorrect RAM type:  %i", type);
+            logger.log("[DMG-CARTRIDGE] Incorrect RAM type:  %i", type);
             exit(1);
     }
 }
 
 void DMG_CARTRIDGE::printCartridgeInfo() {
-    logger.log("Rom Title: %s", rom_title.c_str());
-    logger.log("CGB Game: %s", (cgb_game ? "Yes" : "No"));
-    logger.log("MBC: %i", +mbc_type);
-    logger.log("ROM Banks: %i", rom_banks_count);
-    logger.log("RAM Banks: %i", ram_banks_count);
+    logger.log("[DMG-CARTRIDGE] Rom Title: %s", rom_title.c_str());
+    logger.log("[DMG-CARTRIDGE] CGB Game: %s", (cgb_game ? "Yes" : "No"));
+    logger.log("[DMG-CARTRIDGE] MBC: %i", +mbc_type);
+    logger.log("[DMG-CARTRIDGE] ROM Banks: %i", rom_banks_count);
+    logger.log("[DMG-CARTRIDGE] RAM Banks: %i", ram_banks_count);
 }

@@ -15,7 +15,7 @@ bool DMG::initialize() {
     managerInterrupts = std::make_shared<DMG_INTERRUPT>(*managerMMU);
     managerTimer = std::make_shared<DMG_TIMER>(logger, *managerInterrupts);
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts, false, 0);
-    managerPPU = std::make_shared<DMG_PPU>(*managerMMU);
+    managerPPU = std::make_shared<DMG_PPU>(logger, *managerMMU, *managerInterrupts);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
     
@@ -39,12 +39,12 @@ void DMG::stepAll() {
 std::string DMG::loadROM(const char* path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
-        logger.log("[DMG] WARNING: Failed to open ROM: %s", path);
+        logger.log("[DMG-CPU] WARNING: Failed to open ROM: %s", path);
         return "Failed to open ROM";
     }
     std::streamsize size = file.tellg();
     if (size <= 0 || size > 0x8000) {
-        logger.log("[DMG] WARNING: Invalid ROM size: %i", (int)size, " bytes");
+        logger.log("[DMG-CPU] WARNING: Invalid ROM size: %i", (int)size, " bytes");
         file.close();
         return "Invalid ROM size";
     }
@@ -53,7 +53,7 @@ std::string DMG::loadROM(const char* path) {
         gFramebuffer[i] = 0xFF9BBC0F;
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
-        logger.log("[DMG] WARNING: Failed to read ROM data!");
+        logger.log("[DMG-CPU] WARNING: Failed to read ROM data!");
         file.close();
         return "Failed to read ROM data";
     }

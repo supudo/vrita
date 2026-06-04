@@ -45,7 +45,7 @@ private:
     void resetROM();
     void stepAll();
 
-    uint32_t stepCPU();
+    void stepCPU();
     void stepMMU(uint32_t cycles);
     void stepPPU(uint32_t cycles);
     void stepAPU(uint32_t cycles);

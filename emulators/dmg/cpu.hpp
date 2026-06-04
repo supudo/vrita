@@ -22,12 +22,9 @@ GameBoy (DMG)
 
 class DMG_CPU {
 public:
-    DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts, bool halted, uint64_t cycles) : logger(logger), mmu(mmu), interrupts(interrupts), halted(halted), cycles(cycles) {}
-    void stepCPU(bool ROMFileLoaded);
+    DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts, bool halted, uint64_t cycles) : logger(logger), mmu(mmu), interrupts(interrupts) {}
+    void step(bool ROMFileLoaded);
     void clearResources();
-
-    uint64_t cycles = 0;
-    bool halted = false;
 
     DMGCpuRegisters Registers;
 
@@ -85,6 +82,8 @@ private:
     void sra(uint8_t* value);
     void srl(uint8_t* value);
     void swap(uint8_t* value);
+
+    void logCall(bool is8bit, const char* msg);
 };
 
 #endif

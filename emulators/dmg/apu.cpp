@@ -3,6 +3,6 @@
 void DMG_APU::clearResources() {
 }
 
-void DMG_APU::stepAPU(bool ROMFileLoaded) {
+void DMG_APU::step(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
 }

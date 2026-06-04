@@ -13,7 +13,7 @@ class DMG_PPU {
 public:
     DMG_PPU(DMG_MMU& mmu) : mmu(mmu) {}
 
-    void stepPPU(bool ROMFileLoaded);
+    void step(bool ROMFileLoaded);
     void clearResources();
 
 private:

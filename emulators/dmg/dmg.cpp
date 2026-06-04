@@ -29,15 +29,11 @@ bool DMG::initialize() {
 void DMG::stepAll() {
     if (ROMFileLoaded) {
         uint32_t cycles = 0;
-        if (!managerInterrupts->checkForInterrupts()) {
-            cycles = stepCPU();
-            if (cycles == 0) return; // unsupported opcode
-        }
+        if (!managerInterrupts->checkForInterrupts())
+            stepCPU();
         stepPPU(cycles);
         stepAPU(cycles);
     }
-    //else
-    //    managerTimer->tick();
 }
 
 std::string DMG::loadROM(const char* path) {
@@ -75,22 +71,25 @@ void DMG::resetROM() {
     managerAPU->clearResources();
 }
 
-uint32_t DMG::stepCPU() {
-    uint64_t before = managerCPU->cycles;
-    if (managerCPU->halted)
-        managerCPU->cycles += 4;
-    else
-        managerCPU->stepCPU(ROMFileLoaded);
-    return (uint32_t)(managerCPU->cycles - before);
+void DMG::stepCPU() {
+    if (managerMMU->is_halted) {
+        managerMMU->tick(4);
+        return;
+    }
+    managerCPU->step(ROMFileLoaded);
 }
 
 void DMG::stepMMU(uint32_t cycles) {
     managerMMU->tick(cycles);
 }
 
-void DMG::stepPPU(uint32_t cycles) {}
+void DMG::stepPPU(uint32_t cycles) {
+    managerPPU->step(ROMFileLoaded);
+}
 
-void DMG::stepAPU(uint32_t cycles) {}
+void DMG::stepAPU(uint32_t cycles) {
+    managerAPU->step(ROMFileLoaded);
+}
 
 #pragma region Rendering
 void DMG::release(SDL_GPUDevice* device) {

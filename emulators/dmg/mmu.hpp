@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+class Logger;
 class DMG_APU;
 class DMG_CARTRIDGE;
 class DMG_CPU;
@@ -12,7 +13,7 @@ class DMG_TIMER;
 
 class DMG_MMU {
 public:
-    void setUnits(DMG_CARTRIDGE* cartridge, DMG_CPU* cpu, DMG_TIMER* timer, DMG_INTERRUPT* interrupts, DMG_PPU* ppu, DMG_APU* apu);
+    void setUnits(Logger& logger, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu);
     void clearMemory();
     void clearResources();
     void tick(uint32_t cycles);
@@ -31,6 +32,7 @@ public:
     inline uint16_t read_stack(uint16_t* sp) { uint16_t value = read16(*sp); *sp += 2; return value; }
 
 private:
+    Logger* logger = nullptr;
     DMG_CARTRIDGE* managerCartridge = nullptr;
     DMG_CPU* managerCPU = nullptr;
     DMG_TIMER* managerTimer = nullptr;

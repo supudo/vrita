@@ -1,7 +1,9 @@
 #include "timer.hpp"
+
+#include "utilities\logger.hpp"
 #include "interrupt.hpp"
 
-DMG_TIMER::DMG_TIMER(DMG_INTERRUPT& managerInterrupts) : managerInterrupts(managerInterrupts) {
+DMG_TIMER::DMG_TIMER(Logger& logger, DMG_INTERRUPT& managerInterrupts) : logger(logger), managerInterrupts(managerInterrupts) {
     reset();
 }
 

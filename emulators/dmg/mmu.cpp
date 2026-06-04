@@ -1,15 +1,25 @@
 #include "mmu.hpp"
 
+#include "utilities/logger.hpp"
+#include "cartridge.hpp"
+#include "cpu.hpp"
+#include "timer.hpp"
+#include "interrupt.hpp"
+#include "ppu.hpp"
+#include "apu.hpp"
+
 void DMG_MMU::tick(uint32_t cycles) {
+    managerTimer->tick(cycles);
 }
 
-void DMG_MMU::setUnits(DMG_CARTRIDGE* cartridge, DMG_CPU* cpu, DMG_TIMER* timer, DMG_INTERRUPT* interrupts, DMG_PPU* ppu, DMG_APU* apu) {
-    managerCartridge = cartridge;
-    managerCPU = cpu;
-    managerTimer = timer;
-    managerInterrupts = interrupts;
-    managerPPU = ppu;
-    managerAPU = apu;
+void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu) {
+    logger = &log;
+    managerCartridge = &cartridge;
+    managerCPU = &cpu;
+    managerTimer = &timer;
+    managerInterrupts = &interrupts;
+    managerPPU = &ppu;
+    managerAPU = &apu;
 }
 
 void DMG_MMU::clearResources() {

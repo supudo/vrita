@@ -28,7 +28,7 @@ void DMG_CPU::step(bool ROMFileLoaded) {
         executeInstruction8bit(ROMFileLoaded, opcode);
 }
 
-// instructions
+#pragma region instructions
 void DMG_CPU::ret(bool condition) {
     logCall(true, "ret");
     mmu.tick(4);
@@ -191,10 +191,9 @@ void DMG_CPU::cp_n(uint8_t value) {
     setFlag(FLAG_CARRY, value > Registers.A);
     setFlag(FLAG_HALF_CARRY, (value & 0x0f) > (Registers.A & 0x0f));
 }
+#pragma endregion
 
-// ================================================
-// extended instructions
-
+#pragma region extended instructions
 void DMG_CPU::bit(uint8_t bit, uint8_t value) {
     logCall(false, "bit");
     setFlag(FLAG_ZERO, !(value & bit));
@@ -285,6 +284,7 @@ void DMG_CPU::swap(uint8_t* value) {
     setFlag(FLAG_ZERO, !*value);
     setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY | FLAG_CARRY, false);
 }
+#pragma endregion
 
 void DMG_CPU::logCall(bool is8bit, const char* msg) {
     logger.log("[DMG-CPU] CALL %ibit %s", (is8bit ? 8 : 16), msg);

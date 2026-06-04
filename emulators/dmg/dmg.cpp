@@ -13,7 +13,7 @@ bool DMG::initialize() {
     managerMMU->clearResources();
 
     managerInterrupts = std::make_shared<DMG_INTERRUPT>(*managerMMU);
-    managerTimer = std::make_shared<DMG_TIMER>(*managerInterrupts);
+    managerTimer = std::make_shared<DMG_TIMER>(logger, *managerInterrupts);
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts, false, 0);
     managerPPU = std::make_shared<DMG_PPU>(*managerMMU);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
@@ -21,7 +21,7 @@ bool DMG::initialize() {
     
     managerTimer->reset();
 
-    managerMMU->setUnits(managerCartridge.get(), managerCPU.get(), managerTimer.get(), managerInterrupts.get(), managerPPU.get(), managerAPU.get());
+    managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU);
 
     return true;
 }

@@ -17,15 +17,18 @@ void DMG_INTERRUPT::unsetInterruptFlag(uint8_t flag) {
 }
 
 void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
+    mmu.tick(8);
     mmu.write_stack(&Registers.SP, Registers.PC);
     Registers.PC = jump_pc;
     setIME(false);
     unsetInterruptFlag(interrupt);
+    mmu.is_halted = false;
+    mmu.tick(4);
 }
 
 bool DMG_INTERRUPT::checkForInterrupts() {
-    if (mmu.memory[addressInterruptEnabled] & mmu.memory[addressInterruptFlag] & 0x0F) {
-    }
+    if (mmu.memory[addressInterruptEnabled] & mmu.memory[addressInterruptFlag] & 0x0F)
+        mmu.is_halted = false;
 
     if (!getIME())
         return false;

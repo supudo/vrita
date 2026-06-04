@@ -29,8 +29,8 @@ private:
     std::string rom_title;
     bool cgb_game = false;
     uint8_t mbc_type = 0x0;
-    int rom_banks_count;
-    int ram_banks_count;
+    int rom_banks_count = 0;
+    int ram_banks_count = 0;
 
     int get_ram_banks_count(uint8_t type);
     void printCartridgeInfo();

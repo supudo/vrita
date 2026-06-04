@@ -38,11 +38,11 @@ private:
     uint32_t internalTimerCounter = 0;
 
     // addresses
-    static constexpr uint16_t addressDIV = 0xFF04;
-    static constexpr uint16_t addressTIMA = 0xFF05;
-    static constexpr uint16_t addressTMA = 0xFF06;
-    static constexpr uint16_t addressTAC = 0xFF07;
-    static constexpr uint8_t addressTIMER_INTERRUPT = 0x04;
+    static constexpr uint16_t addressDIV = 0xFF04; // DIV - divier register
+    static constexpr uint16_t addressTIMA = 0xFF05; // TIMA - timer counter
+    static constexpr uint16_t addressTMA = 0xFF06; // TMA - timer modulo
+    static constexpr uint16_t addressTAC = 0xFF07; // TAC - timer control
+    static constexpr uint8_t addressTIMER_INTERRUPT = 0x04; // timer interrupt
 
     void incrementTIMA();
 };

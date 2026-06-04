@@ -667,9 +667,10 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
         case 0xCA: // JP Z, nn
             jump(isFlagSet(FLAG_ZERO));
             break;
-        case 0xCB:
-            executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
-            break;
+        // handled in cpu
+        //case 0xCB:
+        //    executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
+        //    break;
         case 0xCC: // CALL Z, nn
             call(isFlagSet(FLAG_ZERO));
             break;

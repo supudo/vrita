@@ -18,7 +18,10 @@ void DMG_CPU::clearResources() {
 void DMG_CPU::stepCPU(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
     uint8_t opcode = mmu.memory[Registers.PC++];
-    executeInstruction8bit(ROMFileLoaded, opcode);
+    if (opcode == 0xCB)
+        executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
+    else
+        executeInstruction8bit(ROMFileLoaded, opcode);
 }
 
 // instructions

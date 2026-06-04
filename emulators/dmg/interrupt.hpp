@@ -19,7 +19,7 @@ class DMG_INTERRUPT {
 public:
     DMG_INTERRUPT(DMG_MMU& mmu) : mmu(mmu) {}
 
-    bool IME;
+    bool IME = false; // interrupts are OFF on start
 
     bool checkForInterrupts();
     bool isInterruptEnabled(uint8_t flag); // if IE - 0xFFFF is set

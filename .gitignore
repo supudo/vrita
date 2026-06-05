@@ -70,3 +70,6 @@ DerivedData
 .idea/
 *.hmap
 xcuserdata/*
+
+# specifics
+*.ini

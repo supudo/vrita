@@ -12,7 +12,10 @@ public:
     void init(int positionX, int positionY, int width, int height);
     void clear();
     void addToLog(const char* fmt, ...) IM_FMTARGS(2);
-    void draw(const char* title, bool* p_opened = nullptr);
+    void render(bool* p_opened = nullptr);
+
+    ImVec2 getWindowPosition();
+    ImVec2 getWindowSize();
 
     ImGuiTextBuffer Buf;
     ImGuiTextFilter Filter;

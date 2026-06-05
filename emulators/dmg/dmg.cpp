@@ -199,16 +199,29 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     );
 
     ImGui::Begin("GameBoy (DMG)", windowOpened);
+    
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
     if (ImGui::Button("Load ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         showFileBrowser("dmg");
     if (ImGui::Button("Eject ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         ROMFileLoaded = false;
+    
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
+    
     ImGui::Separator();
     if (ImGui::Button(gameStateLabel.c_str(), ImVec2(60, 0)))
         toggleGameState();
+
+    ImGui::Separator();
+    ImGui::Text("Game Speed");
+    ImGui::SameLine();
+    ImGui::Button("0.5x");
+    ImGui::SameLine();
+    ImGui::Button("1x");
+    ImGui::SameLine();
+    ImGui::Button("2x");
+
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();

@@ -24,7 +24,15 @@ void Log::addToLog(const char* fmt, ...) {
     this->ScrollToBottom = true;
 }
 
-void Log::draw(const char* title, bool* p_opened) {
+ImVec2 Log::getWindowPosition() {
+    return ImGui::GetWindowPos();
+}
+
+ImVec2 Log::getWindowSize() {
+    return ImGui::GetWindowSize();
+}
+
+void Log::render(bool* p_opened) {
     if (this->width > 0 && this->height > 0)
         ImGui::SetNextWindowSize(ImVec2((float)this->width, (float)this->height), ImGuiCond_FirstUseEver);
     else
@@ -33,7 +41,7 @@ void Log::draw(const char* title, bool* p_opened) {
     if (this->positionX > 0 && this->positionY > 0)
         ImGui::SetNextWindowPos(ImVec2((float)this->positionX, (float)this->positionY), ImGuiCond_FirstUseEver);
 
-    ImGui::Begin(title, p_opened);
+    ImGui::Begin("Log", p_opened);
     if (ImGui::Button("Clear"))
         this->clear();
     ImGui::SameLine();

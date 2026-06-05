@@ -23,7 +23,7 @@
 
 SDL_Window* appWindow;
 
-Settings settings("app_settings.ini");
+Settings appSettings("app_settings.ini");
 
 std::shared_ptr<Dots> eyeCandy_Dots;
 bool SHOW_DOTS = false;
@@ -114,8 +114,8 @@ void loadROM(const char* romFilePath) {
 
 void loadGui() {
     // set gui visibility flags
-    guiMetricsVisible = settings.GetBool("Visibility", "guiMetricsVisible", false);
-    guiLogVisible = settings.GetBool("Visibility", "guiLogVisible", false);
+    guiMetricsVisible = appSettings.GetBool("Visibility", "guiMetricsVisible", false);
+    guiLogVisible = appSettings.GetBool("Visibility", "guiLogVisible", false);
 
     guiLog = std::make_shared<Log>();
 
@@ -124,32 +124,28 @@ void loadGui() {
     });
 
     managerEmulators = std::make_shared<Emulators>(*logger);
-    managerEmulators->init();
-    managerEmulators->EMULATORS_SHOW_DMG = settings.GetBool("Visibility", "EMULATORS_SHOW_DMG", false);
-    managerEmulators->EMULATORS_SHOW_AGB = settings.GetBool("Visibility", "EMULATORS_SHOW_AGB", false);
+    managerEmulators->init(appSettings);
 
     guiFileBrowser = std::make_shared<FileBrowser>();
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 }
 
 void saveAppSettings() {
-    settings.Set("Visibility", "guiMetricsVisible", guiMetricsVisible);
-    settings.Set("Visibility", "guiLogVisible", guiLogVisible);
-    settings.Set("Visibility", "EMULATORS_SHOW_DMG", managerEmulators->EMULATORS_SHOW_DMG);
-    settings.Set("Visibility", "EMULATORS_SHOW_AGB", managerEmulators->EMULATORS_SHOW_AGB);
+    appSettings.Set("Visibility", "guiMetricsVisible", guiMetricsVisible);
+    appSettings.Set("Visibility", "guiLogVisible", guiLogVisible);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     int width, height;
     SDL_GetWindowSize(appWindow, &width, &height);
-    settings.Set("MainWindow", "width", (int)(width / main_scale));
-    settings.Set("MainWindow", "height", (int)(height / main_scale));
+    appSettings.Set("MainWindow", "width", (int)(width / main_scale));
+    appSettings.Set("MainWindow", "height", (int)(height / main_scale));
     int x, y;
     SDL_GetWindowPosition(appWindow, &x, &y);
-    settings.Set("MainWindow", "hasPosition", true);
-    settings.Set("MainWindow", "x", x);
-    settings.Set("MainWindow", "y", y);
+    appSettings.Set("MainWindow", "hasPosition", true);
+    appSettings.Set("MainWindow", "x", x);
+    appSettings.Set("MainWindow", "y", y);
 
-    settings.Save();
+    appSettings.Save();
 }
 
 int main(int argc, char** argv) {
@@ -160,17 +156,17 @@ int main(int argc, char** argv) {
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    int windowWidth = settings.GetInt("MainWindow", "width", WINDOW_WIDTH);
-    int windowHeight = settings.GetInt("MainWindow", "height", WINDOW_HEIGHT);
+    int windowWidth = appSettings.GetInt("MainWindow", "width", WINDOW_WIDTH);
+    int windowHeight = appSettings.GetInt("MainWindow", "height", WINDOW_HEIGHT);
     appWindow = SDL_CreateWindow(AppTitle, (int)(windowWidth * main_scale), (int)(windowHeight * main_scale), window_flags);
     if (appWindow == nullptr) {
         printf("[VRITA] Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return 1;
     }
-    bool hasSavedPos = settings.GetBool("MainWindow", "hasPosition", false);
+    bool hasSavedPos = appSettings.GetBool("MainWindow", "hasPosition", false);
     if (hasSavedPos) {
-        int windowX = settings.GetInt("MainWindow", "x", 0);
-        int windowY = settings.GetInt("MainWindow", "y", 0);
+        int windowX = appSettings.GetInt("MainWindow", "x", 0);
+        int windowY = appSettings.GetInt("MainWindow", "y", 0);
         SDL_SetWindowPosition(appWindow, windowX, windowY);
     }
     else
@@ -293,7 +289,7 @@ int main(int argc, char** argv) {
 
     SDL_WaitForGPUIdle(gpu_device);
 
-    managerEmulators->release(gpu_device);
+    managerEmulators->release(gpu_device, appSettings);
     eyeCandy_Dots->release(gpu_device);
 
     ImGui::SaveIniSettingsToDisk("gui_options.ini"); 

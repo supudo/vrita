@@ -8,14 +8,28 @@
 #include "dmg/dmg.hpp"
 #include "agb/agb.hpp"
 
+#include "utilities/settings.hpp"
+
 std::shared_ptr<DMG> emulatorDMG;
 std::shared_ptr<AGB> emulatorAGB;
 
-void Emulators::init() {
+void Emulators::init(Settings settings) {
     emulatorDMG = std::make_shared<DMG>(logger);
-    emulatorDMG->initialize();
+    int dmgWindowPositionX = settings.GetInt("Emulators - DMG", "position_x", 44);
+    int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
+    int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);
+    int dmgWindowSizeHeight = settings.GetInt("Emulators - DMG", "height", 300);
+    emulatorDMG->initialize(dmgWindowPositionX, dmgWindowPositionY, dmgWindowSizeWidth, dmgWindowSizeHeight);
+
     emulatorAGB = std::make_shared<AGB>(logger);
-    emulatorAGB->initialize();
+    int agbWindowPositionX = settings.GetInt("Emulators - AGB", "position_x", 44);
+    int agbWindowPositionY = settings.GetInt("Emulators - AGB", "position_y", 44);
+    int agbWindowSizeWidth = settings.GetInt("Emulators - AGB", "width", 300);
+    int agbWindowSizeHeight = settings.GetInt("Emulators - AGB", "height", 300);
+    emulatorAGB->initialize(agbWindowPositionX, agbWindowPositionY, agbWindowSizeWidth, agbWindowSizeHeight);
+
+    EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
+    EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
@@ -51,7 +65,26 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
 }
 
-void Emulators::release(SDL_GPUDevice* device) {
+void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
+    settings.Set("Emulators", "show_dmg", EMULATORS_SHOW_DMG);
+    settings.Set("Emulators", "show_agb", EMULATORS_SHOW_AGB);
+
+    ImVec2 dmg_position = emulatorDMG->getWindowPosition();
+    settings.Set("Emulators - DMG", "position_x", (int)dmg_position.x);
+    settings.Set("Emulators - DMG", "position_y", (int)dmg_position.y);
+    ImVec2 dmg_size = emulatorDMG->getWindowSize();
+    settings.Set("Emulators - DMG", "width", (int)dmg_size.x);
+    settings.Set("Emulators - DMG", "height", (int)dmg_size.y);
+
+    ImVec2 agb_position = emulatorAGB->getWindowPosition();
+    settings.Set("Emulators - AGB", "position_x", (int)agb_position.x);
+    settings.Set("Emulators - AGB", "position_y", (int)agb_position.y);
+    ImVec2 agb_size = emulatorAGB->getWindowSize();
+    settings.Set("Emulators - AGB", "width", (int)agb_size.x);
+    settings.Set("Emulators - AGB", "height", (int)agb_size.y);
+
+    settings.Save();
+
     emulatorDMG->release(device);
     emulatorAGB->release(device);
 }

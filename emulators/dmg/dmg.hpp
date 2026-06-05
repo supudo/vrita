@@ -7,10 +7,11 @@ GameBoy (DMG)
 #ifndef VRITA_DMG_INCLUDES
 #define VRITA_DMG_INCLUDES
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
 #include <stdint.h>
 #include <iostream>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_gpu.h>
+#include <imgui.h>
 
 #include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
@@ -27,7 +28,9 @@ class DMG {
 public:
     DMG(Logger& logger) : logger(logger) {}
 
-    bool initialize();
+    bool initialize(int x, int y, int width, int height);
+    ImVec2 getWindowPosition();
+    ImVec2 getWindowSize();
 
     // rendering
     bool createTexture(SDL_GPUDevice* device);
@@ -55,12 +58,18 @@ private:
     void stepAPU(uint32_t cycles);
 
     // rendering
+    int windowPositionX = 40;
+    int windowPositionY = 40;
+    int windowWidth = 300;
+    int windowHeight = 300;
     static const uint32_t WIDTH = 160;
     static const uint32_t HEIGHT = 144;
     uint32_t gFramebuffer[WIDTH * HEIGHT];
     SDL_GPUTexture* gTexture = nullptr;
     int windowScale = 1;
     int lastWindowScale = -1;
+    ImVec2 lastWindowPosition = ImVec2(44, 44);
+    ImVec2 lastWindowSize = ImVec2(300, 300);
 
     std::shared_ptr<DMG_TIMER> managerTimer;
     std::shared_ptr<DMG_INTERRUPT> managerInterrupts;

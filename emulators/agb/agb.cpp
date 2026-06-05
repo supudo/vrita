@@ -4,9 +4,21 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
-// ===============
-// rendering
-// ===============
+bool AGB::initialize(int x, int y, int width, int height) {
+    windowPositionX = x;
+    windowPositionY = y;
+    windowWidth = width;
+    windowHeight = height;
+    return true;
+}
+
+ImVec2 AGB::getWindowPosition() {
+    return lastWindowPosition;
+}
+
+ImVec2 AGB::getWindowSize() {
+    return lastWindowSize;
+}
 
 void AGB::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);
@@ -76,8 +88,8 @@ void AGB::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
 }
 
 void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    float imgW = (float)(AGB::WIDTH * windowScale);
-    float imgH = (float)(AGB::HEIGHT * windowScale);
+    float imgW = (float)(windowWidth * windowScale);
+    float imgH = (float)(windowHeight * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
@@ -90,7 +102,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     struct ConstraintData { float aspect; float decorH; float padX; };
     static ConstraintData cd;
-    cd = { (float)AGB::WIDTH / (float)AGB::HEIGHT, decorH, padX };
+    cd = { (float)windowWidth / (float)windowHeight, decorH, padX };
 
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + AGB::WIDTH, decorH + AGB::HEIGHT),
@@ -104,6 +116,10 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     );
 
     ImGui::Begin("GameBoy Advance (AGB)", windowOpened);
+
+    lastWindowPosition = ImGui::GetWindowPos();
+    lastWindowSize = ImGui::GetWindowSize();
+
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("agb");
 
@@ -115,7 +131,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float aspect = (float)AGB::WIDTH / (float)AGB::HEIGHT;
+    float aspect = (float)windowWidth / (float)windowHeight;
     float dispW = avail.x;
     float dispH = dispW / aspect;
     if (dispH > avail.y) {

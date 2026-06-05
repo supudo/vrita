@@ -8,9 +8,14 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
-bool DMG::initialize() {
+bool DMG::initialize(int x, int y, int width, int height) {
     gameIsPaused = false;
     gameStateLabel = "Pause game";
+
+    windowPositionX = x;
+    windowPositionY = y;
+    windowWidth = width;
+    windowHeight = height;
 
     managerMMU = std::make_shared<DMG_MMU>();
     managerMMU->clearResources();
@@ -27,6 +32,14 @@ bool DMG::initialize() {
     managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU);
 
     return true;
+}
+
+ImVec2 DMG::getWindowPosition() {
+    return lastWindowPosition;
+}
+
+ImVec2 DMG::getWindowSize() {
+    return lastWindowSize;
 }
 
 void DMG::stepAll() {
@@ -171,8 +184,8 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
 }
 
 void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    float imgW = (float)(DMG::WIDTH * windowScale);
-    float imgH = (float)(DMG::HEIGHT * windowScale);
+    float imgW = (float)(windowWidth * windowScale);
+    float imgH = (float)(windowHeight * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
@@ -185,7 +198,9 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     struct ConstraintData { float aspect; float decorH; float padX; };
     static ConstraintData cd;
-    cd = { (float)DMG::WIDTH / (float)DMG::HEIGHT, decorH, padX };
+    cd = { (float)windowWidth / (float)windowHeight, decorH, padX };
+
+    ImGui::SetNextWindowPos(ImVec2(windowPositionX, windowPositionY));
 
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),
@@ -199,6 +214,9 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     );
 
     ImGui::Begin("GameBoy (DMG)", windowOpened);
+
+    lastWindowPosition = ImGui::GetWindowPos();
+    lastWindowSize = ImGui::GetWindowSize();
     
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
@@ -225,7 +243,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
+    float aspect = (float)windowWidth / (float)windowHeight;
     float dispW = avail.x;
     float dispH = dispW / aspect;
     if (dispH > avail.y) {

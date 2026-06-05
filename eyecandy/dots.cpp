@@ -31,14 +31,14 @@ bool Dots::createTexture(SDL_GPUDevice* device) {
     return gTexture != nullptr;
 }
 
-void Dots::generateTestPattern(float width, float height, float time) {
-    uint32_t w = (uint32_t)std::max(1.0f, width);
-    uint32_t h = (uint32_t)std::max(1.0f, height);
+void Dots::generateTestPattern(float fwidth, float fheight, float time) {
+    uint32_t w = (uint32_t)std::max(1.0f, fwidth);
+    uint32_t h = (uint32_t)std::max(1.0f, fheight);
 
     if (w != width || h != height) {
         width = w;
         height = h;
-        framebuffer.resize(width * height);
+        framebuffer.resize((size_t)width * height);
 
         if (gTexture) {
             SDL_ReleaseGPUTexture(device, gTexture);

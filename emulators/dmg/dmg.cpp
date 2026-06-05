@@ -200,7 +200,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     static ConstraintData cd;
     cd = { (float)windowWidth / (float)windowHeight, decorH, padX };
 
-    ImGui::SetNextWindowPos(ImVec2(windowPositionX, windowPositionY));
+    ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY));
 
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),

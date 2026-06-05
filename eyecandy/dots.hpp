@@ -9,7 +9,7 @@
 class Dots {
 public:
     bool createTexture(SDL_GPUDevice* device);
-    void generateTestPattern(float width, float height, float time);
+    void generateTestPattern(float fwidth, float fheight, float time);
     void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);
     void run();
     void release(SDL_GPUDevice* device);

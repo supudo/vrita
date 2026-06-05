@@ -35,7 +35,7 @@ void DMG_CPU::ret(const char* logMessage, bool condition) {
     logCall(true, concatOpcodeStrings(logMessage, " - ret"));
     mmu.tick(4);
     if (condition) {
-        Registers.PC = mmu.read_stack(&Registers.SP);
+        Registers.PC = mmu.readStack(&Registers.SP);
         mmu.tick(4);
     }
 }
@@ -161,7 +161,7 @@ void DMG_CPU::call(const char* logMessage, bool condition) {
     Registers.PC += 2;
     if (condition) {
         mmu.tick(4);
-        mmu.write_stack(&Registers.SP, Registers.PC);
+        mmu.writeStack(&Registers.SP, Registers.PC);
         Registers.PC = operand;
     }
 }

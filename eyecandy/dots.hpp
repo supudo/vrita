@@ -15,10 +15,10 @@ public:
     void release(SDL_GPUDevice* device);
 
 private:
-    SDL_GPUDevice* mDevice = nullptr;
-    uint32_t mWidth = 0;
-    uint32_t mHeight = 0;
-    std::vector<uint32_t> mFramebuffer;
+    SDL_GPUDevice* device = nullptr;
+    uint32_t width = 0;
+    uint32_t height = 0;
+    std::vector<uint32_t> framebuffer;
     SDL_GPUTexture* gTexture = nullptr;
 };
 

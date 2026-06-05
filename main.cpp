@@ -18,7 +18,6 @@
 #include "eyecandy/dots.hpp"
 #include "gui/filebrowser.hpp"
 #include "gui/log.hpp"
-
 #include "utilities/logger.hpp"
 
 SDL_Window* appWindow;
@@ -113,7 +112,6 @@ void loadROM(const char* romFilePath) {
 }
 
 void loadGui() {
-    // set gui visibility flags
     guiMetricsVisible = appSettings.GetBool("Visibility", "guiMetricsVisible", false);
     guiLogVisible = appSettings.GetBool("Visibility", "guiLogVisible", false);
 

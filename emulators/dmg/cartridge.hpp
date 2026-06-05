@@ -26,13 +26,13 @@ private:
     std::unique_ptr<DMG_MBC> mbc;
     std::vector<uint8_t> ram;
 
-    std::string rom_title;
-    bool cgb_game = false;
-    uint8_t mbc_type = 0x0;
-    int rom_banks_count = 0;
-    int ram_banks_count = 0;
+    std::string romTitle;
+    bool cgbGame = false;
+    uint8_t mbcType = 0x0;
+    int romBanksCount = 0;
+    int ramBanksCount = 0;
 
-    int get_ram_banks_count(uint8_t type);
+    int getRamBanksCount(uint8_t type);
     void printCartridgeInfo();
 };
 

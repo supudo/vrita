@@ -198,9 +198,9 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     struct ConstraintData { float aspect; float decorH; float padX; };
     static ConstraintData cd;
-    cd = { (float)windowWidth / (float)windowHeight, decorH, padX };
+    cd = { (float)DMG::WIDTH / (float)DMG::HEIGHT, decorH, padX };
 
-    ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY));
+    ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_Once);
 
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),

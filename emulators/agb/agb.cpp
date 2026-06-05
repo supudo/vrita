@@ -102,7 +102,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     struct ConstraintData { float aspect; float decorH; float padX; };
     static ConstraintData cd;
-    cd = { (float)windowWidth / (float)windowHeight, decorH, padX };
+    cd = { (float)AGB::WIDTH / (float)AGB::HEIGHT, decorH, padX };
 
     ImGui::SetNextWindowSizeConstraints(
         ImVec2(padX + AGB::WIDTH, decorH + AGB::HEIGHT),

@@ -31,6 +31,7 @@ public:
     void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);
     void run(bool *windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
     void release(SDL_GPUDevice* device);
+    void clear();
 
     // DMG specifics
     bool initialize();

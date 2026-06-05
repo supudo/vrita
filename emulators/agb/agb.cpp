@@ -161,3 +161,6 @@ std::string AGB::loadROM(const char* romFilePath) {
 
 void AGB::stepCPU() {
 }
+
+void AGB::clear() {
+}

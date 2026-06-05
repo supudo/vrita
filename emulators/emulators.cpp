@@ -59,10 +59,16 @@ void Emulators::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommand
 }
 
 void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    if (EMULATORS_SHOW_DMG)
+    if (EMULATORS_SHOW_DMG) {
+        EMULATORS_SHOW_AGB = false;
+        emulatorAGB->clear();
         emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
-    if (EMULATORS_SHOW_AGB)
+    }
+    if (EMULATORS_SHOW_AGB) {
+        EMULATORS_SHOW_DMG = false;
+        emulatorDMG->clear();
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
+    }
 }
 
 void Emulators::release(SDL_GPUDevice* device, Settings& settings) {

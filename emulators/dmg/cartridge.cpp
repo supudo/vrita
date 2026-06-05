@@ -41,6 +41,10 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
     printCartridgeInfo();
 }
 
+void DMG_CARTRIDGE::clearResources() {
+    mbc.release();
+}
+
 uint8_t DMG_CARTRIDGE::read(uint16_t addr) {
     return mbc->read(addr);
 }

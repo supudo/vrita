@@ -64,7 +64,7 @@ std::string DMG::loadROM(const char* path) {
         file.close();
         return "Invalid ROM size";
     }
-    resetROM();
+    clear();
     for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
         gFramebuffer[i] = 0xFF9BBC0F;
     file.seekg(0, std::ios::beg);
@@ -81,12 +81,14 @@ std::string DMG::loadROM(const char* path) {
     return "";
 }
 
-void DMG::resetROM() {
+void DMG::clear() {
     ROMFileLoaded = false;
     managerCPU->clearResources();
     managerMMU->clearResources();
     managerPPU->clearResources();
     managerAPU->clearResources();
+    managerTimer->reset();
+    managerCartridge->clearResources();
 }
 
 void DMG::stepCPU() {

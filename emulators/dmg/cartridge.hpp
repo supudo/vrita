@@ -15,6 +15,8 @@ class DMG_CARTRIDGE {
 public:
     DMG_CARTRIDGE(Logger& logger, DMG_MMU& mmu) : logger(logger), mmu(mmu) {}
 
+    void clearResources();
+
     void loadROM(std::streamsize size);
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t value);

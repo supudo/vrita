@@ -131,7 +131,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float aspect = (float)windowWidth / (float)windowHeight;
+    float aspect = (float)AGB::WIDTH / (float)AGB::HEIGHT;
     float dispW = avail.x;
     float dispH = dispW / aspect;
     if (dispH > avail.y) {

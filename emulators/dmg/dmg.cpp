@@ -243,7 +243,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float aspect = (float)windowWidth / (float)windowHeight;
+    float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
     float dispW = avail.x;
     float dispH = dispW / aspect;
     if (dispH > avail.y) {

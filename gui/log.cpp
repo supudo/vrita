@@ -1,12 +1,5 @@
 #include "log.hpp"
 
-void Log::init(int positionX, int positionY, int width, int height) {
-    this->positionX = positionX;
-    this->positionY = positionY;
-    this->width = width;
-    this->height = height;
-}
-
 void Log::clear() {
     this->Buf.clear();
     this->LineOffsets.clear();
@@ -24,22 +17,9 @@ void Log::addToLog(const char* fmt, ...) {
     this->ScrollToBottom = true;
 }
 
-ImVec2 Log::getWindowPosition() {
-    return ImGui::GetWindowPos();
-}
-
-ImVec2 Log::getWindowSize() {
-    return ImGui::GetWindowSize();
-}
-
 void Log::render(bool* p_opened) {
-    if (this->width > 0 && this->height > 0)
-        ImGui::SetNextWindowSize(ImVec2((float)this->width, (float)this->height), ImGuiCond_FirstUseEver);
-    else
-        ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_FirstUseEver);
-
-    if (this->positionX > 0 && this->positionY > 0)
-        ImGui::SetNextWindowPos(ImVec2((float)this->positionX, (float)this->positionY), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(40, 40), ImGuiCond_FirstUseEver);
 
     ImGui::Begin("Log", p_opened);
     if (ImGui::Button("Clear"))

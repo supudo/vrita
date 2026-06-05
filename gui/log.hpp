@@ -9,21 +9,14 @@
 
 class Log {
 public:
-    void init(int positionX, int positionY, int width, int height);
     void clear();
     void addToLog(const char* fmt, ...) IM_FMTARGS(2);
     void render(bool* p_opened = nullptr);
-
-    ImVec2 getWindowPosition();
-    ImVec2 getWindowSize();
 
     ImGuiTextBuffer Buf;
     ImGuiTextFilter Filter;
     ImVector<int> LineOffsets;
     bool ScrollToBottom;
-
-private:
-    int positionX, positionY, width, height;
 };
 
 #endif

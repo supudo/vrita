@@ -114,15 +114,10 @@ void loadROM(const char* romFilePath) {
 
 void loadGui() {
     // set gui visibility flags
-    guiMetricsVisible = settings.GetBool("guiMetricsVisible", false);
-    guiLogVisible = settings.GetBool("guiLogVisible", false);
+    guiMetricsVisible = settings.GetBool("Visibility", "guiMetricsVisible", false);
+    guiLogVisible = settings.GetBool("Visibility", "guiLogVisible", false);
 
     guiLog = std::make_shared<Log>();
-    int windowLogX = settings.GetInt("windowLogX", 40);
-    int windowLogY = settings.GetInt("windowLogY", 40);
-    int windowLogWidth = settings.GetInt("windowLogWidth", 400);
-    int windowLogHeight = settings.GetInt("windowLogHeight", 200);
-    guiLog->init(windowLogX, windowLogY, windowLogWidth, windowLogHeight);
 
     logger = std::make_shared<Logger>([] (const char* msg) {
         guiLog->addToLog("%s\n", msg);
@@ -130,34 +125,29 @@ void loadGui() {
 
     managerEmulators = std::make_shared<Emulators>(*logger);
     managerEmulators->init();
-    managerEmulators->EMULATORS_SHOW_DMG = settings.GetBool("EMULATORS_SHOW_DMG", false);
-    managerEmulators->EMULATORS_SHOW_AGB = settings.GetBool("EMULATORS_SHOW_AGB", false);
+    managerEmulators->EMULATORS_SHOW_DMG = settings.GetBool("Visibility", "EMULATORS_SHOW_DMG", false);
+    managerEmulators->EMULATORS_SHOW_AGB = settings.GetBool("Visibility", "EMULATORS_SHOW_AGB", false);
 
     guiFileBrowser = std::make_shared<FileBrowser>();
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 }
 
 void saveAppSettings() {
-    settings.Set("guiMetricsVisible", guiMetricsVisible);
-    settings.Set("guiLogVisible", guiLogVisible);
-    settings.Set("EMULATORS_SHOW_DMG", managerEmulators->EMULATORS_SHOW_DMG);
-    settings.Set("EMULATORS_SHOW_AGB", managerEmulators->EMULATORS_SHOW_AGB);
-
-    //settings.Set("windowLogX", guiLog->getWindowPosition().x);
-    //settings.Set("windowLogY", guiLog->getWindowPosition().y);
-    //settings.Set("windowLogWidth", guiLog->getWindowSize().x);
-    //settings.Set("windowLogHeight", guiLog->getWindowSize().y);
+    settings.Set("Visibility", "guiMetricsVisible", guiMetricsVisible);
+    settings.Set("Visibility", "guiLogVisible", guiLogVisible);
+    settings.Set("Visibility", "EMULATORS_SHOW_DMG", managerEmulators->EMULATORS_SHOW_DMG);
+    settings.Set("Visibility", "EMULATORS_SHOW_AGB", managerEmulators->EMULATORS_SHOW_AGB);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     int width, height;
     SDL_GetWindowSize(appWindow, &width, &height);
-    settings.Set("mainWindowWidth", (int)(width / main_scale));
-    settings.Set("mainWindowHeight", (int)(height / main_scale));
+    settings.Set("MainWindow", "width", (int)(width / main_scale));
+    settings.Set("MainWindow", "height", (int)(height / main_scale));
     int x, y;
     SDL_GetWindowPosition(appWindow, &x, &y);
-    settings.Set("mainWindowHasPos", true);
-    settings.Set("mainWindowX", x);
-    settings.Set("mainWindowY", y);
+    settings.Set("MainWindow", "hasPosition", true);
+    settings.Set("MainWindow", "x", x);
+    settings.Set("MainWindow", "y", y);
 
     settings.Save();
 }
@@ -170,17 +160,17 @@ int main(int argc, char** argv) {
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    int windowWidth = settings.GetInt("mainWindowWidth", WINDOW_WIDTH);
-    int windowHeight = settings.GetInt("mainWindowHeight", WINDOW_HEIGHT);
+    int windowWidth = settings.GetInt("MainWindow", "width", WINDOW_WIDTH);
+    int windowHeight = settings.GetInt("MainWindow", "height", WINDOW_HEIGHT);
     appWindow = SDL_CreateWindow(AppTitle, (int)(windowWidth * main_scale), (int)(windowHeight * main_scale), window_flags);
     if (appWindow == nullptr) {
         printf("[VRITA] Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return 1;
     }
-    bool hasSavedPos = settings.GetBool("mainWindowHasPos", false);
+    bool hasSavedPos = settings.GetBool("MainWindow", "hasPosition", false);
     if (hasSavedPos) {
-        int windowX = settings.GetInt("mainWindowX", 0);
-        int windowY = settings.GetInt("mainWindowY", 0);
+        int windowX = settings.GetInt("MainWindow", "x", 0);
+        int windowY = settings.GetInt("MainWindow", "y", 0);
         SDL_SetWindowPosition(appWindow, windowX, windowY);
     }
     else

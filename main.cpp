@@ -14,11 +14,12 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
+#include "utilities/logger.hpp"
 #include "emulators/emulators.hpp"
 #include "eyecandy/dots.hpp"
 #include "gui/filebrowser.hpp"
 #include "gui/log.hpp"
-#include "utilities/logger.hpp"
+#include "emulators/debuggers/memoryviewer.hpp"
 
 SDL_Window* appWindow;
 
@@ -42,6 +43,9 @@ bool guiLogVisible = false;
 bool guiStyleOptionsVisible = false;
 bool guiMetricsVisible = false;
 
+std::shared_ptr<MemoryViewer> debuggersMemoryViewer;
+bool debuggersMemoryViewerVisible = false;
+
 void ShowMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -58,6 +62,11 @@ void ShowMainMenu() {
                 managerEmulators->EMULATORS_SHOW_DMG = !managerEmulators->EMULATORS_SHOW_DMG;
             if (ImGui::MenuItem("GameBoy Advance (AGB)", NULL, managerEmulators->EMULATORS_SHOW_AGB))
                 managerEmulators->EMULATORS_SHOW_AGB = !managerEmulators->EMULATORS_SHOW_AGB;
+            ImGui::EndMenu();
+        }
+        if (ImGui::BeginMenu("Debuggers")) {
+            if (ImGui::MenuItem("Memory Viewer", NULL, debuggersMemoryViewerVisible))
+                debuggersMemoryViewerVisible = !debuggersMemoryViewerVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {
@@ -90,6 +99,9 @@ void renderGUIComponents() {
         ImGui::ShowStyleEditor(&ImGui::GetStyle());
     if (guiMetricsVisible)
         ImGui::ShowMetricsWindow(&guiMetricsVisible);
+
+    if (debuggersMemoryViewerVisible)
+        debuggersMemoryViewer->render(&debuggersMemoryViewerVisible);
 }
 
 void loadROM(const char* romFilePath) {
@@ -111,9 +123,10 @@ void loadROM(const char* romFilePath) {
     }
 }
 
-void loadGui() {
+void initComponents() {
     guiMetricsVisible = appSettings.GetBool("Visibility", "guiMetricsVisible", false);
     guiLogVisible = appSettings.GetBool("Visibility", "guiLogVisible", false);
+    debuggersMemoryViewerVisible = appSettings.GetBool("Debuggers - Memory Viewer", "visible", false);
 
     guiLog = std::make_shared<Log>();
 
@@ -126,6 +139,9 @@ void loadGui() {
 
     guiFileBrowser = std::make_shared<FileBrowser>();
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
+
+    debuggersMemoryViewer = std::make_shared<MemoryViewer>(*logger);
+    debuggersMemoryViewer->init(appSettings);
 }
 
 void saveAppSettings() {
@@ -142,6 +158,8 @@ void saveAppSettings() {
     appSettings.Set("MainWindow", "hasPosition", true);
     appSettings.Set("MainWindow", "x", x);
     appSettings.Set("MainWindow", "y", y);
+
+    appSettings.Set("Debuggers - Memory Viewer", "visible", debuggersMemoryViewerVisible);
 
     appSettings.Save();
 }
@@ -185,7 +203,7 @@ int main(int argc, char** argv) {
 
     SDL_SetGPUSwapchainParameters(gpu_device, appWindow, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
 
-    loadGui();
+    initComponents();
 
     eyeCandy_Dots = std::make_shared<Dots>();
 
@@ -289,9 +307,10 @@ int main(int argc, char** argv) {
 
     managerEmulators->release(gpu_device, appSettings);
     eyeCandy_Dots->release(gpu_device);
+    debuggersMemoryViewer->release(appSettings);
+    saveAppSettings();
 
     ImGui::SaveIniSettingsToDisk("gui_options.ini"); 
-    saveAppSettings();
 
     ImGui_ImplSDL3_Shutdown();
     ImGui_ImplSDLGPU3_Shutdown();

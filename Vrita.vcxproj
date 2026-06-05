@@ -141,6 +141,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="emulators\agb\agb.cpp" />
+    <ClCompile Include="emulators\debuggers\memoryviewer.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
     <ClCompile Include="emulators\dmg\cartridge.cpp" />
     <ClCompile Include="emulators\dmg\cpu.cpp" />
@@ -159,6 +160,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\agb\agb.hpp" />
+    <ClInclude Include="emulators\debuggers\memoryviewer.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />

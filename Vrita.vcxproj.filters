@@ -47,6 +47,9 @@
     <ClCompile Include="emulators\dmg\cpu_extended.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\debuggers\memoryviewer.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -109,6 +112,9 @@
     <ClInclude Include="utilities\strings.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
+    <ClInclude Include="emulators\debuggers\memoryviewer.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">
@@ -128,6 +134,9 @@
     </Filter>
     <Filter Include="eyecandy">
       <UniqueIdentifier>{65eb6884-3c42-42da-84be-f77ab17950e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="emulators\debuggers">
+      <UniqueIdentifier>{3b55912f-8868-482e-b45b-7f696fc7da7e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

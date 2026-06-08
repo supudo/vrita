@@ -60,7 +60,7 @@ private:
     std::vector<uint8_t> shadowMemory;
     std::vector<float> changeTimer;
 
-    std::array<MemoryRegion, 9> MemoryMap_DMG;
+    std::array<MemoryRegion, 10> MemoryMap_DMG;
     std::array<MemoryRegion, 11> MemoryMap_AGB;
     const MemoryRegion* memoryRegions = nullptr;
     size_t memoryRegionCount = 0;

@@ -22,6 +22,7 @@ bool MemoryEditor::init(Settings settings) {
         {"WRAM", "Work RAM", {0xC000, 0xDFFF}, 0x0000FF, true},
         {"Echo RAM", "Mirror of WRAM", {0xE000, 0xFDFF}, 0x0000AA, true},
         {"OAM", "Sprite attributes", {0xFE00, 0xFE9F}, 0xFF00FF, true},
+        {"Unusable", "Prohibited - reads 0xFF, writes ignored", {0xFEA0, 0xFEFF}, 0x444444, false},
         {"I/O Registers", "I/O registers", {0xFF00, 0xFF7F}, 0xFFFF00, true},
         {"HRAM + IE", "High RAM + IE register", {0xFF80, 0xFFFF}, 0xFF8800, true}
     } };

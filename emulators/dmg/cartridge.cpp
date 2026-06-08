@@ -1,6 +1,7 @@
 #include "cartridge.hpp"
 
 void DMG_CARTRIDGE::loadROM(std::streamsize size) {
+    ram.assign(0x8000, 0);
     uint8_t type = mmu.memory[0x147];
     switch (type) {
         case 0x00:
@@ -42,7 +43,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
 }
 
 void DMG_CARTRIDGE::clearResources() {
-    mbc.release();
+    mbc.reset();
 }
 
 uint8_t DMG_CARTRIDGE::read(uint16_t addr) {

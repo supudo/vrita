@@ -1,6 +1,7 @@
 #include "memoryeditor.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
@@ -156,8 +157,12 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
             scrollToAddress = (int)(gotoAddr & ~0xF);
     }
 
+    float previewHeight = ImGui::GetFrameHeightWithSpacing() + ImGui::GetTextLineHeightWithSpacing() * 2.0f + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y * 2.0f;
+    float tableHeight = ImGui::GetContentRegionAvail().y - previewHeight;
+    tableHeight = std::max(tableHeight, ImGui::GetFrameHeightWithSpacing() * 3.0f);
+
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
-    if (ImGui::BeginTable("##memoryeditor", 18, tableFlags, ImVec2(0, 0))) {
+    if (ImGui::BeginTable("##memoryeditor", 18, tableFlags, ImVec2(0, tableHeight))) {
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_NoHide);
         for (int i = 0; i < 16; i++) {
@@ -259,4 +264,69 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
         }
         ImGui::EndTable();
     }
+
+    ImGui::Separator();
+
+    ImGui::Text("Preview as:");
+    ImGui::SameLine();
+    if (ImGui::BeginCombo("##combo_previewType", selectedDataType, ImGuiComboFlags_HeightLargest)) {
+        for (int n = 0; n < IM_ARRAYSIZE(previewDataTypes); n++) {
+            bool isSelected = (selectedDataType == previewDataTypes[n]);
+            if (ImGui::Selectable(previewDataTypes[n], isSelected))
+                selectedDataType = previewDataTypes[n];
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+
+    char bufDec[128] = "", bufHex[128] = "", bufBin[128] = "";
+    getPreviewData(activeAddress, bufDec, 'd');
+    getPreviewData(activeAddress, bufHex, 'x');
+    getPreviewData(activeAddress, bufBin, 'b');
+    ImGui::Text("Dec"); ImGui::SameLine(); ImGui::TextUnformatted(bufDec);
+    ImGui::Text("Hex"); ImGui::SameLine(); ImGui::TextUnformatted(bufHex);
+    ImGui::Text("Bin"); ImGui::SameLine(); ImGui::TextUnformatted(bufBin);
+}
+
+void MemoryEditor::getPreviewData(int address, char* out_buf, char format) {
+    out_buf[0] = '\0';
+    if (address < 0 || !memoryData || (uint32_t)address >= memorySize)
+        return;
+
+    auto safe = [&](uint32_t sz) { return (uint32_t)address + sz <= memorySize; };
+
+    auto writeBin = [&](uint64_t v, int bits) {
+        int pos = 0;
+        for (int i = bits - 1; i >= 0; i--) {
+            if (i < bits - 1 && i % 8 == 7) out_buf[pos++] = ' ';
+            out_buf[pos++] = (v >> i) & 1 ? '1' : '0';
+        }
+        out_buf[pos] = '\0';
+    };
+
+    uint8_t v8 = 0;
+    uint16_t v16 = 0;
+    uint32_t v32 = 0;
+
+    if (strcmp(selectedDataType, "Uint8") == 0 && safe(1)) {
+        v8 = memoryData[address];
+        if (format == 'd') snprintf(out_buf, 128, "%u", (unsigned)v8);
+        else if (format == 'x') snprintf(out_buf, 128, "0x%02X", (unsigned)v8);
+        else writeBin(v8, 8);
+    } 
+    else if (strcmp(selectedDataType, "Uint16") == 0 && safe(2)) {
+        memcpy(&v16, &memoryData[address], 2);
+        if (format == 'd') snprintf(out_buf, 128, "%u", (unsigned)v16);
+        else if (format == 'x') snprintf(out_buf, 128, "0x%04X", (unsigned)v16);
+        else writeBin(v16, 16);
+    } 
+    else if (strcmp(selectedDataType, "Uint32") == 0 && safe(4)) {
+        memcpy(&v32, &memoryData[address], 4);
+        if (format == 'd') snprintf(out_buf, 128, "%u", v32);
+        else if (format == 'x') snprintf(out_buf, 128, "0x%08X", v32);
+        else writeBin(v32, 32);
+    } 
+    else
+        snprintf(out_buf, 128, "N/A");
 }

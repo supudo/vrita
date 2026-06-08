@@ -65,12 +65,16 @@ private:
     const MemoryRegion* memoryRegions = nullptr;
     size_t memoryRegionCount = 0;
     uint8_t emulatorType = 0;
+    static constexpr const char* previewDataTypes[] = { "Uint8", "Uint16", "Uint32" };
+    const char* selectedDataType = previewDataTypes[0];
 
     void renderMemoryRegion(MemoryRegion region);
     const MemoryRegion* getRegion(uint32_t addr) const;
 
     std::function<uint8_t(uint32_t)> memoryRead;
     std::function<void(uint32_t, uint8_t)> memoryWrite;
+
+    void getPreviewData(int address, char* out_buf, char format);
 };
 
 #endif

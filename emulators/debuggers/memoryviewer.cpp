@@ -176,11 +176,11 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                         uint8_t b = memoryData[addr + col];
                         if (region.editable) {
                             ImGui::PushID(addr + col);
-                            int value = b;
-                            ImGui::SetNextItemWidth(25);
-                            if (ImGui::InputInt("##byte", &value, 0, 0, ImGuiInputTextFlags_CharsHexadecimal)) {
-                                writeMemory(addr + col, static_cast<uint8_t>(value));
-                                memoryData[addr + col] = static_cast<uint8_t>(value);
+                            uint8_t value = b;
+                            ImGui::SetNextItemWidth(28);
+                            if (ImGui::InputScalar("##byte", ImGuiDataType_U8, &value, nullptr, nullptr, "%02X", ImGuiInputTextFlags_CharsHexadecimal)) {
+                                writeMemory(addr + col, value);
+                                memoryData[addr + col] = value;
                             }
                             ImGui::PopID();
                         }

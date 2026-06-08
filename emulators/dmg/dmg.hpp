@@ -61,7 +61,6 @@ private:
     double renderingFPS = 0.0;
     double renderingSpeed = 0.0;
     const double DMG_FPS = 59.7275;
-    std::string renderingStats = "FPS: ... Speed: ...";
 
     void toggleGameState();
     std::string gameStateLabel = "Pause game";

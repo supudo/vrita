@@ -16,7 +16,6 @@ bool DMG::initialize(int x, int y, int width, int height) {
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
-    renderingStats = "FPS: ... Speed: ...";
 
     windowPositionX = x;
     windowPositionY = y;
@@ -86,7 +85,6 @@ std::string DMG::loadROM(const char* path) {
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
-    renderingStats = "FPS: ... Speed: ...";
     managerCartridge->loadROM(size);
     return "";
 }
@@ -235,19 +233,22 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
-    if (ImGui::Button("Load ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+    if (ImGui::Button("Load ROM file"))
         showFileBrowser("dmg");
-    if (ImGui::Button("Eject ROM file", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+    ImGui::SameLine();
+    if (ImGui::Button("Eject ROM file"))
         ROMFileLoaded = false;
     
     ImGui::SliderInt("Scale", &windowScale, 1, 20);
     
     ImGui::Separator();
+
     if (ImGui::Button(gameStateLabel.c_str(), ImVec2(60, 0)))
         toggleGameState();
     ImGui::SameLine();
 
     ImGui::Separator();
+
     ImGui::SameLine();
     ImGui::Text("Game Speed");
     ImGui::SameLine();
@@ -268,7 +269,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::Separator();
 
-    ImGui::Text(renderingStats.c_str());
+    ImGui::Text("FPS: %.2f, Speed: %.2f%%", renderingFPS, renderingSpeed);
     
     ImGui::Separator();
 
@@ -297,8 +298,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             renderingFPS = renderingFrames / elapsed;
             renderingFrames = 0;
             lastTime = now;
-            double speed = (renderingFPS / DMG_FPS) * 100.0;
-            renderingStats = logger.str_format("FPS: %.2f, Speed: %.2f%", renderingFPS, speed);
+            renderingSpeed = (renderingFPS / DMG_FPS) * 100.0;
         }
     }
 

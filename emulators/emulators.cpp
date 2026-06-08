@@ -73,9 +73,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
 
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->ROMFileLoaded)
-        debuggerMemoryViewer->setMemory(emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
+        debuggerMemoryViewer->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
     else
-        debuggerMemoryViewer->setMemory(nullptr, 0);
+        debuggerMemoryViewer->setMemory("agb", nullptr, 0);
 
     if (debuggersMemoryViewerVisible)
         debuggerMemoryViewer->render(&debuggersMemoryViewerVisible);

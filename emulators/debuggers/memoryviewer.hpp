@@ -7,12 +7,26 @@ GameBoy Advance (AGB)
 #ifndef VRITA_MEMORYVIEWER_INCLUDES
 #define VRITA_MEMORYVIEWER_INCLUDES
 
+#include <array>
 #include <stdint.h>
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
 
 class Settings;
+
+struct AddressRange {
+    uint32_t start;
+    uint32_t end;
+};
+
+struct MemoryRegion {
+    const char* region;
+    const char* notes;
+    AddressRange range;
+    uint32_t color;
+    bool editable;
+};
 
 class MemoryViewer {
 public:
@@ -22,7 +36,7 @@ public:
     void release(Settings& settings);
 
     void render(bool* windowOpened);
-    void setMemory(const uint8_t* data, uint32_t size);
+    void setMemory(const char* emulatorType, const uint8_t* data, uint32_t size);
 
 private:
     Logger& logger;
@@ -37,6 +51,13 @@ private:
     const uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
     int scrollToAddrress = -1;
+
+    std::array<MemoryRegion, 9> MemoryMap_DMG;
+    std::array<MemoryRegion, 11> MemoryMap_AGB;
+    const MemoryRegion* memoryRegions = nullptr;
+    size_t memoryRegionCount = 0;
+
+    const MemoryRegion* getRegion(uint32_t addr) const;
 };
 
 #endif

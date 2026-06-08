@@ -298,7 +298,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             renderingFrames = 0;
             lastTime = now;
             double speed = (renderingFPS / DMG_FPS) * 100.0;
-            renderingStats = logger.str_format("FPS: %.2f, Speed: %.2f", renderingFPS, speed);
+            renderingStats = logger.str_format("FPS: %.2f, Speed: %.2f%", renderingFPS, speed);
         }
     }
 

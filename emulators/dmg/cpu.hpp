@@ -86,7 +86,7 @@ private:
     void srl(const char* logMessage, uint8_t* value);
     void swap(const char* logMessage, uint8_t* value);
 
-    void logCall(bool isNormal, std::string msg);
+    void logCall(bool isNormal, const char* msg1, const char* msg2 = "");
 };
 
 #endif

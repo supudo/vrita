@@ -9,6 +9,10 @@
 
 #include "utilities/logger.hpp"
 #include "debuggers/memoryeditor.hpp"
+#include "debuggers/tileviewer.hpp"
+#include "debuggers/tilemapviewer.hpp"
+#include "debuggers/spriteviewer.hpp"
+#include "debuggers/paletteviewer.hpp"
 
 class Settings;
 class DMG;
@@ -31,6 +35,18 @@ public:
 
     std::shared_ptr<MemoryEditor> debuggerMemoryEditor;
     bool debuggersMemoryEditorVisible = false;
+
+    std::shared_ptr<TileViewer> debuggerTileViewer;
+    bool debuggerTileViewerVisible = false;
+
+    std::shared_ptr<TilemapViewer> debuggerTilemapViewer;
+    bool debuggerTilemapViewerVisible = false;
+
+    std::shared_ptr<SpriteViewer> debuggerSpriteViewer;
+    bool debuggerSpriteViewerVisible = false;
+
+    std::shared_ptr<PaletteViewer> debuggerPaletteViewer;
+    bool debuggerPaletteViewerVisible = false;
 
 private:
     Logger& logger;

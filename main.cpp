@@ -63,6 +63,14 @@ void ShowMainMenu() {
         if (ImGui::BeginMenu("Debuggers")) {
             if (ImGui::MenuItem("Memory Editor", NULL, managerEmulators->debuggersMemoryEditorVisible))
                 managerEmulators->debuggersMemoryEditorVisible = !managerEmulators->debuggersMemoryEditorVisible;
+            if (ImGui::MenuItem("Tile Viewer", NULL, managerEmulators->debuggerTileViewerVisible))
+                managerEmulators->debuggerTileViewerVisible = !managerEmulators->debuggerTileViewerVisible;
+            if (ImGui::MenuItem("Tilemap Viewer", NULL, managerEmulators->debuggerTilemapViewerVisible))
+                managerEmulators->debuggerTilemapViewerVisible = !managerEmulators->debuggerTilemapViewerVisible;
+            if (ImGui::MenuItem("Sprite Viewer", NULL, managerEmulators->debuggerSpriteViewerVisible))
+                managerEmulators->debuggerSpriteViewerVisible = !managerEmulators->debuggerSpriteViewerVisible;
+            if (ImGui::MenuItem("Palette Viewer", NULL, managerEmulators->debuggerPaletteViewerVisible))
+                managerEmulators->debuggerPaletteViewerVisible = !managerEmulators->debuggerPaletteViewerVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {

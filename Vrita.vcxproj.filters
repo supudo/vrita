@@ -50,6 +50,18 @@
     <ClCompile Include="emulators\debuggers\memoryeditor.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\debuggers\spriteviewer.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\debuggers\tilemapviewer.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\debuggers\tileviewer.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\debuggers\paletteviewer.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -113,6 +125,18 @@
       <Filter>utilities</Filter>
     </ClInclude>
     <ClInclude Include="emulators\debuggers\memoryeditor.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\paletteviewer.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\spriteviewer.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\tilemapviewer.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\tileviewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
   </ItemGroup>

@@ -32,6 +32,22 @@ void Emulators::init(Settings& settings) {
     debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger);
     debuggerMemoryEditor->init(settings);
     debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
+
+    debuggerTileViewer = std::make_shared<TileViewer>(logger);
+    debuggerTileViewer->init(settings);
+    debuggerTileViewerVisible = settings.GetBool("Debuggers - Tile Viewer", "visible", false);
+
+    debuggerTilemapViewer = std::make_shared<TilemapViewer>(logger);
+    debuggerTilemapViewer->init(settings);
+    debuggerTilemapViewerVisible = settings.GetBool("Debuggers - Tilemap Viewer", "visible", false);
+
+    debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger);
+    debuggerSpriteViewer->init(settings);
+    debuggerSpriteViewerVisible = settings.GetBool("Debuggers - Sprite Viewer", "visible", false);
+
+    debuggerPaletteViewer = std::make_shared<PaletteViewer>(logger);
+    debuggerPaletteViewer->init(settings);
+    debuggerPaletteViewerVisible = settings.GetBool("Debuggers - Palette Viewer", "visible", false);
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
@@ -88,6 +104,14 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
 
     if (debuggersMemoryEditorVisible)
         debuggerMemoryEditor->render(&debuggersMemoryEditorVisible);
+    if (debuggerTileViewerVisible)
+        debuggerTileViewer->render(&debuggerTileViewerVisible);
+    if (debuggerTilemapViewerVisible)
+        debuggerTilemapViewer->render(&debuggerTilemapViewerVisible);
+    if (debuggerSpriteViewerVisible)
+        debuggerSpriteViewer->render(&debuggerSpriteViewerVisible);
+    if (debuggerPaletteViewerVisible)
+        debuggerPaletteViewer->render(&debuggerPaletteViewerVisible);
 }
 
 void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
@@ -109,6 +133,10 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
     settings.Set("Emulators - AGB", "height", (int)agb_size.y);
 
     settings.Set("Debuggers - Memory Editor", "visible", debuggersMemoryEditorVisible);
+    settings.Set("Debuggers - Tile Viewer", "visible", debuggerTileViewerVisible);
+    settings.Set("Debuggers - Tilemap Viewer", "visible", debuggerTilemapViewerVisible);
+    settings.Set("Debuggers - Sprite Viewer", "visible", debuggerSpriteViewerVisible);
+    settings.Set("Debuggers - Palette Viewer", "visible", debuggerPaletteViewerVisible);
 
     settings.Save();
 

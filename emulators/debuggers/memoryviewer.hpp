@@ -54,6 +54,7 @@ private:
     uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
     int scrollToAddrress = -1;
+    int activeAddr = -1;
 
     std::array<MemoryRegion, 9> MemoryMap_DMG;
     std::array<MemoryRegion, 11> MemoryMap_AGB;

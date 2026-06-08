@@ -175,15 +175,20 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
+                        bool isSelected = ((int)(addr + col) == activeAddr);
+                        if (isSelected)
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(80, 80, 180, 120));
                         uint8_t b = memoryData[addr + col];
                         if (region.editable) {
                             ImGui::PushID(addr + col);
                             uint8_t value = b;
                             ImGui::SetNextItemWidth(28);
-                            if (ImGui::InputScalar("##byte", ImGuiDataType_U8, &value, nullptr, nullptr, "%02X", ImGuiInputTextFlags_CharsHexadecimal)) {
+                            if (ImGui::InputScalar("##byte", ImGuiDataType_U8, &value, nullptr, nullptr, "%02X", ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AutoSelectAll)) {
                                 memoryWrite(addr + col, value);
                                 memoryData[addr + col] = value;
                             }
+                            if (ImGui::IsItemFocused())
+                                activeAddr = (int)(addr + col);
                             ImGui::PopID();
                         }
                         else
@@ -206,11 +211,20 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
+                        bool isSelected = ((int)currentAddr == activeAddr);
+                        if (isSelected)
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.31f, 0.31f, 0.71f, 0.8f));
                         ImGui::PushID(currentAddr);
                         ImGui::SetNextItemWidth(12);
-                        if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank))
+                        if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_AutoSelectAll)) {
                             memoryWrite(currentAddr, static_cast<uint8_t>(c[0]));
+                            memoryData[currentAddr] = static_cast<uint8_t>(c[0]);
+                        }
+                        if (ImGui::IsItemFocused())
+                            activeAddr = (int)currentAddr;
                         ImGui::PopID();
+                        if (isSelected)
+                            ImGui::PopStyleColor();
                         if (col != 15)
                             ImGui::SameLine(0.0f, 0.0f);
                     }

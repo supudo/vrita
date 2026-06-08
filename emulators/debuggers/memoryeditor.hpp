@@ -4,8 +4,8 @@ GameBoy Advance (AGB)
 
 */
 
-#ifndef VRITA_MEMORYVIEWER_INCLUDES
-#define VRITA_MEMORYVIEWER_INCLUDES
+#ifndef VRITA_MEMORYEDITOR_INCLUDES
+#define VRITA_MEMORYEDITOR_INCLUDES
 
 #include <array>
 #include <vector>
@@ -31,9 +31,9 @@ struct MemoryRegion {
     bool editable;
 };
 
-class MemoryViewer {
+class MemoryEditor {
 public:
-    MemoryViewer(Logger& logger) : logger(logger) {}
+    MemoryEditor(Logger& logger) : logger(logger) {}
 
     bool init(Settings settings);
     void release(Settings& settings);

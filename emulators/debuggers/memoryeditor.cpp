@@ -1,4 +1,4 @@
-#include "memoryviewer.hpp"
+#include "memoryeditor.hpp"
 
 #include <algorithm>
 #include <imgui.h>
@@ -7,11 +7,11 @@
 
 #include "utilities/settings.hpp"
 
-bool MemoryViewer::init(Settings settings) {
-    windowPositionX = settings.GetInt("Debuggers - Memory Viewer", "position_x", 44);
-    windowPositionY = settings.GetInt("Debuggers - Memory Viewer", "position_y", 44);
-    windowWidth = settings.GetInt("Debuggers - Memory Viewer", "width", 300);
-    windowHeight = settings.GetInt("Debuggers - Memory Viewer", "height", 300);
+bool MemoryEditor::init(Settings settings) {
+    windowPositionX = settings.GetInt("Debuggers - Memory Editor", "position_x", 44);
+    windowPositionY = settings.GetInt("Debuggers - Memory Editor", "position_y", 44);
+    windowWidth = settings.GetInt("Debuggers - Memory Editor", "width", 300);
+    windowHeight = settings.GetInt("Debuggers - Memory Editor", "height", 300);
 
     MemoryMap_DMG = { {
         {"ROM Bank 0", "Fixed cartridge ROM bank", {0x0000, 0x3FFF}, 0xAAAAAA, false},
@@ -42,15 +42,15 @@ bool MemoryViewer::init(Settings settings) {
     return true;
 }
 
-void MemoryViewer::release(Settings& settings) {
-    settings.Set("Debuggers - Memory Viewer", "position_x", (int)lastWindowPosition.x);
-    settings.Set("Debuggers - Memory Viewer", "position_y", (int)lastWindowPosition.y);
-    settings.Set("Debuggers - Memory Viewer", "width", (int)lastWindowSize.x);
-    settings.Set("Debuggers - Memory Viewer", "height", (int)lastWindowSize.y);
+void MemoryEditor::release(Settings& settings) {
+    settings.Set("Debuggers - Memory Editor", "position_x", (int)lastWindowPosition.x);
+    settings.Set("Debuggers - Memory Editor", "position_y", (int)lastWindowPosition.y);
+    settings.Set("Debuggers - Memory Editor", "width", (int)lastWindowSize.x);
+    settings.Set("Debuggers - Memory Editor", "height", (int)lastWindowSize.y);
     settings.Save();
 }
 
-void MemoryViewer::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
+void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
     if (data != memoryData || size != memorySize) {
         if (data && size > 0) {
             shadowMemory.assign(data, data + size);
@@ -79,7 +79,7 @@ void MemoryViewer::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
     }
 }
 
-const MemoryRegion* MemoryViewer::getRegion(uint32_t addr) const {
+const MemoryRegion* MemoryEditor::getRegion(uint32_t addr) const {
     for (size_t i = 0; i < memoryRegionCount; i++) {
         const auto& region = memoryRegions[i];
         if (addr >= region.range.start &&
@@ -90,16 +90,16 @@ const MemoryRegion* MemoryViewer::getRegion(uint32_t addr) const {
     return nullptr;
 }
 
-void MemoryViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
     memoryRead = read8;
     memoryWrite = write8;
 }
 
-void MemoryViewer::render(bool* windowOpened) {
+void MemoryEditor::render(bool* windowOpened) {
     ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);
 
-    if (!ImGui::Begin("Debuggers - Memory Viewer", windowOpened)) {
+    if (!ImGui::Begin("Debuggers - Memory Editor", windowOpened)) {
         ImGui::End();
         return;
     }
@@ -123,7 +123,7 @@ void MemoryViewer::render(bool* windowOpened) {
             changeTimer[i] = std::max(0.0f, changeTimer[i] - dt);
     }
 
-    if (ImGui::BeginTabBar("MemoryViewer", ImGuiTabBarFlags_None)) {
+    if (ImGui::BeginTabBar("MemoryEditor", ImGuiTabBarFlags_None)) {
         for (size_t r = 0; r < memoryRegionCount; r++) {
             if (ImGui::BeginTabItem(memoryRegions[r].region)) {
                 ImGui::SetItemTooltip(memoryRegions[r].notes);
@@ -137,7 +137,7 @@ void MemoryViewer::render(bool* windowOpened) {
     ImGui::End();
 }
 
-void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
+void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
     uint32_t regionStart = region.range.start;
     uint32_t regionEnd = region.range.end;
     if (regionStart >= memorySize)
@@ -149,7 +149,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
 
     static uint32_t gotoAddr = 0;
     ImGui::SetNextItemWidth(120);
-    ImGui::InputScalar("##memoryviewergoto", ImGuiDataType_U32, &gotoAddr, nullptr, nullptr, "%04X");
+    ImGui::InputScalar("##memoryeditorgoto", ImGuiDataType_U32, &gotoAddr, nullptr, nullptr, "%04X");
     ImGui::SameLine();
     if (ImGui::Button("Jump")) {
         if (gotoAddr >= regionStart && gotoAddr <= regionEnd)
@@ -157,7 +157,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
     }
 
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
-    if (ImGui::BeginTable("##memoryviewer", 18, tableFlags, ImVec2(0, 0))) {
+    if (ImGui::BeginTable("##memoryeditor", 18, tableFlags, ImVec2(0, 0))) {
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_NoHide);
         for (int i = 0; i < 16; i++) {

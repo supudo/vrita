@@ -9,7 +9,7 @@
 #include "agb/agb.hpp"
 
 #include "utilities/settings.hpp"
-#include "debuggers/memoryviewer.hpp"
+#include "debuggers/memoryeditor.hpp"
 
 void Emulators::init(Settings& settings) {
     emulatorDMG = std::make_shared<DMG>(logger, settings);
@@ -29,9 +29,9 @@ void Emulators::init(Settings& settings) {
     EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
     EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
 
-    debuggerMemoryViewer = std::make_shared<MemoryViewer>(logger);
-    debuggerMemoryViewer->init(settings);
-    debuggersMemoryViewerVisible = settings.GetBool("Debuggers - Memory Viewer", "visible", false);
+    debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger);
+    debuggerMemoryEditor->init(settings);
+    debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
@@ -73,8 +73,8 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
 
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->ROMFileLoaded) {
-        debuggerMemoryViewer->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
-        debuggerMemoryViewer->setCallbacks(
+        debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
+        debuggerMemoryEditor->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
             },
@@ -84,10 +84,10 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         );
     }
     else
-        debuggerMemoryViewer->setMemory("agb", nullptr, 0);
+        debuggerMemoryEditor->setMemory("agb", nullptr, 0);
 
-    if (debuggersMemoryViewerVisible)
-        debuggerMemoryViewer->render(&debuggersMemoryViewerVisible);
+    if (debuggersMemoryEditorVisible)
+        debuggerMemoryEditor->render(&debuggersMemoryEditorVisible);
 }
 
 void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
@@ -108,7 +108,7 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
     settings.Set("Emulators - AGB", "width", (int)agb_size.x);
     settings.Set("Emulators - AGB", "height", (int)agb_size.y);
 
-    settings.Set("Debuggers - Memory Viewer", "visible", debuggersMemoryViewerVisible);
+    settings.Set("Debuggers - Memory Editor", "visible", debuggersMemoryEditorVisible);
 
     settings.Save();
 

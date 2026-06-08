@@ -8,7 +8,7 @@
 #include <string>
 
 #include "utilities/logger.hpp"
-#include "debuggers/memoryviewer.hpp"
+#include "debuggers/memoryeditor.hpp"
 
 class Settings;
 class DMG;
@@ -29,8 +29,8 @@ public:
     void release(SDL_GPUDevice* device, Settings& settings);
     std::string loadROM(const char* romFilePath);
 
-    std::shared_ptr<MemoryViewer> debuggerMemoryViewer;
-    bool debuggersMemoryViewerVisible = false;
+    std::shared_ptr<MemoryEditor> debuggerMemoryEditor;
+    bool debuggersMemoryEditorVisible = false;
 
 private:
     Logger& logger;

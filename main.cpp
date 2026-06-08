@@ -61,8 +61,8 @@ void ShowMainMenu() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debuggers")) {
-            if (ImGui::MenuItem("Memory Viewer", NULL, managerEmulators->debuggersMemoryViewerVisible))
-                managerEmulators->debuggersMemoryViewerVisible = !managerEmulators->debuggersMemoryViewerVisible;
+            if (ImGui::MenuItem("Memory Editor", NULL, managerEmulators->debuggersMemoryEditorVisible))
+                managerEmulators->debuggersMemoryEditorVisible = !managerEmulators->debuggersMemoryEditorVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {

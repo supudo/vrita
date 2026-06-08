@@ -47,7 +47,7 @@
     <ClCompile Include="emulators\dmg\cpu_extended.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\memoryviewer.cpp">
+    <ClCompile Include="emulators\debuggers\memoryeditor.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,7 +112,7 @@
     <ClInclude Include="utilities\strings.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\memoryviewer.hpp">
+    <ClInclude Include="emulators\debuggers\memoryeditor.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
   </ItemGroup>

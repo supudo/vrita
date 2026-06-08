@@ -235,6 +235,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         onFocused("dmg");
     if (ImGui::Button("Recent Files"))
         ImGui::OpenPopup("recentFiles");
+    ImGui::SameLine();
 
     if (ImGui::BeginPopupContextItem("recentFiles")) {
         for (const auto& [key, value] : settings.GetSection("DMG - Recent Files")) {

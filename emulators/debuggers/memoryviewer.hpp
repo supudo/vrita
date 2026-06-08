@@ -8,6 +8,7 @@ GameBoy Advance (AGB)
 #define VRITA_MEMORYVIEWER_INCLUDES
 
 #include <array>
+#include <vector>
 #include <stdint.h>
 #include <cstdint>
 #include <functional>
@@ -55,6 +56,9 @@ private:
     uint32_t memorySize = 0;
     int scrollToAddrress = -1;
     int activeAddr = -1;
+
+    std::vector<uint8_t> shadowMemory;
+    std::vector<float> changeTimer;
 
     std::array<MemoryRegion, 9> MemoryMap_DMG;
     std::array<MemoryRegion, 11> MemoryMap_AGB;

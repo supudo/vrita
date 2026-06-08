@@ -1,5 +1,6 @@
 #include "memoryviewer.hpp"
 
+#include <algorithm>
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
@@ -50,6 +51,15 @@ void MemoryViewer::release(Settings& settings) {
 }
 
 void MemoryViewer::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
+    if (data != memoryData || size != memorySize) {
+        if (data && size > 0) {
+            shadowMemory.assign(data, data + size);
+            changeTimer.assign(size, 0.0f);
+        } else {
+            shadowMemory.clear();
+            changeTimer.clear();
+        }
+    }
     memoryData = data;
     memorySize = size;
     if (emulatorType == "dmg") {
@@ -101,6 +111,16 @@ void MemoryViewer::render(bool* windowOpened) {
         ImGui::Text("No file loaded. Memory is empty.");
         ImGui::End();
         return;
+    }
+
+    float dt = ImGui::GetIO().DeltaTime;
+    for (uint32_t i = 0; i < memorySize; i++) {
+        if (memoryData[i] != shadowMemory[i]) {
+            changeTimer[i] = 1.0f;
+            shadowMemory[i] = memoryData[i];
+        }
+        if (changeTimer[i] > 0.0f)
+            changeTimer[i] = std::max(0.0f, changeTimer[i] - dt);
     }
 
     if (ImGui::BeginTabBar("MemoryViewer", ImGuiTabBarFlags_None)) {
@@ -176,8 +196,11 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
                         bool isSelected = ((int)(addr + col) == activeAddr);
+                        float ct = (addr + col < changeTimer.size()) ? changeTimer[addr + col] : 0.0f;
                         if (isSelected)
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(80, 80, 180, 120));
+                        else if (ct > 0.0f)
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(180, 60, 60, (int)(ct * 160)));
                         uint8_t b = memoryData[addr + col];
                         if (region.editable) {
                             ImGui::PushID(addr + col);
@@ -212,8 +235,12 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
                         bool isSelected = ((int)currentAddr == activeAddr);
+                        float ct = (currentAddr < changeTimer.size()) ? changeTimer[currentAddr] : 0.0f;
+                        bool hasHighlight = isSelected || ct > 0.0f;
                         if (isSelected)
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.31f, 0.31f, 0.71f, 0.8f));
+                        else if (ct > 0.0f)
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.7f, 0.24f, 0.24f, ct * 0.8f));
                         ImGui::PushID(currentAddr);
                         ImGui::SetNextItemWidth(12);
                         if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_AutoSelectAll)) {
@@ -223,7 +250,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                         if (ImGui::IsItemFocused())
                             activeAddr = (int)currentAddr;
                         ImGui::PopID();
-                        if (isSelected)
+                        if (hasHighlight)
                             ImGui::PopStyleColor();
                         if (col != 15)
                             ImGui::SameLine(0.0f, 0.0f);

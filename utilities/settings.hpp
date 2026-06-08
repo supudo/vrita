@@ -54,6 +54,13 @@ public:
         return it->second;
     }
 
+    inline const std::unordered_map<std::string, std::string>& GetSection(const std::string& section) const {
+        static const std::unordered_map<std::string, std::string> empty;
+        auto sit = values.find(section);
+        if (sit == values.end()) return empty;
+        return sit->second;
+    }
+
     inline void Save() const {
         std::ofstream file(filename);
         for (const auto& [section, keys] : values) {

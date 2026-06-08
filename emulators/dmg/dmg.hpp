@@ -15,6 +15,7 @@ GameBoy (DMG)
 
 #include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
+#include "utilities/settings.hpp"
 
 #include "apu.hpp"
 #include "cartridge.hpp"
@@ -26,7 +27,7 @@ GameBoy (DMG)
 
 class DMG {
 public:
-    DMG(Logger& logger) : logger(logger) {}
+    DMG(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
     bool initialize(int x, int y, int width, int height);
     ImVec2 getWindowPosition();
@@ -55,6 +56,8 @@ public:
 
 private:
     Logger& logger;
+    Settings& settings;
+
     void stepAll();
 
     uint32_t renderingFrames = 0;

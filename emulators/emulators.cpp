@@ -11,8 +11,8 @@
 #include "utilities/settings.hpp"
 #include "debuggers/memoryviewer.hpp"
 
-void Emulators::init(Settings settings) {
-    emulatorDMG = std::make_shared<DMG>(logger);
+void Emulators::init(Settings& settings) {
+    emulatorDMG = std::make_shared<DMG>(logger, settings);
     int dmgWindowPositionX = settings.GetInt("Emulators - DMG", "position_x", 44);
     int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
     int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);

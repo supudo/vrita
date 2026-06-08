@@ -233,13 +233,23 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
+    if (ImGui::Button("Recent Files"))
+        ImGui::OpenPopup("recentFiles");
+
+    if (ImGui::BeginPopupContextItem("recentFiles")) {
+        for (const auto& [key, value] : settings.GetSection("DMG - Recent Files")) {
+            if (ImGui::Selectable(value.c_str()))
+                loadROM(key.c_str());
+            ImGui::SetItemTooltip(key.c_str());
+        }
+        ImGui::EndPopup();
+    }
+
     if (ImGui::Button("Load ROM file"))
         showFileBrowser("dmg");
     ImGui::SameLine();
     if (ImGui::Button("Eject ROM file"))
         ROMFileLoaded = false;
-    
-    ImGui::SliderInt("Scale", &windowScale, 1, 20);
     
     ImGui::Separator();
 

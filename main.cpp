@@ -129,7 +129,7 @@ void initComponents() {
     managerEmulators = std::make_shared<Emulators>(*logger);
     managerEmulators->init(appSettings);
 
-    guiFileBrowser = std::make_shared<FileBrowser>();
+    guiFileBrowser = std::make_shared<FileBrowser>(appSettings);
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 }
 

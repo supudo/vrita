@@ -21,7 +21,7 @@ public:
     bool EMULATORS_SHOW_DMG = false;
     bool EMULATORS_SHOW_AGB = false;
 
-    void init(Settings settings);
+    void init(Settings& settings);
     bool createTexture(SDL_GPUDevice* device);
     void generateTestPattern(float time);
     void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);

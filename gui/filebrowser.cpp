@@ -58,8 +58,14 @@ void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulato
 		VritaUtils::FBEntity entity = iter->second;
 		if (ImGui::Selectable(entity.title.c_str(), selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
 			selected = i;
-			if (entity.isFile)
+			if (entity.isFile) {
+				if (emulatorType == "dmg")
+					settings.Set("DMG - Recent Files", entity.path, entity.title);
+				if (emulatorType == "agb")
+					settings.Set("AGB - Recent Files", entity.path, entity.title);
+				settings.Save();
 				processFile(entity.path.c_str());
+			}
 			else {
 				try {
 					this->drawFiles(entity.path, emulatorType);

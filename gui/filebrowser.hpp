@@ -11,9 +11,12 @@
 #include <vector>
 
 #include "utilities/files.hpp"
+#include "utilities/settings.hpp"
 
 class FileBrowser {
 public:
+    FileBrowser(Settings& settings) : settings(settings) {}
+
     void init(const std::function<void(const char*)>& processFile);
     void render(bool* p_opened = nullptr, std::string const& emulatorType = "dmg");
 
@@ -30,6 +33,8 @@ private:
         { "dmg", { ".gb", ".gbc" } }, // Game Boy / Color
         { "agb", { ".gba", ".agb" } },   // Game Boy Advance
     };
+
+    Settings& settings;
 };
 
 #endif

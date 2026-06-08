@@ -22,6 +22,12 @@ void Log::render(bool* p_opened) {
     ImGui::SetNextWindowPos(ImVec2(40, 40), ImGuiCond_FirstUseEver);
 
     ImGui::Begin("Log", p_opened);
+
+    ImGuiIO& io = ImGui::GetIO();
+    (void)io;
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+    ImGui::Separator();
+
     if (ImGui::Button("Clear"))
         this->clear();
     ImGui::SameLine();
@@ -52,5 +58,6 @@ void Log::render(bool* p_opened) {
     this->ScrollToBottom = false;
     ImGui::PopStyleVar();
     ImGui::EndChild();
+
     ImGui::End();
 }

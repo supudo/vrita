@@ -8,8 +8,11 @@
 #include <string>
 
 #include "utilities/logger.hpp"
+#include "debuggers/memoryviewer.hpp"
 
 class Settings;
+class DMG;
+class AGB;
 
 class Emulators {
 public:
@@ -26,8 +29,14 @@ public:
     void release(SDL_GPUDevice* device, Settings& settings);
     std::string loadROM(const char* romFilePath);
 
+    std::shared_ptr<MemoryViewer> debuggerMemoryViewer;
+    bool debuggersMemoryViewerVisible = false;
+
 private:
     Logger& logger;
+
+    std::shared_ptr<DMG> emulatorDMG;
+    std::shared_ptr<AGB> emulatorAGB;
 };
 
 #endif

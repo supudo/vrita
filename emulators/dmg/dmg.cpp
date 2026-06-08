@@ -11,6 +11,7 @@
 bool DMG::initialize(int x, int y, int width, int height) {
     gameIsPaused = false;
     gameStateLabel = "Pause game";
+    logCallsLabel = "Log CPU calls (OFF)";
 
     windowPositionX = x;
     windowPositionY = y;
@@ -244,6 +245,13 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::Separator();
 
+    if (ImGui::Button(logCallsLabel.c_str())) {
+        managerCPU->logCalls = !managerCPU->logCalls;
+        logCallsLabel = managerCPU->logCalls ? "Log CPU calls (ON)" : "Log CPU calls (OFF)";
+    }
+
+    ImGui::Separator();
+
     ImVec2 avail = ImGui::GetContentRegionAvail();
     float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
     float dispW = avail.x;
@@ -264,6 +272,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     }
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
+
+    ImGui::Separator();
 
     ImGui::End();
 }

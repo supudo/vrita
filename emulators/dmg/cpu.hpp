@@ -43,6 +43,8 @@ public:
     inline bool isFlagSet(uint8_t flag) const { return Registers.F & (flag); }
     inline void printFlags() { logger.log("[DMG-CPU] Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
 
+    bool logCalls = false;
+
 private:
     Logger& logger;
     DMG_MMU& mmu;

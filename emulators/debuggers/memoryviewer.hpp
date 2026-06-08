@@ -7,14 +7,9 @@ GameBoy Advance (AGB)
 #ifndef VRITA_MEMORYVIEWER_INCLUDES
 #define VRITA_MEMORYVIEWER_INCLUDES
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
-#include <functional>
-#include <iostream>
 #include <stdint.h>
 #include <imgui.h>
 
-#include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
 
 class Settings;
@@ -27,6 +22,7 @@ public:
     void release(Settings& settings);
 
     void render(bool* windowOpened);
+    void setMemory(const uint8_t* data, uint32_t size);
 
 private:
     Logger& logger;
@@ -37,6 +33,10 @@ private:
     int windowHeight = 300;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
+
+    const uint8_t* memoryData = nullptr;
+    uint32_t memorySize = 0;
+    int scrollToAddrress = -1;
 };
 
 #endif

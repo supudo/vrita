@@ -43,14 +43,24 @@ public:
     // DMG specifics
     std::string loadROM(const char* romFilePath);
 
+    std::shared_ptr<DMG_TIMER> managerTimer;
+    std::shared_ptr<DMG_INTERRUPT> managerInterrupts;
+    std::shared_ptr<DMG_CARTRIDGE> managerCartridge;
+    std::shared_ptr<DMG_CPU> managerCPU;
+    std::shared_ptr<DMG_APU> managerAPU;
+    std::shared_ptr<DMG_MMU> managerMMU;
+    std::shared_ptr<DMG_PPU> managerPPU;
+
+    bool ROMFileLoaded = false;
+
 private:
     Logger& logger;
-    bool ROMFileLoaded = false;
     void stepAll();
 
     void toggleGameState();
     std::string gameStateLabel = "Pause game";
     bool gameIsPaused = false;
+    std::string logCallsLabel = "Log CPU calls (OFF)";
 
     void stepCPU();
     void stepMMU(uint32_t cycles);
@@ -70,14 +80,6 @@ private:
     int lastWindowScale = -1;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
-
-    std::shared_ptr<DMG_TIMER> managerTimer;
-    std::shared_ptr<DMG_INTERRUPT> managerInterrupts;
-    std::shared_ptr<DMG_CARTRIDGE> managerCartridge;
-    std::shared_ptr<DMG_CPU> managerCPU;
-    std::shared_ptr<DMG_APU> managerAPU;
-    std::shared_ptr<DMG_MMU> managerMMU;
-    std::shared_ptr<DMG_PPU> managerPPU;
 };
 
 #endif

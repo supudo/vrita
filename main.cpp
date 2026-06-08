@@ -19,7 +19,6 @@
 #include "eyecandy/dots.hpp"
 #include "gui/filebrowser.hpp"
 #include "gui/log.hpp"
-#include "emulators/debuggers/memoryviewer.hpp"
 
 SDL_Window* appWindow;
 
@@ -43,9 +42,6 @@ bool guiLogVisible = false;
 bool guiStyleOptionsVisible = false;
 bool guiMetricsVisible = false;
 
-std::shared_ptr<MemoryViewer> debuggersMemoryViewer;
-bool debuggersMemoryViewerVisible = false;
-
 void ShowMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
@@ -65,8 +61,8 @@ void ShowMainMenu() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debuggers")) {
-            if (ImGui::MenuItem("Memory Viewer", NULL, debuggersMemoryViewerVisible))
-                debuggersMemoryViewerVisible = !debuggersMemoryViewerVisible;
+            if (ImGui::MenuItem("Memory Viewer", NULL, &managerEmulators->debuggersMemoryViewerVisible))
+                managerEmulators->debuggersMemoryViewerVisible = !managerEmulators->debuggersMemoryViewerVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {
@@ -99,9 +95,6 @@ void renderGUIComponents() {
         ImGui::ShowStyleEditor(&ImGui::GetStyle());
     if (guiMetricsVisible)
         ImGui::ShowMetricsWindow(&guiMetricsVisible);
-
-    if (debuggersMemoryViewerVisible)
-        debuggersMemoryViewer->render(&debuggersMemoryViewerVisible);
 }
 
 void loadROM(const char* romFilePath) {
@@ -126,7 +119,6 @@ void loadROM(const char* romFilePath) {
 void initComponents() {
     guiMetricsVisible = appSettings.GetBool("Visibility", "guiMetricsVisible", false);
     guiLogVisible = appSettings.GetBool("Visibility", "guiLogVisible", false);
-    debuggersMemoryViewerVisible = appSettings.GetBool("Debuggers - Memory Viewer", "visible", false);
 
     guiLog = std::make_shared<Log>();
 
@@ -139,9 +131,6 @@ void initComponents() {
 
     guiFileBrowser = std::make_shared<FileBrowser>();
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
-
-    debuggersMemoryViewer = std::make_shared<MemoryViewer>(*logger);
-    debuggersMemoryViewer->init(appSettings);
 }
 
 void saveAppSettings() {
@@ -158,8 +147,6 @@ void saveAppSettings() {
     appSettings.Set("MainWindow", "hasPosition", true);
     appSettings.Set("MainWindow", "x", x);
     appSettings.Set("MainWindow", "y", y);
-
-    appSettings.Set("Debuggers - Memory Viewer", "visible", debuggersMemoryViewerVisible);
 
     appSettings.Save();
 }
@@ -307,7 +294,6 @@ int main(int argc, char** argv) {
 
     managerEmulators->release(gpu_device, appSettings);
     eyeCandy_Dots->release(gpu_device);
-    debuggersMemoryViewer->release(appSettings);
     saveAppSettings();
 
     ImGui::SaveIniSettingsToDisk("gui_options.ini"); 

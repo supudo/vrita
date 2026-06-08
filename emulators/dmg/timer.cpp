@@ -39,8 +39,6 @@ void DMG_TIMER::tick(uint32_t cycles) {
 
     internalTimerCounter += cycles;
 
-    logger.log("[DMG-TIMER] Tick... %i : %i", cycles, frequencyCycles);
-
     while (internalTimerCounter >= frequencyCycles) {
         internalTimerCounter -= frequencyCycles;
         incrementTIMA();

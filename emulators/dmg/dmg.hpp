@@ -57,6 +57,12 @@ private:
     Logger& logger;
     void stepAll();
 
+    uint32_t renderingFrames = 0;
+    double renderingFPS = 0.0;
+    double renderingSpeed = 0.0;
+    const double DMG_FPS = 59.7275;
+    std::string renderingStats = "FPS: ... Speed: ...";
+
     void toggleGameState();
     std::string gameStateLabel = "Pause game";
     bool gameIsPaused = false;

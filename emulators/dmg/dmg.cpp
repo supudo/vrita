@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <cstdint>
+#include <chrono>
 
 #include <imgui.h>
 #include <imgui_impl_sdl3.h>
@@ -12,6 +13,10 @@ bool DMG::initialize(int x, int y, int width, int height) {
     gameIsPaused = false;
     gameStateLabel = "Pause game";
     logCallsLabel = "Log CPU calls (OFF)";
+    renderingFrames = 0;
+    renderingFPS = 0.0;
+    renderingSpeed = 0.0;
+    renderingStats = "FPS: ... Speed: ...";
 
     windowPositionX = x;
     windowPositionY = y;
@@ -78,12 +83,19 @@ std::string DMG::loadROM(const char* path) {
     ROMFileLoaded = true;
     gameIsPaused = false;
     gameStateLabel = "Pause game";
+    renderingFrames = 0;
+    renderingFPS = 0.0;
+    renderingSpeed = 0.0;
+    renderingStats = "FPS: ... Speed: ...";
     managerCartridge->loadROM(size);
     return "";
 }
 
 void DMG::clear() {
     ROMFileLoaded = false;
+    renderingFrames = 0;
+    renderingFPS = 0.0;
+    renderingSpeed = 0.0;
     managerCPU->clearResources();
     managerMMU->clearResources();
     managerPPU->clearResources();
@@ -233,8 +245,10 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
     if (ImGui::Button(gameStateLabel.c_str(), ImVec2(60, 0)))
         toggleGameState();
+    ImGui::SameLine();
 
     ImGui::Separator();
+    ImGui::SameLine();
     ImGui::Text("Game Speed");
     ImGui::SameLine();
     ImGui::Button("0.5x");
@@ -243,13 +257,19 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::SameLine();
     ImGui::Button("2x");
 
+    ImGui::SameLine();
     ImGui::Separator();
+    ImGui::SameLine();
 
     if (ImGui::Button(logCallsLabel.c_str())) {
         managerCPU->logCalls = !managerCPU->logCalls;
         logCallsLabel = managerCPU->logCalls ? "Log CPU calls (ON)" : "Log CPU calls (OFF)";
     }
 
+    ImGui::Separator();
+
+    ImGui::Text(renderingStats.c_str());
+    
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
@@ -264,16 +284,25 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
+    static auto lastTime = std::chrono::steady_clock::now();
     if (ROMFileLoaded && !gameIsPaused) {
         static const uint64_t CYCLES_PER_FRAME = 70224; // 154 lines * 456 dots @ 4.194304 MHz / 59.7275 fps
         uint64_t frameStart = managerMMU->totalCycles;
         while ((managerMMU->totalCycles - frameStart) < CYCLES_PER_FRAME)
             stepAll();
+        renderingFrames++;
+        auto now = std::chrono::steady_clock::now();
+        double elapsed = std::chrono::duration<double>(now - lastTime).count();
+        if (elapsed >= 1.0) {
+            renderingFPS = renderingFrames / elapsed;
+            renderingFrames = 0;
+            lastTime = now;
+            double speed = (renderingFPS / DMG_FPS) * 100.0;
+            renderingStats = logger.str_format("FPS: %.2f, Speed: %.2f", renderingFPS, speed);
+        }
     }
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
-
-    ImGui::Separator();
 
     ImGui::End();
 }

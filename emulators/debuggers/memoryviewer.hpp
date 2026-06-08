@@ -64,8 +64,8 @@ private:
     void renderMemoryRegion(MemoryRegion region);
     const MemoryRegion* getRegion(uint32_t addr) const;
 
-    std::function<uint8_t(uint32_t)> readMemory;
-    std::function<void(uint32_t, uint8_t)> writeMemory;
+    std::function<uint8_t(uint32_t)> memoryRead;
+    std::function<void(uint32_t, uint8_t)> memoryWrite;
 };
 
 #endif

@@ -81,8 +81,8 @@ const MemoryRegion* MemoryViewer::getRegion(uint32_t addr) const {
 }
 
 void MemoryViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
-    readMemory = read8;
-    writeMemory = write8;
+    memoryRead = read8;
+    memoryWrite = write8;
 }
 
 void MemoryViewer::render(bool* windowOpened) {
@@ -163,12 +163,14 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
 
                 ImGui::TableNextRow();
 
+                // Address
                 ImGui::TableSetColumnIndex(0);
                 if (this->emulatorType == 1)
                     ImGui::Text("%04X", addr);
                 else
                     ImGui::Text("%08X", addr);
 
+                // Bytes
                 char ascii[17] = {};
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
@@ -179,19 +181,39 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                             uint8_t value = b;
                             ImGui::SetNextItemWidth(28);
                             if (ImGui::InputScalar("##byte", ImGuiDataType_U8, &value, nullptr, nullptr, "%02X", ImGuiInputTextFlags_CharsHexadecimal)) {
-                                writeMemory(addr + col, value);
+                                memoryWrite(addr + col, value);
                                 memoryData[addr + col] = value;
                             }
                             ImGui::PopID();
                         }
                         else
                             ImGui::TextColored(color, "%02X", b);
-                        ascii[col] = (b >= 32 && b < 127) ? (char)b : '.';
+                        uint8_t final_b = memoryData[addr + col];
+                        ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
                     }
                 }
 
+                // Dump
                 ImGui::TableSetColumnIndex(17);
-                ImGui::TextUnformatted(ascii);
+                if (!region.editable)
+                    ImGui::TextUnformatted(ascii);
+                else
+                    for (int col = 0; col < 16; col++) {
+                        uint32_t currentAddr = addr + col;
+                        if (currentAddr >= memorySize)
+                            return;
+                        uint8_t value = memoryData[currentAddr];
+                        char c[2];
+                        c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
+                        c[1] = '\0';
+                        ImGui::PushID(currentAddr);
+                        ImGui::SetNextItemWidth(12);
+                        if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank))
+                            memoryWrite(currentAddr, static_cast<uint8_t>(c[0]));
+                        ImGui::PopID();
+                        if (col != 15)
+                            ImGui::SameLine(0.0f, 0.0f);
+                    }
             }
         }
         ImGui::EndTable();

@@ -9,6 +9,8 @@ GameBoy Advance (AGB)
 
 #include <array>
 #include <stdint.h>
+#include <cstdint>
+#include <functional>
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
@@ -34,9 +36,10 @@ public:
 
     bool init(Settings settings);
     void release(Settings& settings);
-
     void render(bool* windowOpened);
-    void setMemory(const char* emulatorType, const uint8_t* data, uint32_t size);
+    
+    void setMemory(const char* emulatorType, uint8_t* data, uint32_t size);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
 
 private:
     Logger& logger;
@@ -48,7 +51,7 @@ private:
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
-    const uint8_t* memoryData = nullptr;
+    uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
     int scrollToAddrress = -1;
 
@@ -56,8 +59,13 @@ private:
     std::array<MemoryRegion, 11> MemoryMap_AGB;
     const MemoryRegion* memoryRegions = nullptr;
     size_t memoryRegionCount = 0;
+    uint8_t emulatorType = 0;
 
+    void renderMemoryRegion(MemoryRegion region);
     const MemoryRegion* getRegion(uint32_t addr) const;
+
+    std::function<uint8_t(uint32_t)> readMemory;
+    std::function<void(uint32_t, uint8_t)> writeMemory;
 };
 
 #endif

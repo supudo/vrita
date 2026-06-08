@@ -72,8 +72,17 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
     }
 
-    if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->ROMFileLoaded)
+    if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->ROMFileLoaded) {
         debuggerMemoryViewer->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
+        debuggerMemoryViewer->setCallbacks(
+            [&] (uint32_t addr) {
+                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
+            },
+            [&] (uint32_t addr, uint8_t value) {
+                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
+            }
+        );
+    }
     else
         debuggerMemoryViewer->setMemory("agb", nullptr, 0);
 

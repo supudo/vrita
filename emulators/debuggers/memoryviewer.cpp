@@ -49,20 +49,23 @@ void MemoryViewer::release(Settings& settings) {
     settings.Save();
 }
 
-void MemoryViewer::setMemory(const char* emulatorType, const uint8_t* data, uint32_t size) {
+void MemoryViewer::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
     memoryData = data;
     memorySize = size;
     if (emulatorType == "dmg") {
         memoryRegions = MemoryMap_DMG.data();
         memoryRegionCount = MemoryMap_DMG.size();
+        this->emulatorType = 1;
     }
     else if (emulatorType == "agb") {
         memoryRegions = MemoryMap_AGB.data();
         memoryRegionCount = MemoryMap_AGB.size();
+        this->emulatorType = 2;
     }
     else {
         memoryRegions = nullptr;
         memoryRegionCount = 0;
+        this->emulatorType = 0;
     }
 }
 
@@ -75,6 +78,11 @@ const MemoryRegion* MemoryViewer::getRegion(uint32_t addr) const {
         }
     }
     return nullptr;
+}
+
+void MemoryViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+    readMemory = read8;
+    writeMemory = write8;
 }
 
 void MemoryViewer::render(bool* windowOpened) {
@@ -95,12 +103,38 @@ void MemoryViewer::render(bool* windowOpened) {
         return;
     }
 
+    if (ImGui::BeginTabBar("MemoryViewer", ImGuiTabBarFlags_None)) {
+        for (size_t r = 0; r < memoryRegionCount; r++) {
+            if (ImGui::BeginTabItem(memoryRegions[r].region)) {
+                ImGui::SetItemTooltip(memoryRegions[r].notes);
+                renderMemoryRegion(memoryRegions[r]);
+                ImGui::EndTabItem();
+            }
+        }
+        ImGui::EndTabBar();
+    }
+
+    ImGui::End();
+}
+
+void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
+    uint32_t regionStart = region.range.start;
+    uint32_t regionEnd = region.range.end;
+    if (regionStart >= memorySize)
+        return;
+    regionEnd = std::min(regionEnd, memorySize - 1);
+    uint32_t regionSize = regionEnd - regionStart + 1;
+    uint32_t c = region.color;
+    ImVec4 color(((c >> 16) & 0xFF) / 255.0f, ((c >> 8) & 0xFF) / 255.0f, (c & 0xFF) / 255.0f, 1.0f);
+
     static uint32_t gotoAddr = 0;
     ImGui::SetNextItemWidth(120);
     ImGui::InputScalar("##memoryviewergoto", ImGuiDataType_U32, &gotoAddr, nullptr, nullptr, "%04X");
     ImGui::SameLine();
-    if (ImGui::Button("Jump"))
-        scrollToAddrress = (int)(gotoAddr & ~0xF);
+    if (ImGui::Button("Jump")) {
+        if (gotoAddr >= regionStart && gotoAddr <= regionEnd)
+            scrollToAddrress = (int)(gotoAddr & ~0xF);
+    }
 
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
     if (ImGui::BeginTable("##memoryviewer", 18, tableFlags, ImVec2(0, 0))) {
@@ -115,53 +149,43 @@ void MemoryViewer::render(bool* windowOpened) {
         ImGui::TableHeadersRow();
 
         if (scrollToAddrress >= 0) {
-            int targetRow = scrollToAddrress / 16;
+            int targetRow = (scrollToAddrress - regionStart) / 16;
             ImGui::SetScrollY((float)targetRow * ImGui::GetTextLineHeightWithSpacing());
             scrollToAddrress = -1;
         }
 
         ImGuiListClipper clipper;
-        clipper.Begin((int)(memorySize / 16));
+        clipper.Begin((int)((regionSize + 15) / 16));
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
-                uint32_t addr = row * 16;
+                uint32_t addr = regionStart + row * 16;
                 if (addr >= memorySize) break;
 
                 ImGui::TableNextRow();
 
                 ImGui::TableSetColumnIndex(0);
-                const MemoryRegion* region = getRegion(addr);
-                if (region)
-                    ImGui::Text("%s:%04X", region->region, addr);
+                if (this->emulatorType == 1)
+                    ImGui::Text("%04X", addr);
                 else
                     ImGui::Text("%08X", addr);
-                if (region && ImGui::IsItemHovered()) {
-                    ImGui::BeginTooltip();
-                    ImGui::TextUnformatted(region->notes);
-                    ImGui::EndTooltip();
-                }
 
                 char ascii[17] = {};
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
                         uint8_t b = memoryData[addr + col];
-
-                        ImVec4 color = ImVec4(1, 1, 1, 1);
-                        for (size_t r = 0; r < memoryRegionCount; r++) {
-                            if (addr + col >= memoryRegions[r].range.start && addr + col <= memoryRegions[r].range.end) {
-                                uint32_t c = memoryRegions[r].color;
-                                color = ImVec4(
-                                    ((c >> 16) & 0xFF) / 255.0f,
-                                    ((c >> 8) & 0xFF) / 255.0f,
-                                    (c & 0xFF) / 255.0f,
-                                    1.0f
-                                );
-                                break;
+                        if (region.editable) {
+                            ImGui::PushID(addr + col);
+                            int value = b;
+                            ImGui::SetNextItemWidth(25);
+                            if (ImGui::InputInt("##byte", &value, 0, 0, ImGuiInputTextFlags_CharsHexadecimal)) {
+                                writeMemory(addr + col, static_cast<uint8_t>(value));
+                                memoryData[addr + col] = static_cast<uint8_t>(value);
                             }
+                            ImGui::PopID();
                         }
-
-                        ImGui::TextColored(color, "%02X", b);
+                        else
+                            ImGui::TextColored(color, "%02X", b);
                         ascii[col] = (b >= 32 && b < 127) ? (char)b : '.';
                     }
                 }
@@ -172,6 +196,4 @@ void MemoryViewer::render(bool* windowOpened) {
         }
         ImGui::EndTable();
     }
-
-    ImGui::End();
 }

@@ -153,7 +153,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
     ImGui::SameLine();
     if (ImGui::Button("Jump")) {
         if (gotoAddr >= regionStart && gotoAddr <= regionEnd)
-            scrollToAddrress = (int)(gotoAddr & ~0xF);
+            scrollToAddress = (int)(gotoAddr & ~0xF);
     }
 
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;
@@ -168,10 +168,10 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
         ImGui::TableSetupColumn("Dump");
         ImGui::TableHeadersRow();
 
-        if (scrollToAddrress >= 0) {
-            int targetRow = (scrollToAddrress - regionStart) / 16;
+        if (scrollToAddress >= 0) {
+            int targetRow = (scrollToAddress - regionStart) / 16;
             ImGui::SetScrollY((float)targetRow * ImGui::GetTextLineHeightWithSpacing());
-            scrollToAddrress = -1;
+            scrollToAddress = -1;
         }
 
         ImGuiListClipper clipper;
@@ -195,7 +195,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
-                        bool isSelected = ((int)(addr + col) == activeAddr);
+                        bool isSelected = ((int)(addr + col) == activeAddress);
                         float ct = (addr + col < changeTimer.size()) ? changeTimer[addr + col] : 0.0f;
                         if (isSelected)
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(80, 80, 180, 120));
@@ -211,7 +211,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                                 memoryData[addr + col] = value;
                             }
                             if (ImGui::IsItemFocused())
-                                activeAddr = (int)(addr + col);
+                                activeAddress = (int)(addr + col);
                             ImGui::PopID();
                         }
                         else
@@ -234,7 +234,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
-                        bool isSelected = ((int)currentAddr == activeAddr);
+                        bool isSelected = ((int)currentAddr == activeAddress);
                         float ct = (currentAddr < changeTimer.size()) ? changeTimer[currentAddr] : 0.0f;
                         bool hasHighlight = isSelected || ct > 0.0f;
                         if (isSelected)
@@ -248,7 +248,7 @@ void MemoryViewer::renderMemoryRegion(MemoryRegion region) {
                             memoryData[currentAddr] = static_cast<uint8_t>(c[0]);
                         }
                         if (ImGui::IsItemFocused())
-                            activeAddr = (int)currentAddr;
+                            activeAddress = (int)currentAddr;
                         ImGui::PopID();
                         if (hasHighlight)
                             ImGui::PopStyleColor();

@@ -54,8 +54,8 @@ private:
 
     uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
-    int scrollToAddrress = -1;
-    int activeAddr = -1;
+    int scrollToAddress = -1;
+    int activeAddress = -1;
 
     std::vector<uint8_t> shadowMemory;
     std::vector<float> changeTimer;

@@ -13,7 +13,7 @@ bool MemoryEditor::init() {
     windowPositionY = settings.GetInt("Debuggers - Memory Editor", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Memory Editor", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Memory Editor", "height", 300);
-    viewPerspective = settings.GetInt("Debuggers - Memory Editor", "viewperspective", 0);
+    viewPerspective = settings.GetInt("Debuggers - Memory Editor", "view_perspective", 0);
     selectedMemoryRegion = nullptr;
     return true;
 }
@@ -105,6 +105,13 @@ void MemoryEditor::render(bool* windowOpened) {
         return;
     }
 
+    if (emulatorType == 1 && followRegister > 0 && registerReadFunction) {
+        static const char* registerNames[] = { "", "BC", "DE", "HL", "SP", "PC" };
+        followAddress = (int)registerReadFunction(registerNames[followRegister]);
+    }
+    else
+        followAddress = -1;
+
     float deltaTime = ImGui::GetIO().DeltaTime;
     for (uint32_t i = 0; i < memorySize; i++) {
         if (memoryData[i] != shadowMemory[i]) {
@@ -117,10 +124,21 @@ void MemoryEditor::render(bool* windowOpened) {
 
     ImGui::Text("View perspective:");
     ImGui::SameLine();
-    const char* viewPerspectives[] = { "Default", "By unit" };
+    static const char* viewPerspectives[] = { "Default", "By unit" };
     if (ImGui::Combo("##viewPerspectiveCombo", &viewPerspective, viewPerspectives, IM_ARRAYSIZE(viewPerspectives))) {
-        settings.Set("Debuggers - Memory Editor", "viewperspective", (int)viewPerspective);
+        settings.Set("Debuggers - Memory Editor", "view_perspective", (int)viewPerspective);
         settings.Save();
+    }
+    ImGui::Separator();
+    ImGui::Separator();
+    if (emulatorType == 1) {
+        static const char* registerFollowOptions[] = { "None", "BC", "DE", "HL", "SP", "PC" };
+        ImGui::Text("Follow register:");
+        ImGui::SameLine();
+        if (ImGui::Combo("##followRegister", &followRegister, registerFollowOptions, IM_ARRAYSIZE(registerFollowOptions))) {
+            settings.Set("Debuggers - Memory Editor", "follow_register", followRegister);
+            settings.Save();
+        }
     }
     ImGui::Separator();
     switch (viewPerspective) {
@@ -133,17 +151,26 @@ void MemoryEditor::render(bool* windowOpened) {
             memoryRegions = nullptr;
             memoryRegionCount = 0;
             if (emulatorType == 1)
-                renderViewPerspectiveByUnitAdvanced(MemoryMap_DMG_ByUnitTree);
+                renderViewPerspectiveAdvanced(MemoryMap_DMG_ByUnitTree);
             break;
     }
 
     ImGui::End();
 }
 
+void MemoryEditor::setRegsiterCallback(std::function<uint16_t(const char*)> getRegsiter) {
+    registerReadFunction = getRegsiter;
+}
+
 void MemoryEditor::renderViewPerspectiveDefault() {
     if (ImGui::BeginTabBar("MemoryEditor", ImGuiTabBarFlags_None)) {
         for (size_t r = 0; r < memoryRegionCount; r++) {
-            if (ImGui::BeginTabItem(memoryRegions[r].region)) {
+            int tab_addr = (followAddress >= 0) ? followAddress : scrollToAddress;
+            bool is_target = tab_addr >= 0
+                && (uint32_t)tab_addr >= memoryRegions[r].range.start
+                && (uint32_t)tab_addr <= memoryRegions[r].range.end;
+            ImGuiTabItemFlags flags = is_target ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+            if (ImGui::BeginTabItem(memoryRegions[r].region, nullptr, flags)) {
                 ImGui::SetItemTooltip(memoryRegions[r].notes);
                 renderMemoryRegion(memoryRegions[r]);
                 ImGui::EndTabItem();
@@ -153,39 +180,7 @@ void MemoryEditor::renderViewPerspectiveDefault() {
     }
 }
 
-void MemoryEditor::renderViewPerspectiveDebug() {
-    if (ImGui::BeginTabBar("MemoryEditor", ImGuiTabBarFlags_None)) {
-        for (size_t r = 0; r < memoryRegionCount; r++) {
-            if (ImGui::BeginTabItem(memoryRegions[r].region)) {
-                ImGui::SetItemTooltip(memoryRegions[r].notes);
-                renderMemoryRegion(memoryRegions[r]);
-                ImGui::EndTabItem();
-            }
-        }
-        ImGui::EndTabBar();
-    }
-}
-
-void MemoryEditor::renderViewPerspectiveByUnit() {
-    if (ImGui::TreeNode("Units")) {
-        for (int r = 0; r < memoryRegionCount; r++) {
-            if (r == 0)
-                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-            ImGui::PushID(r);
-            if (ImGui::TreeNode("", memoryRegions[r].region)) {
-                ImGui::SetItemTooltip(memoryRegions[r].notes);
-                ImGui::Indent();
-                ImGui::Text(memoryRegions[r].region);
-                ImGui::Unindent();
-                ImGui::TreePop();
-            }
-            ImGui::PopID();
-        }
-        ImGui::TreePop();
-    }
-}
-
-void MemoryEditor::renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree) {
+void MemoryEditor::renderViewPerspectiveAdvanced(const MemoryTree& tree) {
     ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -202,7 +197,7 @@ void MemoryEditor::renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree) {
     ImGui::BeginChild("leftPanel", ImVec2(panelsWidthLeft, 0), true);
     ImGui::Text("Sections");
     ImGui::Separator();
-    renderViewPerspectiveByUnitTree(tree);
+    renderViewPerspectiveTree(tree);
     ImGui::EndChild();
 
     ImGui::SameLine(0.0f, 0.0f);
@@ -232,7 +227,55 @@ void MemoryEditor::renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree) {
     ImGui::EndChild();
 }
 
-void MemoryEditor::renderViewPerspectiveByUnitTreeRegion(const MemoryRegion& region) {
+void MemoryEditor::renderViewPerspectiveTree(const MemoryTree& tree) {
+    int tab_addr = (followAddress >= 0) ? followAddress : scrollToAddress;
+    for (const auto& [unitName, categories] : tree) {
+        bool unit_has_target = false;
+        if (tab_addr >= 0) {
+            for (const auto& [catName, regions] : categories)
+                for (const auto& region : regions)
+                    if ((uint32_t)tab_addr >= region.range.start && (uint32_t)tab_addr <= region.range.end) {
+                        unit_has_target = true;
+                        break;
+                    }
+        }
+        if (unit_has_target)
+            ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+        bool openUnit = ImGui::TreeNode(unitName);
+        if (openUnit) {
+            for (const auto& [categoryName, regions] : categories) {
+                bool cat_has_target = false;
+                if (tab_addr >= 0) {
+                    for (const auto& region : regions) {
+                        if ((uint32_t)tab_addr >= region.range.start && (uint32_t)tab_addr <= region.range.end) {
+                            cat_has_target = true;
+                            selectedMemoryRegion = &region;
+                            break;
+                        }
+                    }
+                }
+                if (regions.size() == 1) {
+                    if (cat_has_target)
+                        selectedMemoryRegion = &regions.front();
+                    renderViewPerspectiveTreeRegion(regions.front());
+                }
+                else {
+                    if (cat_has_target)
+                        ImGui::SetNextItemOpen(true, ImGuiCond_Always);
+                    bool openCat = ImGui::TreeNode(categoryName);
+                    if (openCat) {
+                        for (const auto& region : regions)
+                            renderViewPerspectiveTreeRegion(region);
+                        ImGui::TreePop();
+                    }
+                }
+            }
+            ImGui::TreePop();
+        }
+    }
+}
+
+void MemoryEditor::renderViewPerspectiveTreeRegion(const MemoryRegion& region) {
     ImGui::PushID(region.region);
     bool isSelected = (selectedMemoryRegion == &region);
     ImVec4 color(((region.color >> 16) & 0xFF) / 255.0f, ((region.color >> 8) & 0xFF) / 255.0f, (region.color & 0xFF) / 255.0f, 1.0f);
@@ -250,27 +293,6 @@ void MemoryEditor::renderViewPerspectiveByUnitTreeRegion(const MemoryRegion& reg
     ImGui::PopID();
 }
 
-void MemoryEditor::renderViewPerspectiveByUnitTree(const MemoryTree& tree) {
-    for (const auto& [unitName, categories] : tree) {
-        bool openUnit = ImGui::TreeNode(unitName);
-        if (openUnit) {
-            for (const auto& [categoryName, regions] : categories) {
-                if (regions.size() == 1)
-                    renderViewPerspectiveByUnitTreeRegion(regions.front());
-                else {
-                    bool openCat = ImGui::TreeNode(categoryName);
-                    if (openCat) {
-                        for (const auto& region : regions)
-                            renderViewPerspectiveByUnitTreeRegion(region);
-                        ImGui::TreePop();
-                    }
-                }
-            }
-            ImGui::TreePop();
-        }
-    }
-}
-
 void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
     uint32_t regionStart = region.range.start;
     uint32_t regionEnd = region.range.end;
@@ -282,8 +304,10 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
     ImVec4 color(((c >> 16) & 0xFF) / 255.0f, ((c >> 8) & 0xFF) / 255.0f, (c & 0xFF) / 255.0f, 1.0f);
 
     static uint32_t gotoAddr = 0;
+    if (followAddress >= 0)
+        gotoAddr = (uint32_t)followAddress;
     ImGui::SetNextItemWidth(120);
-    ImGui::InputScalar("##memoryeditorgoto", ImGuiDataType_U32, &gotoAddr, nullptr, nullptr, "%04X");
+    ImGui::InputScalar("##memoryeditorgoto", ImGuiDataType_U32, &gotoAddr, nullptr, nullptr, "%04X", ImGuiInputTextFlags_AutoSelectAll);
     ImGui::SameLine();
     if (ImGui::Button("Jump")) {
         if (gotoAddr >= regionStart && gotoAddr <= regionEnd)
@@ -306,14 +330,18 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
         ImGui::TableSetupColumn("Dump");
         ImGui::TableHeadersRow();
 
-        if (scrollToAddress >= 0) {
-            int targetRow = (scrollToAddress - regionStart) / 16;
-            ImGui::SetScrollY((float)targetRow * ImGui::GetTextLineHeightWithSpacing());
+        int scrollTargetRow = -1;
+        if (followAddress >= 0 && (uint32_t)followAddress >= regionStart && (uint32_t)followAddress <= regionEnd)
+            scrollTargetRow = (int)(((uint32_t)followAddress - regionStart) / 16);
+        if (scrollToAddress >= 0 && (uint32_t)scrollToAddress >= regionStart && (uint32_t)scrollToAddress <= regionEnd) {
+            scrollTargetRow = (scrollToAddress - (int)regionStart) / 16;
             scrollToAddress = -1;
         }
 
         ImGuiListClipper clipper;
         clipper.Begin((int)((regionSize + 15) / 16));
+        if (scrollTargetRow >= 0)
+            clipper.IncludeItemsByIndex(scrollTargetRow, scrollTargetRow + 1);
         while (clipper.Step()) {
             for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; row++) {
                 uint32_t addr = regionStart + row * 16;
@@ -327,20 +355,31 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                     ImGui::Text("%04X", addr);
                 else
                     ImGui::Text("%08X", addr);
+                if (row == scrollTargetRow)
+                    ImGui::SetScrollHereY(0.0f);
 
                 // Bytes
                 char ascii[17] = {};
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
-                        bool isSelected = ((int)(addr + col) == activeAddress);
+                        bool is_followed = (followAddress >= 0 && (int)(addr + col) == followAddress);
+                        bool is_selected = ((int)(addr + col) == activeAddress);
                         float ct = (addr + col < changeTimer.size()) ? changeTimer[addr + col] : 0.0f;
-                        if (isSelected)
+                        
+                        if (is_followed)
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(200, 40, 40, 255));
+                        else if (is_selected)
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(80, 80, 180, 120));
                         else if (ct > 0.0f)
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(180, 60, 60, (int)(ct * 160)));
+                        
                         uint8_t b = memoryData[addr + col];
+                        if (is_followed)
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.78f, 0.16f, 0.16f, 1.0f));
                         if (region.editable) {
+                            if (is_followed)
+                                ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.78f, 0.16f, 0.16f, 1.0f));
                             ImGui::PushID(addr + col);
                             uint8_t value = b;
                             ImGui::SetNextItemWidth(28);
@@ -351,9 +390,13 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                             if (ImGui::IsItemFocused())
                                 activeAddress = (int)(addr + col);
                             ImGui::PopID();
+                            if (is_followed)
+                                ImGui::PopStyleColor();
                         }
                         else
-                            ImGui::TextColored(color, "%02X", b);
+                            ImGui::TextColored(is_followed ? ImVec4(1, 1, 1, 1) : color, "%02X", b);
+                        if (is_followed)
+                            ImGui::PopStyleColor();
                         uint8_t final_b = memoryData[addr + col];
                         ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
                     }
@@ -365,30 +408,33 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                     ImGui::TextUnformatted(ascii);
                 else
                     for (int col = 0; col < 16; col++) {
-                        uint32_t currentAddr = addr + col;
-                        if (currentAddr >= memorySize)
+                        uint32_t current_addr = addr + col;
+                        if (current_addr >= memorySize)
                             break;
-                        uint8_t value = memoryData[currentAddr];
+                        uint8_t value = memoryData[current_addr];
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
-                        bool isSelected = ((int)currentAddr == activeAddress);
-                        float ct = (currentAddr < changeTimer.size()) ? changeTimer[currentAddr] : 0.0f;
-                        bool hasHighlight = isSelected || ct > 0.0f;
-                        if (isSelected)
+                        bool is_followed = (followAddress >= 0 && (int)current_addr == followAddress);
+                        bool is_selected = ((int)current_addr == activeAddress);
+                        float ct = (current_addr < changeTimer.size()) ? changeTimer[current_addr] : 0.0f;
+                        if (is_followed)
+                            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.78f, 0.16f, 0.16f, 1.0f));
+                        else if (is_selected)
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.31f, 0.31f, 0.71f, 0.8f));
                         else if (ct > 0.0f)
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.7f, 0.24f, 0.24f, ct * 0.8f));
-                        ImGui::PushID(currentAddr);
+                        bool has_highlight = is_followed || is_selected || ct > 0.0f;
+                        ImGui::PushID(current_addr);
                         ImGui::SetNextItemWidth(12);
                         if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_AutoSelectAll)) {
-                            memoryWrite(currentAddr, static_cast<uint8_t>(c[0]));
-                            memoryData[currentAddr] = static_cast<uint8_t>(c[0]);
+                            memoryWrite(current_addr, static_cast<uint8_t>(c[0]));
+                            memoryData[current_addr] = static_cast<uint8_t>(c[0]);
                         }
                         if (ImGui::IsItemFocused())
-                            activeAddress = (int)currentAddr;
+                            activeAddress = (int)current_addr;
                         ImGui::PopID();
-                        if (hasHighlight)
+                        if (has_highlight)
                             ImGui::PopStyleColor();
                         if (col != 15)
                             ImGui::SameLine(0.0f, 0.0f);
@@ -463,3 +509,4 @@ void MemoryEditor::getPreviewData(int address, char* out_buf, char format) {
     else
         snprintf(out_buf, 128, "N/A");
 }
+

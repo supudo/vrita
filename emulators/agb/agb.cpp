@@ -88,15 +88,18 @@ void AGB::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
 }
 
 void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    float imgW = (float)(windowWidth * windowScale);
-    float imgH = (float)(windowHeight * windowScale);
+    float imgW = (float)(AGB::WIDTH * windowScale);
+    float imgH = (float)(AGB::HEIGHT * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
     float padX = style.WindowPadding.x * 2.0f;
 
-    if (windowScale != lastWindowScale && !ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-        ImGui::SetNextWindowSize(ImVec2(imgW + padX, imgH + decorH), ImGuiCond_Always);
+    if (windowScale != lastWindowScale) {
+        if (lastWindowScale == -1)
+            ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_Once);
+        else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left))
+            ImGui::SetNextWindowSize(ImVec2(imgW + padX, imgH + decorH), ImGuiCond_Always);
         lastWindowScale = windowScale;
     }
 

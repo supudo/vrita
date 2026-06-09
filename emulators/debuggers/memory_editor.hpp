@@ -26,6 +26,7 @@ public:
     
     void setMemory(const char* emulatorType, uint8_t* data, uint32_t size);
     void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
+    void setRegsiterCallback(std::function<uint16_t(const char*)> getRegsiter);
 
 private:
     Logger& logger;
@@ -57,6 +58,10 @@ private:
     static constexpr const char* previewDataTypes[] = { "Uint8", "Uint16", "Uint32" };
     const char* selectedDataType = previewDataTypes[0];
 
+    int followRegister = 0;
+    int followAddress = -1;
+    std::function<uint16_t(const char*)> registerReadFunction;
+
     void renderMemoryRegion(MemoryRegion region);
     const MemoryRegion* getRegion(uint32_t addr) const;
 
@@ -66,12 +71,9 @@ private:
     void getPreviewData(int address, char* out_buf, char format);
 
     void renderViewPerspectiveDefault();
-    void renderViewPerspectiveDebug();
-    void renderViewPerspectiveByUnit();
-
-    void renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree);
-    void renderViewPerspectiveByUnitTree(const MemoryTree& tree);
-    void renderViewPerspectiveByUnitTreeRegion(const MemoryRegion& region);
+    void renderViewPerspectiveAdvanced(const MemoryTree& tree);
+    void renderViewPerspectiveTree(const MemoryTree& tree);
+    void renderViewPerspectiveTreeRegion(const MemoryRegion& region);
 };
 
 #endif

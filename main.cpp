@@ -125,8 +125,8 @@ void loadROM(const char* romFilePath) {
 }
 
 void initComponents() {
-    guiMetricsVisible = appSettings.GetBool("Visibility", "guiMetricsVisible", false);
-    guiLogVisible = appSettings.GetBool("Visibility", "guiLogVisible", false);
+    guiMetricsVisible = appSettings.GetBool("Visibility", "gui_metrics_visible", false);
+    guiLogVisible = appSettings.GetBool("Visibility", "gui_log_visible", false);
 
     guiLog = std::make_shared<Log>();
 
@@ -142,8 +142,8 @@ void initComponents() {
 }
 
 void saveAppSettings() {
-    appSettings.Set("Visibility", "guiMetricsVisible", guiMetricsVisible);
-    appSettings.Set("Visibility", "guiLogVisible", guiLogVisible);
+    appSettings.Set("Visibility", "gui_metrics_visible", guiMetricsVisible);
+    appSettings.Set("Visibility", "gui_log_visible", guiLogVisible);
 
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     int width, height;
@@ -152,7 +152,7 @@ void saveAppSettings() {
     appSettings.Set("MainWindow", "height", (int)(height / main_scale));
     int x, y;
     SDL_GetWindowPosition(appWindow, &x, &y);
-    appSettings.Set("MainWindow", "hasPosition", true);
+    appSettings.Set("MainWindow", "has_position", true);
     appSettings.Set("MainWindow", "x", x);
     appSettings.Set("MainWindow", "y", y);
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         printf("[VRITA] Error: SDL_CreateWindow(): %s\n", SDL_GetError());
         return 1;
     }
-    bool hasSavedPos = appSettings.GetBool("MainWindow", "hasPosition", false);
+    bool hasSavedPos = appSettings.GetBool("MainWindow", "has_position", false);
     if (hasSavedPos) {
         int windowX = appSettings.GetInt("MainWindow", "x", 0);
         int windowY = appSettings.GetInt("MainWindow", "y", 0);

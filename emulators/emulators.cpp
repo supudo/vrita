@@ -88,7 +88,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
     }
 
-    if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->ROMFileLoaded) {
+    if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->managerCPU && emulatorDMG->ROMFileLoaded) {
         debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
         debuggerMemoryEditor->setCallbacks(
             [&] (uint32_t addr) {
@@ -96,6 +96,17 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             },
             [&] (uint32_t addr, uint8_t value) {
                 emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
+            }
+        );
+        debuggerMemoryEditor->setRegsiterCallback(
+            [&] (const char* name) -> uint16_t {
+            auto& r = emulatorDMG->managerCPU->Registers;
+                if (strcmp(name, "BC") == 0) return r.BC;
+                if (strcmp(name, "DE") == 0) return r.DE;
+                if (strcmp(name, "HL") == 0) return r.HL;
+                if (strcmp(name, "SP") == 0) return r.SP;
+                if (strcmp(name, "PC") == 0) return r.PC;
+                return 0;
             }
         );
     }

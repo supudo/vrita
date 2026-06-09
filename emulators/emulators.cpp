@@ -33,20 +33,20 @@ void Emulators::init(Settings& settings) {
     debuggerMemoryEditor->init();
     debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
 
-    debuggerTileViewer = std::make_shared<TileViewer>(logger);
-    debuggerTileViewer->init(settings);
+    debuggerTileViewer = std::make_shared<TileViewer>(logger, settings);
+    debuggerTileViewer->init();
     debuggerTileViewerVisible = settings.GetBool("Debuggers - Tile Viewer", "visible", false);
 
-    debuggerTilemapViewer = std::make_shared<TilemapViewer>(logger);
-    debuggerTilemapViewer->init(settings);
+    debuggerTilemapViewer = std::make_shared<TilemapViewer>(logger, settings);
+    debuggerTilemapViewer->init();
     debuggerTilemapViewerVisible = settings.GetBool("Debuggers - Tilemap Viewer", "visible", false);
 
-    debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger);
-    debuggerSpriteViewer->init(settings);
+    debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger, settings);
+    debuggerSpriteViewer->init();
     debuggerSpriteViewerVisible = settings.GetBool("Debuggers - Sprite Viewer", "visible", false);
 
-    debuggerPaletteViewer = std::make_shared<PaletteViewer>(logger);
-    debuggerPaletteViewer->init(settings);
+    debuggerPaletteViewer = std::make_shared<PaletteViewer>(logger, settings);
+    debuggerPaletteViewer->init();
     debuggerPaletteViewerVisible = settings.GetBool("Debuggers - Palette Viewer", "visible", false);
 }
 
@@ -153,6 +153,11 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
 
     emulatorDMG->release(device);
     emulatorAGB->release(device);
+    debuggerMemoryEditor->release();
+    debuggerTileViewer->release();
+    debuggerTilemapViewer->release();
+    debuggerSpriteViewer->release();
+    debuggerPaletteViewer->release();
 }
 
 std::string Emulators::loadROM(const char* romFilePath) {

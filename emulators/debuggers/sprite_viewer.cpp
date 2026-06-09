@@ -8,7 +8,7 @@
 
 #include "utilities/settings.hpp"
 
-bool SpriteViewer::init(Settings settings) {
+bool SpriteViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Sprite Viewer", "position_x", 44);
     windowPositionY = settings.GetInt("Debuggers - Sprite Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Sprite Viewer", "width", 300);
@@ -16,7 +16,7 @@ bool SpriteViewer::init(Settings settings) {
     return true;
 }
 
-void SpriteViewer::release(Settings& settings) {
+void SpriteViewer::release() {
     settings.Set("Debuggers - Sprite Viewer", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Sprite Viewer", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Sprite Viewer", "width", (int)lastWindowSize.x);

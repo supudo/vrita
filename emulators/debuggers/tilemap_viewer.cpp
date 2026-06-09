@@ -8,7 +8,7 @@
 
 #include "utilities/settings.hpp"
 
-bool TilemapViewer::init(Settings settings) {
+bool TilemapViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Tilemap Viewer", "position_x", 44);
     windowPositionY = settings.GetInt("Debuggers - Tilemap Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Tilemap Viewer", "width", 300);
@@ -16,7 +16,7 @@ bool TilemapViewer::init(Settings settings) {
     return true;
 }
 
-void TilemapViewer::release(Settings& settings) {
+void TilemapViewer::release() {
     settings.Set("Debuggers - Tilemap Viewer", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Tilemap Viewer", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Tilemap Viewer", "width", (int)lastWindowSize.x);

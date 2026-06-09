@@ -14,14 +14,15 @@ class Settings;
 
 class SpriteViewer {
 public:
-    SpriteViewer(Logger& logger) : logger(logger) {}
+    SpriteViewer(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
-    bool init(Settings settings);
-    void release(Settings& settings);
+    bool init();
+    void release();
     void render(bool* windowOpened);
 
 private:
     Logger& logger;
+    Settings& settings;
 
     int windowPositionX = 40;
     int windowPositionY = 40;

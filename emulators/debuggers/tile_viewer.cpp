@@ -8,7 +8,7 @@
 
 #include "utilities/settings.hpp"
 
-bool TileViewer::init(Settings settings) {
+bool TileViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Tile Viewer", "position_x", 44);
     windowPositionY = settings.GetInt("Debuggers - Tile Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Tile Viewer", "width", 300);
@@ -16,7 +16,7 @@ bool TileViewer::init(Settings settings) {
     return true;
 }
 
-void TileViewer::release(Settings& settings) {
+void TileViewer::release() {
     settings.Set("Debuggers - Tile Viewer", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Tile Viewer", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Tile Viewer", "width", (int)lastWindowSize.x);

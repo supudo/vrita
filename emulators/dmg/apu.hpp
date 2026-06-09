@@ -13,7 +13,7 @@ class DMG_APU {
 public:
     DMG_APU(DMG_MMU& mmu) : mmu(mmu) {}
 
-    void step(bool ROMFileLoaded);
+    void step(bool ROMFileLoaded, uint32_t cycles);
     void clearResources();
 
 private:

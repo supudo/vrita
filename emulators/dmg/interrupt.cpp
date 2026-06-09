@@ -1,5 +1,9 @@
 #include "interrupt.hpp"
 
+void DMG_INTERRUPT::setCPURegisters(DMGCpuRegisters& registers) {
+    cpuRegisters = &registers;
+}
+
 bool DMG_INTERRUPT::isInterruptEnabled(uint8_t flag) {
     return mmu.memory[addressInterruptEnabled] & flag;
 }
@@ -17,9 +21,10 @@ void DMG_INTERRUPT::unsetInterruptFlag(uint8_t flag) {
 }
 
 void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
+    if (!cpuRegisters) return
     mmu.tick(8);
-    mmu.writeStack(&Registers.SP, Registers.PC);
-    Registers.PC = jump_pc;
+    mmu.writeStack(&cpuRegisters->SP, cpuRegisters->PC);
+    cpuRegisters->PC = jump_pc;
     setIME(false);
     unsetInterruptFlag(interrupt);
     mmu.isHalted = false;

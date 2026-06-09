@@ -18,7 +18,7 @@ class DMG_PPU {
 public:
     DMG_PPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts) : logger(logger), mmu(mmu), interrupts(interrupts){}
 
-    void step(bool ROMFileLoaded);
+    void step(bool ROMFileLoaded, uint32_t cycles);
     void clearResources();
 
 private:
@@ -26,7 +26,7 @@ private:
     DMG_MMU& mmu;
     DMG_INTERRUPT& interrupts;
 
-    DMGCpuRegisters Registers;
+    uint32_t dotCycles = 0;
 };
 
 #endif

@@ -19,6 +19,8 @@ class DMG_INTERRUPT {
 public:
     DMG_INTERRUPT(DMG_MMU& mmu) : mmu(mmu) {}
 
+    void setCPURegisters(DMGCpuRegisters& registers);
+
     bool IME = false; // interrupts are OFF on start
 
     bool checkForInterrupts();
@@ -34,9 +36,7 @@ public:
 
 private:
     DMG_MMU& mmu;
-
-    DMGCpuRegisters Registers;
-
+    DMGCpuRegisters* cpuRegisters = nullptr;
 
     uint16_t addressInterruptEnabled = 0xFFFF; // IE
     uint16_t addressInterruptFlag = 0xFF0F; // IF

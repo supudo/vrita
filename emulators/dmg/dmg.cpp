@@ -35,6 +35,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerTimer->reset();
 
     managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU);
+    managerInterrupts->setCPURegisters(managerCPU->Registers);
 
     return true;
 }
@@ -49,11 +50,12 @@ ImVec2 DMG::getWindowSize() {
 
 void DMG::stepAll() {
     if (ROMFileLoaded) {
-        uint32_t cycles = 0;
+        uint64_t before = managerMMU->totalCycles;
         if (!managerInterrupts->checkForInterrupts())
             stepCPU();
-        stepPPU(cycles);
-        stepAPU(cycles);
+        uint32_t elapsed = (uint32_t)(managerMMU->totalCycles - before);
+        stepPPU(elapsed);
+        stepAPU(elapsed);
     }
 }
 
@@ -115,11 +117,11 @@ void DMG::stepMMU(uint32_t cycles) {
 }
 
 void DMG::stepPPU(uint32_t cycles) {
-    managerPPU->step(ROMFileLoaded);
+    managerPPU->step(ROMFileLoaded, cycles);
 }
 
 void DMG::stepAPU(uint32_t cycles) {
-    managerAPU->step(ROMFileLoaded);
+    managerAPU->step(ROMFileLoaded, cycles);
 }
 
 void DMG::toggleGameState() {

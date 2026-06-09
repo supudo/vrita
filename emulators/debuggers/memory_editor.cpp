@@ -186,40 +186,17 @@ void MemoryEditor::renderViewPerspectiveAdvanced(const MemoryTree& tree) {
 
     float total_width = ImGui::GetContentRegionAvail().x;
 
-    if (panelsWidthLeft < 100.0f)
-        panelsWidthLeft = 100.0f;
-    if (panelsWidthLeft > total_width - 100.0f)
-        panelsWidthLeft = total_width - 100.0f;
-
-    float right_width = total_width - panelsWidthLeft - panelsSplitterWidth;
-
     // left
-    ImGui::BeginChild("leftPanel", ImVec2(panelsWidthLeft, 0), true);
+    ImGui::BeginChild("leftPanel", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
     ImGui::Text("Sections");
     ImGui::Separator();
     renderViewPerspectiveTree(tree);
     ImGui::EndChild();
 
-    ImGui::SameLine(0.0f, 0.0f);
-
-    // splitter
-    ImGui::InvisibleButton("panelsSplitter", ImVec2(panelsSplitterWidth, -1));
-    if (ImGui::IsItemHovered())
-        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-        panelsWidthLeft += ImGui::GetIO().MouseDelta.x;
-
-    // splitter view
-    ImVec2 p0 = ImGui::GetItemRectMin();
-    ImVec2 p1 = ImGui::GetItemRectMax();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddRectFilled(p0, p1, IM_COL32(80, 80, 80, 255));
-
-    ImGui::SameLine(0.0f, 0.0f);
+    ImGui::SameLine(0.0f, 10.0f);
 
     // right
-    ImGui::BeginChild("rightPanel", ImVec2(right_width, 0), true);
+    ImGui::BeginChild("rightPanel", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
     if (selectedMemoryRegion != nullptr)
         renderMemoryRegion(*selectedMemoryRegion);
     else

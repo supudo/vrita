@@ -40,8 +40,6 @@ private:
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
     int viewPerspective = 0;
-    float panelsWidthLeft = 250.0f;
-    float panelsSplitterWidth = 6.0f;
     const MemoryRegion* selectedMemoryRegion = nullptr;
 
     uint8_t* memoryData = nullptr;

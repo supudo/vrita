@@ -1,9 +1,3 @@
-/*
-
-GameBoy Advance (AGB)
-
-*/
-
 #ifndef VRITA_TILEVIEWER_INCLUDES
 #define VRITA_TILEVIEWER_INCLUDES
 

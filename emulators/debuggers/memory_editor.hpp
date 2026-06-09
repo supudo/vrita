@@ -1,9 +1,3 @@
-/*
-
-GameBoy Advance (AGB)
-
-*/
-
 #ifndef VRITA_MEMORYEDITOR_INCLUDES
 #define VRITA_MEMORYEDITOR_INCLUDES
 
@@ -16,25 +10,11 @@ GameBoy Advance (AGB)
 #include <vector>
 
 #include "utilities/logger.hpp"
+#include "memory_editor_cgb.hpp"
+#include "memory_editor_dmg.hpp"
+#include "memory_editor_agb.hpp"
 
 class Settings;
-
-struct AddressRange {
-    uint32_t start;
-    uint32_t end;
-};
-
-struct MemoryRegion {
-    const char* region;
-    const char* notes;
-    AddressRange range;
-    uint32_t color;
-    bool editable;
-};
-
-using MemoryCategory = std::vector<MemoryRegion>;
-using MemoryUnit = std::map<const char*, MemoryCategory>;
-using MemoryTree = std::map<const char*, MemoryUnit>;
 
 class MemoryEditor {
 public:
@@ -71,12 +51,6 @@ private:
     std::vector<uint8_t> shadowMemory;
     std::vector<float> changeTimer;
 
-    MemoryTree MemoryMap_CGB;
-    std::array<MemoryRegion, 11> MemoryMap_DMG_Default;
-    std::array<MemoryRegion, 25> MemoryMap_DMG_Debug;
-    MemoryTree MemoryMap_DMG_ByUnitTree;
-    std::array<MemoryRegion, 23> MemoryMap_DMG_ByUnit;
-    std::array<MemoryRegion, 11> MemoryMap_AGB;
     const MemoryRegion* memoryRegions = nullptr;
     size_t memoryRegionCount = 0;
     uint8_t emulatorType = 0;

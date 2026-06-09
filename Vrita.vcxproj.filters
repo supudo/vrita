@@ -139,6 +139,18 @@
     <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
+    <ClInclude Include="emulators\debuggers\memory_editor_dmg.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\memory_editor_data.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\memory_editor_agb.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\memory_editor_cgb.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

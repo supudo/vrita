@@ -9,7 +9,7 @@
 #include "agb/agb.hpp"
 
 #include "utilities/settings.hpp"
-#include "debuggers/memoryeditor.hpp"
+#include "debuggers/memory_editor.hpp"
 
 void Emulators::init(Settings& settings) {
     emulatorDMG = std::make_shared<DMG>(logger, settings);

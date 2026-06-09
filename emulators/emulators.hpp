@@ -8,11 +8,11 @@
 #include <string>
 
 #include "utilities/logger.hpp"
-#include "debuggers/memoryeditor.hpp"
-#include "debuggers/tileviewer.hpp"
-#include "debuggers/tilemapviewer.hpp"
-#include "debuggers/spriteviewer.hpp"
-#include "debuggers/paletteviewer.hpp"
+#include "debuggers/memory_editor.hpp"
+#include "debuggers/tile_viewer.hpp"
+#include "debuggers/tilemap_viewer.hpp"
+#include "debuggers/sprite_viewer.hpp"
+#include "debuggers/palette_viewer.hpp"
 
 class Settings;
 class DMG;

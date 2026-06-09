@@ -141,11 +141,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="emulators\agb\agb.cpp" />
-    <ClCompile Include="emulators\debuggers\memoryeditor.cpp" />
-    <ClCompile Include="emulators\debuggers\paletteviewer.cpp" />
-    <ClCompile Include="emulators\debuggers\spriteviewer.cpp" />
-    <ClCompile Include="emulators\debuggers\tilemapviewer.cpp" />
-    <ClCompile Include="emulators\debuggers\tileviewer.cpp" />
+    <ClCompile Include="emulators\debuggers\memory_editor.cpp" />
+    <ClCompile Include="emulators\debuggers\palette_viewer.cpp" />
+    <ClCompile Include="emulators\debuggers\sprite_viewer.cpp" />
+    <ClCompile Include="emulators\debuggers\tilemap_viewer.cpp" />
+    <ClCompile Include="emulators\debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
     <ClCompile Include="emulators\dmg\cartridge.cpp" />
     <ClCompile Include="emulators\dmg\cpu.cpp" />
@@ -164,11 +164,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\agb\agb.hpp" />
-    <ClInclude Include="emulators\debuggers\memoryeditor.hpp" />
-    <ClInclude Include="emulators\debuggers\paletteviewer.hpp" />
-    <ClInclude Include="emulators\debuggers\spriteviewer.hpp" />
-    <ClInclude Include="emulators\debuggers\tilemapviewer.hpp" />
-    <ClInclude Include="emulators\debuggers\tileviewer.hpp" />
+    <ClInclude Include="emulators\debuggers\memory_editor.hpp" />
+    <ClInclude Include="emulators\debuggers\palette_viewer.hpp" />
+    <ClInclude Include="emulators\debuggers\sprite_viewer.hpp" />
+    <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp" />
+    <ClInclude Include="emulators\debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />

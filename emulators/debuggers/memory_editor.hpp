@@ -8,11 +8,12 @@ GameBoy Advance (AGB)
 #define VRITA_MEMORYEDITOR_INCLUDES
 
 #include <array>
-#include <vector>
-#include <stdint.h>
 #include <cstdint>
 #include <functional>
 #include <imgui.h>
+#include <map>
+#include <stdint.h>
+#include <vector>
 
 #include "utilities/logger.hpp"
 
@@ -30,6 +31,10 @@ struct MemoryRegion {
     uint32_t color;
     bool editable;
 };
+
+using MemoryCategory = std::vector<MemoryRegion>;
+using MemoryUnit = std::map<const char*, MemoryCategory>;
+using MemoryTree = std::map<const char*, MemoryUnit>;
 
 class MemoryEditor {
 public:
@@ -54,6 +59,9 @@ private:
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
     int viewPerspective = 0;
+    float panelsWidthLeft = 250.0f;
+    float panelsSplitterWidth = 6.0f;
+    const MemoryRegion* selectedMemoryRegion = nullptr;
 
     uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
@@ -63,8 +71,10 @@ private:
     std::vector<uint8_t> shadowMemory;
     std::vector<float> changeTimer;
 
+    MemoryTree MemoryMap_CGB;
     std::array<MemoryRegion, 11> MemoryMap_DMG_Default;
     std::array<MemoryRegion, 25> MemoryMap_DMG_Debug;
+    MemoryTree MemoryMap_DMG_ByUnitTree;
     std::array<MemoryRegion, 23> MemoryMap_DMG_ByUnit;
     std::array<MemoryRegion, 11> MemoryMap_AGB;
     const MemoryRegion* memoryRegions = nullptr;
@@ -84,6 +94,10 @@ private:
     void renderViewPerspectiveDefault();
     void renderViewPerspectiveDebug();
     void renderViewPerspectiveByUnit();
+
+    void renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree);
+    void renderViewPerspectiveByUnitTree(const MemoryTree& tree);
+    void renderViewPerspectiveByUnitTreeRegion(const MemoryRegion& region);
 };
 
 #endif

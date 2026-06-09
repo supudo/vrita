@@ -47,19 +47,19 @@
     <ClCompile Include="emulators\dmg\cpu_extended.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\memoryeditor.cpp">
+    <ClCompile Include="emulators\debuggers\memory_editor.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\spriteviewer.cpp">
+    <ClCompile Include="emulators\debuggers\palette_viewer.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\tilemapviewer.cpp">
+    <ClCompile Include="emulators\debuggers\sprite_viewer.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\tileviewer.cpp">
+    <ClCompile Include="emulators\debuggers\tile_viewer.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\paletteviewer.cpp">
+    <ClCompile Include="emulators\debuggers\tilemap_viewer.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
   </ItemGroup>
@@ -124,19 +124,19 @@
     <ClInclude Include="utilities\strings.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\memoryeditor.hpp">
+    <ClInclude Include="emulators\debuggers\memory_editor.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\paletteviewer.hpp">
+    <ClInclude Include="emulators\debuggers\palette_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\spriteviewer.hpp">
+    <ClInclude Include="emulators\debuggers\sprite_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\tilemapviewer.hpp">
+    <ClInclude Include="emulators\debuggers\tile_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\tileviewer.hpp">
+    <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
   </ItemGroup>

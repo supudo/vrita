@@ -1,4 +1,4 @@
-#include "memoryeditor.hpp"
+#include "memory_editor.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -14,6 +14,84 @@ bool MemoryEditor::init() {
     windowWidth = settings.GetInt("Debuggers - Memory Editor", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Memory Editor", "height", 300);
     viewPerspective = settings.GetInt("Debuggers - Memory Editor", "viewperspective", 0);
+    selectedMemoryRegion = nullptr;
+
+    MemoryMap_CGB = {
+        {"MMU", {
+            {"ROM", {
+                {"Boot ROM", "DMG/CGB bootstrap ROM", {0x0000, 0x00FF}, 0xFFD700, false},
+                {"ROM Bank 0", "Fixed cartridge ROM", {0x0000, 0x3FFF}, 0xAAAAAA, false},
+                {"ROM Bank N", "Switchable ROM bank", {0x4000, 0x7FFF}, 0x888888, false},
+            }},
+            {"RAM", {
+                {"External RAM", "Cartridge RAM", {0xA000, 0xBFFF}, 0x00AAAA, true},
+                {"WRAM Bank 0", "Work RAM bank 0", {0xC000, 0xCFFF}, 0x0000FF, true},
+                {"WRAM Bank N", "Work RAM banks 1-7 (CGB)", {0xD000, 0xDFFF}, 0x0000CC, true},
+                {"Echo RAM", "Mirror of WRAM", {0xE000, 0xFDFF}, 0x000088, true},
+                {"HRAM", "High RAM", {0xFF80, 0xFFFE}, 0xFF8800, true},
+            }},
+            {"Reserved", {
+                {"Unusable", "Prohibited area", {0xFEA0, 0xFEFF}, 0x666666, false}
+            }}
+        }},
+        {"PPU", {
+            {"VRAM", {
+                {"Tile Data", "Tile patterns", {0x8000, 0x97FF}, 0x00DD00, true},
+                {"BG Map 0", "Background map 0", {0x9800, 0x9BFF}, 0x00AA00, true},
+                {"BG Map 1", "Background map 1", {0x9C00, 0x9FFF}, 0x008800, true},
+            }},
+            {"VRAM Banks (CGB)", {
+                {"VRAM Bank 0", "Base VRAM bank", {0x8000, 0x9FFF}, 0x00FF00, true},
+                {"VRAM Bank 1", "Extra VRAM bank", {0x8000, 0x9FFF}, 0x00CC00, true},
+            }},
+            {"OAM", {
+                {"OAM", "Sprite attribute table", {0xFE00, 0xFE9F}, 0xFF00FF, true}
+            }},
+            {"Registers", {
+                {"LCD Registers", "PPU control/status", {0xFF40, 0xFF4B}, 0xCC00CC, true},
+                {"Palette Registers", "CGB BG/OBJ palettes", {0xFF68, 0xFF6B}, 0xAA00FF, true},
+            }}
+        }},
+        {"APU", {
+            {"Registers", {
+                {"APU", "Sound registers", {0xFF10, 0xFF3F}, 0xFF6666, true}
+            }}
+        }},
+        {"Timer", {
+            {"Registers", {
+                {"Timer", "DIV/TIMA/TMA/TAC", {0xFF04, 0xFF07}, 0xFFFF00, true}
+            }}
+        }},
+        {"Serial", {
+            {"Registers", {
+                {"Serial", "SB/SC", {0xFF01, 0xFF02}, 0x00FFFF, true}
+            }}
+        }},
+        {"DMA", {
+            {"Registers", {
+                {"DMA", "OAM DMA transfer", {0xFF46, 0xFF46}, 0xFFAA00, true}
+            }},
+            {"CGB", {
+                {"HDMA", "HDMA1-5 transfer system", {0xFF51, 0xFF55}, 0xFF7700, true}
+            }}
+        }},
+        {"CPU", {
+            {"Input", {
+                {"Joypad", "P1/JOYP", {0xFF00, 0xFF00}, 0xAAFF00, true}
+            }},
+            {"Interrupts", {
+                {"IF", "Interrupt Flag", {0xFF0F, 0xFF0F}, 0xFF0000, true},
+                {"IE", "Interrupt Enable", {0xFFFF, 0xFFFF}, 0xCC0000, true}
+            }},
+            {"Control", {
+                {"Boot ROM Disable", "FF50 register", {0xFF50, 0xFF50}, 0xAAAA00, true}
+            }},
+            {"CGB", {
+                {"Speed Switch (KEY1)", "CPU speed control", {0xFF4D, 0xFF4D}, 0xFF5500, true},
+                {"Infrared (RP)", "CGB IR port", {0xFF56, 0xFF56}, 0xFF8800, true}
+            }}
+        }}
+    };
 
     MemoryMap_DMG_Default = { {
         {"Boot ROM", "Only when Boot ROM is enabled", {0x0000, 0x00FF}, 0xFAAAAA, false},
@@ -56,6 +134,72 @@ bool MemoryEditor::init() {
         {"HRAM", "High RAM", {0xFF80, 0xFFFE}, 0xFF8800, true},
         {"IE Register", "Interrupt Enable", {0xFFFF, 0xFFFF}, 0xFF0000, true}
     } };
+
+    MemoryMap_DMG_ByUnitTree = {
+        {"MMU", {
+            {"ROM", {
+                {"Boot ROM", "DMG bootstrap ROM", {0x0000, 0x00FF}, 0xFFD700, false},
+                {"ROM Bank 0", "Fixed cartridge ROM", {0x0000, 0x3FFF}, 0xAAAAAA, false},
+                {"ROM Bank N", "Switchable ROM bank", {0x4000, 0x7FFF}, 0x888888, false},
+            }},
+            {"RAM", {
+                {"External RAM", "Cartridge RAM", {0xA000, 0xBFFF}, 0x00AAAA, true},
+                {"WRAM Bank 0", "Work RAM", {0xC000, 0xCFFF}, 0x0000FF, true},
+                {"WRAM Bank 1", "Work RAM (mirror on DMG)", {0xD000, 0xDFFF}, 0x0000CC, true},
+                {"Echo RAM", "Mirror of WRAM", {0xE000, 0xFDFF}, 0x000088, true},
+                {"HRAM", "High RAM", {0xFF80, 0xFFFE}, 0xFF8800, true},
+            }},
+            {"Reserved", {
+                {"Unusable", "Prohibited area", {0xFEA0, 0xFEFF}, 0x666666, false}
+            }}
+        }},
+        {"PPU", {
+            {"VRAM", {
+                {"Tile Data", "Tile patterns", {0x8000, 0x97FF}, 0x00DD00, true},
+                {"BG Map 0", "Background map 0", {0x9800, 0x9BFF}, 0x00AA00, true},
+                {"BG Map 1", "Background map 1", {0x9C00, 0x9FFF}, 0x008800, true},
+            }},
+            {"OAM", {
+                {"OAM", "Sprite attribute table", {0xFE00, 0xFE9F}, 0xFF00FF, true}
+            }},
+            {"Registers", {
+                {"LCD Registers", "PPU control/status registers", {0xFF40, 0xFF4B}, 0xCC00CC, true}
+            }}
+        }},
+        {"APU", {
+            {"Registers", {
+                {"APU", "Sound registers", {0xFF10, 0xFF3F}, 0xFF6666, true}
+            }}
+        }},
+        {"Timer", {
+            {"Registers", {
+                {"Timer", "DIV/TIMA/TMA/TAC", {0xFF04, 0xFF07}, 0xFFFF00, true}
+            }}
+        }},
+        {"Serial", {
+            {"Registers", {
+                {"Serial", "SB/SC", {0xFF01, 0xFF02}, 0x00FFFF, true}
+            }}
+        }},
+        {"DMA", {
+            {"Registers", {
+                {"DMA", "OAM DMA transfer", {0xFF46, 0xFF46}, 0xFFAA00, true}
+            }}
+        }},
+        {"CPU", {
+
+            {"Input", {
+                {"Joypad", "P1/JOYP", {0xFF00, 0xFF00}, 0xAAFF00, true}
+            }},
+            {"Interrupts", {
+                {"IF", "Interrupt Flag", {0xFF0F, 0xFF0F}, 0xFF0000, true},
+                {"IE", "Interrupt Enable", {0xFFFF, 0xFFFF}, 0xCC0000, true}
+            }},
+            {"Control", {
+                {"Boot ROM Disable", "FF50 register", {0xFF50, 0xFF50}, 0xAAAA00, true}
+            }}
+        }}
+    };
 
     MemoryMap_DMG_ByUnit = { {
         // MMU / Cartridge
@@ -120,6 +264,7 @@ bool MemoryEditor::init() {
 }
 
 void MemoryEditor::release() {
+    selectedMemoryRegion = nullptr;
     settings.Set("Debuggers - Memory Editor", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Memory Editor", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Memory Editor", "width", (int)lastWindowSize.x);
@@ -129,10 +274,12 @@ void MemoryEditor::release() {
 
 void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
     if (data != memoryData || size != memorySize) {
+        selectedMemoryRegion = nullptr;
         if (data && size > 0) {
             shadowMemory.assign(data, data + size);
             changeTimer.assign(size, 0.0f);
-        } else {
+        }
+        else {
             shadowMemory.clear();
             changeTimer.clear();
         }
@@ -152,6 +299,15 @@ void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
             case 2:
                 memoryRegions = MemoryMap_DMG_ByUnit.data();
                 memoryRegionCount = MemoryMap_DMG_ByUnit.size();
+                break;
+            case 3:
+                memoryRegions = nullptr;
+                memoryRegionCount = 0;
+                break;
+            default:
+                memoryRegions = nullptr;
+                memoryRegionCount = 0;
+                selectedMemoryRegion = nullptr;
                 break;
         }
         this->emulatorType = 1;
@@ -214,7 +370,7 @@ void MemoryEditor::render(bool* windowOpened) {
 
     ImGui::Text("View perspective:");
     ImGui::SameLine();
-    const char* viewPerspectives[] = { "Default", "Debug", "By unit" };
+    const char* viewPerspectives[] = { "Default", "Debug", "By unit", "Tree" };
     if (ImGui::Combo("##viewPerspectiveCombo", &viewPerspective, viewPerspectives, IM_ARRAYSIZE(viewPerspectives))) {
         settings.Set("Debuggers - Memory Editor", "viewperspective", (int)viewPerspective);
         settings.Save();
@@ -235,6 +391,12 @@ void MemoryEditor::render(bool* windowOpened) {
             memoryRegions = MemoryMap_DMG_ByUnit.data();
             memoryRegionCount = MemoryMap_DMG_ByUnit.size();
             renderViewPerspectiveByUnit();
+            break;
+        case 3:
+            memoryRegions = nullptr;
+            memoryRegionCount = 0;
+            if (emulatorType == 1)
+                renderViewPerspectiveByUnitAdvanced(MemoryMap_DMG_ByUnitTree);
             break;
     }
 
@@ -267,7 +429,110 @@ void MemoryEditor::renderViewPerspectiveDebug() {
     }
 }
 
-void MemoryEditor::renderViewPerspectiveByUnit() {}
+void MemoryEditor::renderViewPerspectiveByUnit() {
+    if (ImGui::TreeNode("Units")) {
+        for (int r = 0; r < memoryRegionCount; r++) {
+            if (r == 0)
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+            ImGui::PushID(r);
+            if (ImGui::TreeNode("", memoryRegions[r].region)) {
+                ImGui::SetItemTooltip(memoryRegions[r].notes);
+                ImGui::Indent();
+                ImGui::Text(memoryRegions[r].region);
+                ImGui::Unindent();
+                ImGui::TreePop();
+            }
+            ImGui::PopID();
+        }
+        ImGui::TreePop();
+    }
+}
+
+void MemoryEditor::renderViewPerspectiveByUnitAdvanced(const MemoryTree& tree) {
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    float total_width = ImGui::GetContentRegionAvail().x;
+
+    if (panelsWidthLeft < 100.0f)
+        panelsWidthLeft = 100.0f;
+    if (panelsWidthLeft > total_width - 100.0f)
+        panelsWidthLeft = total_width - 100.0f;
+
+    float right_width = total_width - panelsWidthLeft - panelsSplitterWidth;
+
+    // left
+    ImGui::BeginChild("leftPanel", ImVec2(panelsWidthLeft, 0), true);
+    ImGui::Text("Sections");
+    ImGui::Separator();
+    renderViewPerspectiveByUnitTree(tree);
+    ImGui::EndChild();
+
+    ImGui::SameLine(0.0f, 0.0f);
+
+    // splitter
+    ImGui::InvisibleButton("panelsSplitter", ImVec2(panelsSplitterWidth, -1));
+    if (ImGui::IsItemHovered())
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+
+    if (ImGui::IsItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+        panelsWidthLeft += ImGui::GetIO().MouseDelta.x;
+
+    // splitter view
+    ImVec2 p0 = ImGui::GetItemRectMin();
+    ImVec2 p1 = ImGui::GetItemRectMax();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddRectFilled(p0, p1, IM_COL32(80, 80, 80, 255));
+
+    ImGui::SameLine(0.0f, 0.0f);
+
+    // right
+    ImGui::BeginChild("rightPanel", ImVec2(right_width, 0), true);
+    if (selectedMemoryRegion != nullptr)
+        renderMemoryRegion(*selectedMemoryRegion);
+    else
+        ImGui::Text("Select a section from left.");
+    ImGui::EndChild();
+}
+
+void MemoryEditor::renderViewPerspectiveByUnitTreeRegion(const MemoryRegion& region) {
+    ImGui::PushID(region.region);
+    bool isSelected = (selectedMemoryRegion == &region);
+    ImVec4 color(((region.color >> 16) & 0xFF) / 255.0f, ((region.color >> 8) & 0xFF) / 255.0f, (region.color & 0xFF) / 255.0f, 1.0f);
+    ImGui::ColorButton("##color", color, ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoDragDrop, ImVec2(10, 10));
+    ImGui::SameLine();
+    char label[128];
+    snprintf(label, sizeof(label), "%s [0x%04X - 0x%04X]", region.region, region.range.start, region.range.end);
+    if (region.editable)
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.2f, 1.0f, 0.2f, 1.0f));
+    if (ImGui::Selectable(label, isSelected))
+        selectedMemoryRegion = &region;
+    if (region.editable)
+        ImGui::PopStyleColor();
+    ImGui::SetItemTooltip(region.notes);
+    ImGui::PopID();
+}
+
+void MemoryEditor::renderViewPerspectiveByUnitTree(const MemoryTree& tree) {
+    for (const auto& [unitName, categories] : tree) {
+        bool openUnit = ImGui::TreeNode(unitName);
+        if (openUnit) {
+            for (const auto& [categoryName, regions] : categories) {
+                if (regions.size() == 1)
+                    renderViewPerspectiveByUnitTreeRegion(regions.front());
+                else {
+                    bool openCat = ImGui::TreeNode(categoryName);
+                    if (openCat) {
+                        for (const auto& region : regions)
+                            renderViewPerspectiveByUnitTreeRegion(region);
+                        ImGui::TreePop();
+                    }
+                }
+            }
+            ImGui::TreePop();
+        }
+    }
+}
 
 void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
     uint32_t regionStart = region.range.start;

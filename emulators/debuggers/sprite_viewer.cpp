@@ -1,4 +1,4 @@
-#include "spriteviewer.hpp"
+#include "sprite_viewer.hpp"
 
 #include <algorithm>
 #include <cstring>

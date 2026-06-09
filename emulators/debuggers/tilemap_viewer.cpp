@@ -1,4 +1,4 @@
-#include "tilemapviewer.hpp"
+#include "tilemap_viewer.hpp"
 
 #include <algorithm>
 #include <cstring>

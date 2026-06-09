@@ -33,10 +33,10 @@ struct MemoryRegion {
 
 class MemoryEditor {
 public:
-    MemoryEditor(Logger& logger) : logger(logger) {}
+    MemoryEditor(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
-    bool init(Settings settings);
-    void release(Settings& settings);
+    bool init();
+    void release();
     void render(bool* windowOpened);
     
     void setMemory(const char* emulatorType, uint8_t* data, uint32_t size);
@@ -44,6 +44,7 @@ public:
 
 private:
     Logger& logger;
+    Settings& settings;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -51,6 +52,8 @@ private:
     int windowHeight = 300;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
+
+    int viewPerspective = 0;
 
     uint8_t* memoryData = nullptr;
     uint32_t memorySize = 0;
@@ -60,7 +63,9 @@ private:
     std::vector<uint8_t> shadowMemory;
     std::vector<float> changeTimer;
 
-    std::array<MemoryRegion, 10> MemoryMap_DMG;
+    std::array<MemoryRegion, 11> MemoryMap_DMG_Default;
+    std::array<MemoryRegion, 25> MemoryMap_DMG_Debug;
+    std::array<MemoryRegion, 23> MemoryMap_DMG_ByUnit;
     std::array<MemoryRegion, 11> MemoryMap_AGB;
     const MemoryRegion* memoryRegions = nullptr;
     size_t memoryRegionCount = 0;
@@ -75,6 +80,10 @@ private:
     std::function<void(uint32_t, uint8_t)> memoryWrite;
 
     void getPreviewData(int address, char* out_buf, char format);
+
+    void renderViewPerspectiveDefault();
+    void renderViewPerspectiveDebug();
+    void renderViewPerspectiveByUnit();
 };
 
 #endif

@@ -29,8 +29,8 @@ void Emulators::init(Settings& settings) {
     EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
     EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
 
-    debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger);
-    debuggerMemoryEditor->init(settings);
+    debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger, settings);
+    debuggerMemoryEditor->init();
     debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
 
     debuggerTileViewer = std::make_shared<TileViewer>(logger);

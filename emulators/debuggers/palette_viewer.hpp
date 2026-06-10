@@ -43,6 +43,7 @@ private:
     void renderCenteredCellContent(const char* lbl);
     void renderColorButtons(const char* label, uint8_t paletteValue);
     bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color, float border_thickness = 2.0f);
+    PaletteColor getColorPalette(uint8_t colorValue);
 
     inline static std::string rgbToHex(int r, int g, int b) { char buffer[8]; std::snprintf(buffer, sizeof(buffer), "#%02X%02X%02X", r, g, b); return buffer; }
 };

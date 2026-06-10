@@ -54,7 +54,7 @@ void PaletteViewer::render(bool* windowOpened) {
     ImGui::Text("Choose palette transformer:");
     ImGui::SameLine();
     ImGui::SetNextItemWidth(100);
-    static const char* paletteChoices[] = { "Default", "Green" };
+    static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
     if (ImGui::Combo("##paletteChoicesCombo", &paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
         settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteChoicesSelected);
         settings.Save();
@@ -104,6 +104,19 @@ void PaletteViewer::renderCenteredCellContent(const char* lbl) {
     ImGui::Text("%s", lbl);
 }
 
+PaletteColor PaletteViewer::getColorPalette(uint8_t colorValue) {
+    switch (paletteChoicesSelected) {
+        case 2:
+            return DMG_Palette_CGB[colorValue];
+        case 3:
+            return DMG_Palette_MGB[colorValue];
+        case 4:
+            return DMG_Palette_MGL[colorValue];
+        default:
+            return DMG_Palette_DMG[colorValue];
+    }
+}
+
 void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) {
     ImGui::PushID(label);
     uint8_t colorValue0 = paletteValue & 0x03;
@@ -112,11 +125,11 @@ void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) 
     uint8_t colorValue3 = (paletteValue >> 6) & 0x03;
 
     PaletteColor bgp_color0, bgp_color1, bgp_color2, bgp_color3;
-    if (paletteChoicesSelected == 1) {
-        bgp_color0 = DMG_Palette_Green[colorValue0];
-        bgp_color1 = DMG_Palette_Green[colorValue1];
-        bgp_color2 = DMG_Palette_Green[colorValue2];
-        bgp_color3 = DMG_Palette_Green[colorValue3];
+    if (paletteChoicesSelected > 0) {
+        bgp_color0 = getColorPalette(colorValue0);
+        bgp_color1 = getColorPalette(colorValue1);
+        bgp_color2 = getColorPalette(colorValue2);
+        bgp_color3 = getColorPalette(colorValue3);
     }
     else {
         float v0 = colorValue0 / 3.0f, v1 = colorValue1 / 3.0f;

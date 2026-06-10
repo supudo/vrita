@@ -151,7 +151,7 @@
     <ClInclude Include="emulators\debuggers\memory_editor_cgb.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\palette_viewer_dmg.hpp">
+    <ClInclude Include="emulators\debuggers\palette_viewer_datas.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
   </ItemGroup>

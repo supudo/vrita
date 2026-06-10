@@ -12,8 +12,8 @@
 bool PaletteViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Palette Viewer", "position_x", 44);
     windowPositionY = settings.GetInt("Debuggers - Palette Viewer", "position_y", 44);
-    windowWidth = settings.GetInt("Debuggers - Palette Viewer", "width", 300);
-    windowHeight = settings.GetInt("Debuggers - Palette Viewer", "height", 300);
+    //windowWidth = settings.GetInt("Debuggers - Palette Viewer", "width", 488);
+    //windowHeight = settings.GetInt("Debuggers - Palette Viewer", "height", 357);
     paletteChoicesSelected = settings.GetInt("Debuggers - Palette Viewer", "dmg_chosen_palette", 0);
     return true;
 }
@@ -32,16 +32,16 @@ void PaletteViewer::setMemory(const char* emulatorType, uint8_t bgp, uint8_t obp
         this->emulatorType = 1;
     else if (strcmp(emulatorType, "agb") == 0)
         this->emulatorType = 2;
-    paletteBGP = bgp;
-    paletteOBP0 = obp0;
-    paletteOBP1 = obp1;
+    if (autoRefresh) {
+        paletteBGP = bgp;
+        paletteOBP0 = obp0;
+        paletteOBP1 = obp1;
+    }
 }
 
 void PaletteViewer::render(bool* windowOpened) {
-    ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);
-
-    if (!ImGui::Begin("Debuggers - Palette Viewer", windowOpened)) {
+    ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight));
+    if (!ImGui::Begin("Debuggers - Palette Viewer", windowOpened, ImGuiWindowFlags_NoResize)) {
         ImGui::End();
         return;
     }
@@ -59,6 +59,10 @@ void PaletteViewer::render(bool* windowOpened) {
         settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteChoicesSelected);
         settings.Save();
     }
+
+    ImGui::Text("Auto refresh:");
+    ImGui::SameLine();
+    ImGui::Checkbox("##autoRefresh", &autoRefresh);
 
     ImGui::Separator();
 

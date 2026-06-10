@@ -9,7 +9,7 @@
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
-#include "palette_viewer_dmg.hpp"
+#include "palette_viewer_datas.hpp"
 
 class Settings;
 
@@ -26,10 +26,12 @@ private:
     Logger& logger;
     Settings& settings;
 
+    bool autoRefresh = true;
+
     int windowPositionX = 40;
     int windowPositionY = 40;
-    int windowWidth = 300;
-    int windowHeight = 300;
+    int windowWidth = 488;
+    int windowHeight = 357;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 

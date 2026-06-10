@@ -161,9 +161,10 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
 }
 
 std::string Emulators::loadROM(const char* romFilePath) {
+    std::string result = "";
     if (EMULATORS_SHOW_DMG)
-        return emulatorDMG->loadROM(romFilePath);
+        result = emulatorDMG->loadROM(romFilePath);
     if (EMULATORS_SHOW_AGB)
-        return emulatorAGB->loadROM(romFilePath);
-    return "";
+        result = emulatorAGB->loadROM(romFilePath);
+    return result;
 }

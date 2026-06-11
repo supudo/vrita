@@ -33,7 +33,11 @@ void Emulators::init(Settings& settings) {
     debuggerMemoryEditor->init();
     debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
 
-    debuggerTileViewer = std::make_shared<TileViewer>(logger, settings);
+    debuggerPaletteViewer = std::make_shared<PaletteViewer>(logger, settings);
+    debuggerPaletteViewer->init();
+    debuggerPaletteViewerVisible = settings.GetBool("Debuggers - Palette Viewer", "visible", false);
+
+    debuggerTileViewer = std::make_shared<TileViewer>(logger, settings, *debuggerPaletteViewer);
     debuggerTileViewer->init();
     debuggerTileViewerVisible = settings.GetBool("Debuggers - Tile Viewer", "visible", false);
 
@@ -44,10 +48,6 @@ void Emulators::init(Settings& settings) {
     debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger, settings);
     debuggerSpriteViewer->init();
     debuggerSpriteViewerVisible = settings.GetBool("Debuggers - Sprite Viewer", "visible", false);
-
-    debuggerPaletteViewer = std::make_shared<PaletteViewer>(logger, settings);
-    debuggerPaletteViewer->init();
-    debuggerPaletteViewerVisible = settings.GetBool("Debuggers - Palette Viewer", "visible", false);
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
@@ -110,6 +110,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
+        debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory);
     }
     else
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);

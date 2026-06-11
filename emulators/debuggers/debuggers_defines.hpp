@@ -1,7 +1,33 @@
-#ifndef VRITA_PALETTEVIEWER_DMG_INCLUDES
-#define VRITA_PALETTEVIEWER_DMG_INCLUDES
+#ifndef VRITA_DEBUGGERS_DEFINES_INCLUDES
+#define VRITA_DEBUGGERS_DEFINES_INCLUDES
 
 #include <array>
+#include <imgui.h>
+
+struct TileColor {
+    float r, g, b, a;
+};
+
+struct TileItem {
+    ImGuiID TileItemID;
+    TileColor pixels[8][8];
+
+    TileItem(ImGuiID id) { TileItemID = id; }
+};
+
+const uint32_t DMG_Width = 160;
+const uint32_t DMG_Height = 144;
+const uint16_t DMG_TilesCount = 384;
+const uint16_t DMG_TileAddressStart = 0x8000;
+const uint16_t DMG_TileAddressEnd = 0x97FF;
+
+const uint32_t CGB_Width = 160;
+const uint32_t CGB_Height = 144;
+const uint16_t CGB_TilesCount = 768;
+
+const uint32_t AGB_Width = 240;
+const uint32_t AGB_Height = 160;
+const uint16_t AGB_TilesCount = 3072;
 
 struct PaletteColor {
     float r, g, b;

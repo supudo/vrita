@@ -144,13 +144,13 @@ void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) 
         bgp_color3 = { v3, v3, v3 };
     }
 
-    renderButtonWithBorder("##0", ImVec2(80, 80), bgp_color0, { 1.0f, 1.0f, 1.0f }, 2.0f);
+    renderButtonWithBorder("##0", ImVec2(80, 80), bgp_color0);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##1", ImVec2(80, 80), bgp_color1, { 1.0f, 1.0f, 1.0f }, 2.0f);
+    renderButtonWithBorder("##1", ImVec2(80, 80), bgp_color1);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##2", ImVec2(80, 80), bgp_color2, { 1.0f, 1.0f, 1.0f }, 2.0f);
+    renderButtonWithBorder("##2", ImVec2(80, 80), bgp_color2);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##3", ImVec2(80, 80), bgp_color3, { 1.0f, 1.0f, 1.0f }, 2.0f);
+    renderButtonWithBorder("##3", ImVec2(80, 80), bgp_color3);
     ImGui::PopID();
 }
 

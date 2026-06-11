@@ -164,13 +164,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\agb\agb.hpp" />
+    <ClInclude Include="emulators\debuggers\debuggers_defines.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor_agb.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor_cgb.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor_data.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor_dmg.hpp" />
     <ClInclude Include="emulators\debuggers\palette_viewer.hpp" />
-    <ClInclude Include="emulators\debuggers\palette_viewer_datas.hpp" />
     <ClInclude Include="emulators\debuggers\sprite_viewer.hpp" />
     <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp" />
     <ClInclude Include="emulators\debuggers\tile_viewer.hpp" />

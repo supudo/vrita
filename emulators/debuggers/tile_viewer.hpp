@@ -2,27 +2,29 @@
 #define VRITA_TILEVIEWER_INCLUDES
 
 #include <array>
-#include <vector>
 #include <stdint.h>
 #include <cstdint>
-#include <functional>
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
+#include "debuggers_defines.hpp"
+#include "palette_viewer.hpp"
 
 class Settings;
 
 class TileViewer {
 public:
-    TileViewer(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
+    TileViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
+    void setMemory(const char* emulatorType, uint8_t* data);
     void release();
     void render(bool* windowOpened);
 
 private:
     Logger& logger;
     Settings& settings;
+    PaletteViewer& paletteViewer;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -30,6 +32,16 @@ private:
     int windowHeight = 300;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
+
+    uint8_t* memoryData = nullptr;
+    uint8_t emulatorType = -1;
+
+    ImVector<TileItem> tiles;
+    ImGuiID nextTileID;
+
+    void initializeData(uint8_t emulatorType);
+    void decodeTile(const uint8_t* tileData, TileItem& tile);
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize);
 };
 
 #endif

@@ -79,15 +79,22 @@ void TileViewer::render(bool* windowOpened) {
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
 
+    if (!memoryData) {
+        ImGui::Text("No file loaded. Memory is empty.");
+        ImGui::End();
+        return;
+    }
+
+    float pixelSize = 32.0f;
+    float tileSize = 8 + pixelSize;
+    int tilesPerRow = 16;
+
+    //logger.log("START ======================================================================");
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 start = ImGui::GetCursorScreenPos();
-
-        float pixelSize = 32.0f;
-        float tileSize = 8 + pixelSize;
-        int tilesPerRow = 16;
-
         if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
+            logger.log("Tiles 1");
             for (int i = 0; i < tiles.Size; i++) {
                 int tx = i % tilesPerRow;
                 int ty = i / tilesPerRow;
@@ -98,15 +105,35 @@ void TileViewer::render(bool* windowOpened) {
         }
 
         if (ImGui::BeginTabItem("Tiles 2 (0x8800 signed)", nullptr, ImGuiTabItemFlags_None)) {
+            for (int i = 0; i < 256; i++) {
+                const uint8_t* tileData = memoryData + DMG_TileAddressStart + 0x1000 + (int8_t)i * 16;
+                TileItem temp(0);
+                decodeTile(tileData, temp);
+                int x = i % tilesPerRow;
+                int y = i / tilesPerRow;
+                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), pixelSize);
+            }
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("OBJ Tiles", nullptr, ImGuiTabItemFlags_None)) {
+            int count = 0;
+            for (int oam = 0; oam < 160; oam += 4) {
+                uint8_t tileIndex = memoryData[0xFE00 + oam + 2];
+                const uint8_t* tileData = memoryData + 0x8000 + tileIndex * 16;
+                TileItem temp(0);
+                decodeTile(tileData, temp);
+                int x = count % tilesPerRow;
+                int y = count / tilesPerRow;
+                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), pixelSize);
+                count++;
+            }
             ImGui::EndTabItem();
         }
 
         ImGui::EndTabBar();
     }
+    //logger.log("END ======================================================================");
 
     ImGui::End();
 }
@@ -116,6 +143,7 @@ void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 po
         for (int x = 0; x < 8; x++) {
             const TileColor& c = tile.pixels[x][y];
             ImU32 col = IM_COL32((int)(c.r * 255.0f), (int)(c.g * 255.0f), (int)(c.b * 255.0f), (int)(c.a * 255.0f));
+            //logger.log("%.2f %.2f %.2f %.2f = %i, %i, %i, %i", c.r, c.g, c.b, c.a, (int)(c.r * 255.0f), (int)(c.g * 255.0f), (int)(c.b * 255.0f), (int)(c.a * 255.0f));
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y + pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
             draw_list->AddRectFilled(p0, p1, col);

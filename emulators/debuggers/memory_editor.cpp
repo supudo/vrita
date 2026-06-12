@@ -41,7 +41,7 @@ void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
     }
     memoryData = data;
     memorySize = size;
-    if (emulatorType == "dmg") {
+    if (strcmp(emulatorType, "dmg") == 0) {
         switch (viewPerspective) {
             case 0:
                 memoryRegions = MemoryMap_DMG_Default.data();
@@ -59,7 +59,7 @@ void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
         }
         this->emulatorType = 1;
     }
-    else if (emulatorType == "agb") {
+    else if (strcmp(emulatorType, "agb") == 0) {
         memoryRegions = MemoryMap_AGB_Default.data();
         memoryRegionCount = MemoryMap_AGB_Default.size();
         this->emulatorType = 2;

@@ -38,6 +38,8 @@ private:
 
     ImVector<TileItem> tiles;
     ImGuiID nextTileID;
+    float zoomPerPixel = 32.0f;
+    int tilesPerRow = 16;
 
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);

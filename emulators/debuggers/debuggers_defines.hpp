@@ -20,6 +20,7 @@ const uint32_t DMG_Height = 144;
 const uint16_t DMG_TilesCount = 384;
 const uint16_t DMG_TileAddressStart = 0x8000;
 const uint16_t DMG_TileAddressEnd = 0x8FFF;
+const uint16_t DMG_TileAddressOBJ = 0xFE00;
 const uint16_t DMG_TileAddressEnded = 0x97FF;
 
 const uint32_t CGB_Width = 160;

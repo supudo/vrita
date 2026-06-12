@@ -85,21 +85,29 @@ void TileViewer::render(bool* windowOpened) {
         return;
     }
 
-    float pixelSize = 32.0f;
-    float tileSize = 8 + pixelSize;
-    int tilesPerRow = 16;
+    ImGui::Text("Tiles per row:");
+    ImGui::SameLine();
+    ImGui::SliderInt("##tilesPerRow", &tilesPerRow, 8, 64);
+
+    ImGui::Text("Tiles size:");
+    ImGui::SameLine();
+    ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 64.0f);
+
+    ImGui::Separator();
+
+    float tileSize = 8 + zoomPerPixel;
 
     //logger.log("START ======================================================================");
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         ImVec2 start = ImGui::GetCursorScreenPos();
         if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
-            logger.log("Tiles 1");
+            //logger.log("Tiles 1");
             for (int i = 0; i < tiles.Size; i++) {
                 int tx = i % tilesPerRow;
                 int ty = i / tilesPerRow;
                 ImVec2 tilePos(start.x + tx * tileSize, start.y  + ty * tileSize);
-                drawTile(draw_list, tiles[i], tilePos, pixelSize);
+                drawTile(draw_list, tiles[i], tilePos, tileSize);
             }
             ImGui::EndTabItem();
         }
@@ -111,7 +119,7 @@ void TileViewer::render(bool* windowOpened) {
                 decodeTile(tileData, temp);
                 int x = i % tilesPerRow;
                 int y = i / tilesPerRow;
-                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), pixelSize);
+                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), tileSize);
             }
             ImGui::EndTabItem();
         }
@@ -119,13 +127,13 @@ void TileViewer::render(bool* windowOpened) {
         if (ImGui::BeginTabItem("OBJ Tiles", nullptr, ImGuiTabItemFlags_None)) {
             int count = 0;
             for (int oam = 0; oam < 160; oam += 4) {
-                uint8_t tileIndex = memoryData[0xFE00 + oam + 2];
-                const uint8_t* tileData = memoryData + 0x8000 + tileIndex * 16;
+                uint8_t tileIndex = memoryData[DMG_TileAddressOBJ + oam + 2];
+                const uint8_t* tileData = memoryData + DMG_TileAddressStart + tileIndex * 16;
                 TileItem temp(0);
                 decodeTile(tileData, temp);
                 int x = count % tilesPerRow;
                 int y = count / tilesPerRow;
-                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), pixelSize);
+                drawTile(draw_list, temp, ImVec2(start.x + x * tileSize, start.y + y * tileSize), tileSize);
                 count++;
             }
             ImGui::EndTabItem();

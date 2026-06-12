@@ -116,7 +116,7 @@ void TileViewer::render(bool* windowOpened) {
 
         if (ImGui::BeginTabItem("Tiles 2 (0x8800 signed)", nullptr, ImGuiTabItemFlags_None)) {
             for (int i = 0; i < 256; i++) {
-                uint8_t tileIndex = 256 + (uint8_t)i;
+                int tileIndex = 256 + (int8_t)i;
                 int x = i % tilesPerRow;
                 int y = i / tilesPerRow;
                 drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + x * tileSize, start.y + y * tileSize), zoomPerPixel);

@@ -21,7 +21,7 @@ void DMG_INTERRUPT::unsetInterruptFlag(uint8_t flag) {
 }
 
 void DMG_INTERRUPT::triggerInterrupt(Interrupts interrupt, uint8_t jump_pc) {
-    if (!cpuRegisters) return
+    if (!cpuRegisters) return;
     mmu.tick(8);
     mmu.writeStack(&cpuRegisters->SP, cpuRegisters->PC);
     cpuRegisters->PC = jump_pc;

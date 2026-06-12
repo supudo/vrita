@@ -8,11 +8,6 @@
 #include "ppu.hpp"
 #include "apu.hpp"
 
-void DMG_MMU::tick(uint32_t cycles) {
-    totalCycles += cycles;
-    managerTimer->tick(cycles);
-}
-
 void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu) {
     logger = &log;
     managerCartridge = &cartridge;
@@ -21,11 +16,6 @@ void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_
     managerInterrupts = &interrupts;
     managerPPU = &ppu;
     managerAPU = &apu;
-}
-
-void DMG_MMU::clearResources() {
-    totalCycles = 0;
-    clearMemory();
 }
 
 void DMG_MMU::clearMemory() {
@@ -86,4 +76,32 @@ void DMG_MMU::clearMemory() {
     memory[0xFF4B] = 0x00; // WX
 
     memory[0xFFFF] = 0x00; // IE
+}
+
+void DMG_MMU::clearResources() {
+    totalCycles = 0;
+    clearMemory();
+}
+
+uint8_t DMG_MMU::read8(uint16_t address) const {
+    if (address < 0x8000 || (address > 0xA000 && address < 0xC000))
+        return managerCartridge->read(address);
+    return memory[address];
+}
+
+void DMG_MMU::write8(uint16_t address, uint8_t value) {
+    if (address < 0x8000) { // MBC write, no memory store
+        managerCartridge->write(address, value);
+        return;
+    }
+    if (address > 0xA000 && address < 0xC000) { // external cartridge RAM
+        managerCartridge->write(address, value);
+        return;
+    }
+    memory[address] = value;
+}
+
+void DMG_MMU::tick(uint32_t cycles) {
+    totalCycles += cycles;
+    managerTimer->tick(cycles);
 }

@@ -16,11 +16,13 @@ void DMG_CPU::clearResources() {
 void DMG_CPU::step(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
 
-    uint8_t opcode = mmu.memory[Registers.PC];
+    uint8_t opcode = mmu.read8(Registers.PC);
 
     if (!mmu.triggerHaltBug)
         Registers.PC++;
     mmu.triggerHaltBug = false;
+
+    mmu.tick(4);
 
     if (opcode == 0xCB)
         executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));

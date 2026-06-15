@@ -1,14 +1,16 @@
-# Vrita
+# Vrita (WIP)
 
 C/C++ Emulator - GameBoy (DMG), etc.
 
 #### Using/Including
 
 - [ImGui](https://github.com/ocornut/imgui)
-- [SDL3](https://www.libsdl.org/)
+- [SDL3](https://www.libsdl.org/) (SDL3 GPU Bindings)
 
 #### Thanks to
 - [Cinoop](https://cturt.github.io/cinoop.html)
+- [NoobBoy](https://github.com/Mika412/NoobBoy)
+- all the others GameBoy/Advance emulators!
 
 #### License
 

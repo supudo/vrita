@@ -13,6 +13,7 @@
 #include "debuggers/tilemap_viewer.hpp"
 #include "debuggers/sprite_viewer.hpp"
 #include "debuggers/palette_viewer.hpp"
+#include "debuggers/debugger.hpp"
 
 class Settings;
 class DMG;
@@ -47,6 +48,9 @@ public:
 
     std::shared_ptr<PaletteViewer> debuggerPaletteViewer;
     bool debuggerPaletteViewerVisible = false;
+
+    std::shared_ptr<Debugger> debuggerDebugger;
+    bool debuggerDebuggerVisible = false;
 
 private:
     Logger& logger;

@@ -71,6 +71,8 @@ void ShowMainMenu() {
                 managerEmulators->debuggerSpriteViewerVisible = !managerEmulators->debuggerSpriteViewerVisible;
             if (ImGui::MenuItem("Palette Viewer", NULL, managerEmulators->debuggerPaletteViewerVisible))
                 managerEmulators->debuggerPaletteViewerVisible = !managerEmulators->debuggerPaletteViewerVisible;
+            if (ImGui::MenuItem("Debugger", NULL, managerEmulators->debuggerDebuggerVisible))
+                managerEmulators->debuggerDebuggerVisible = !managerEmulators->debuggerDebuggerVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {

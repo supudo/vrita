@@ -48,6 +48,10 @@ void Emulators::init(Settings& settings) {
     debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger, settings);
     debuggerSpriteViewer->init();
     debuggerSpriteViewerVisible = settings.GetBool("Debuggers - Sprite Viewer", "visible", false);
+
+    debuggerDebugger = std::make_shared<Debugger>(logger, settings);
+    debuggerDebugger->init();
+    debuggerDebuggerVisible = settings.GetBool("Debuggers - Debugger", "visible", false);
 }
 
 bool Emulators::createTexture(SDL_GPUDevice* device) {
@@ -111,6 +115,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         );
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory);
+        debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memory);
     }
     else
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);
@@ -125,6 +130,8 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerSpriteViewer->render(&debuggerSpriteViewerVisible);
     if (debuggerPaletteViewerVisible)
         debuggerPaletteViewer->render(&debuggerPaletteViewerVisible);
+    if (debuggerDebuggerVisible)
+        debuggerDebugger->render(&debuggerDebuggerVisible);
 }
 
 void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
@@ -150,6 +157,7 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
     settings.Set("Debuggers - Tilemap Viewer", "visible", debuggerTilemapViewerVisible);
     settings.Set("Debuggers - Sprite Viewer", "visible", debuggerSpriteViewerVisible);
     settings.Set("Debuggers - Palette Viewer", "visible", debuggerPaletteViewerVisible);
+    settings.Set("Debuggers - Debugger", "visible", debuggerDebuggerVisible);
 
     settings.Save();
 
@@ -160,6 +168,7 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
     debuggerTilemapViewer->release();
     debuggerSpriteViewer->release();
     debuggerPaletteViewer->release();
+    debuggerDebugger->release();
 }
 
 std::string Emulators::loadROM(const char* romFilePath) {

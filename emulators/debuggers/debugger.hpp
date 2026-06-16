@@ -1,15 +1,15 @@
 #ifndef VRITA_DEBUGGER_INCLUDES
 #define VRITA_DEBUGGER_INCLUDES
 
-#include <array>
-#include <vector>
 #include <stdint.h>
 #include <cstdint>
+#include <string>
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
 
 class Settings;
+struct DMGCpuRegisters;
 
 class Debugger {
 public:
@@ -18,7 +18,7 @@ public:
     bool init();
     void setMemory(const char* emulatorType, uint8_t* data);
     void release();
-    void render(bool* windowOpened);
+    void render(bool* windowOpened, DMGCpuRegisters& registers);
 
 private:
     Logger& logger;
@@ -33,6 +33,11 @@ private:
 
     uint8_t* memoryData = nullptr;
     uint8_t emulatorType = 0;
+
+    float memoryPanelHeight = 260.0f;
+
+    void renderPerspective1();
+    void renderPerspective2();
 };
 
 #endif

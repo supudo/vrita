@@ -130,8 +130,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerSpriteViewer->render(&debuggerSpriteViewerVisible);
     if (debuggerPaletteViewerVisible)
         debuggerPaletteViewer->render(&debuggerPaletteViewerVisible);
-    if (debuggerDebuggerVisible)
-        debuggerDebugger->render(&debuggerDebuggerVisible);
+    if (debuggerDebuggerVisible) {
+        debuggerDebugger->render(&debuggerDebuggerVisible, emulatorDMG->managerCPU->Registers);
+    }
 }
 
 void Emulators::release(SDL_GPUDevice* device, Settings& settings) {

@@ -306,6 +306,12 @@ void Debugger::renderMemoryRegion() {
 
 // region: Registers quadrant
 
+const char* Debugger::getAddressValue(uint32_t address) const {
+    if (address >= memorySize)
+        return nullptr;
+    return reinterpret_cast<const char*>(memoryData + address);
+}
+
 void Debugger::renderRegisters() {
     if (ImGui::TreeNodeEx("Registers", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::TreeNodeEx("BC", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
@@ -342,7 +348,7 @@ void Debugger::renderRegisters() {
             ImGui::TreePop();
         }
 
-        ImGui::TreeNodeEx("SCY ($FF42)", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+        ImGui::TreeNodeEx("SCY ($FF42)", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "SCY ($FF42): %02X", getAddressValue(0xFF42));
         ImGui::TreeNodeEx("SCX ($FF43)", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
         ImGui::TreeNodeEx("LY ($FF414", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
         ImGui::TreeNodeEx("LYC ($FF45)", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);

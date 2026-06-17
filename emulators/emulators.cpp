@@ -117,8 +117,10 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory);
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memory);
     }
-    else
+    else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);
+        debuggerDebugger->setMemory("agb", nullptr);
+    }
 
     if (debuggersMemoryEditorVisible)
         debuggerMemoryEditor->render(&debuggersMemoryEditorVisible);

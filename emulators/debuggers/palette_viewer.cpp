@@ -8,6 +8,9 @@
 #include <imgui_impl_sdlgpu3.h>
 
 #include "utilities/settings.hpp"
+#include "debuggers_defines_dmg.hpp"
+#include "debuggers_defines_cgb.hpp"
+#include "debuggers_defines_agb.hpp"
 
 bool PaletteViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Palette Viewer", "position_x", 44);

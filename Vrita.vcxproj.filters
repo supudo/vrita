@@ -142,22 +142,19 @@
     <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\memory_editor_dmg.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\memory_editor_data.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\memory_editor_agb.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\memory_editor_cgb.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
     <ClInclude Include="emulators\debuggers\debuggers_defines.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
     <ClInclude Include="emulators\debuggers\debugger.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\debuggers_defines_dmg.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\debuggers_defines_agb.hpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\debuggers\debuggers_defines_cgb.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -183,5 +180,16 @@
     <Filter Include="emulators\debuggers">
       <UniqueIdentifier>{3b55912f-8868-482e-b45b-7f696fc7da7e}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="emulators\debuggers\debuggers_defines_dmg.inl">
+      <Filter>emulators\debuggers</Filter>
+    </None>
+    <None Include="emulators\debuggers\debuggers_defines_agb.inl">
+      <Filter>emulators\debuggers</Filter>
+    </None>
+    <None Include="emulators\debuggers\debuggers_defines_cgb.inl">
+      <Filter>emulators\debuggers</Filter>
+    </None>
   </ItemGroup>
 </Project>

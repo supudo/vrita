@@ -7,6 +7,9 @@
 #include <imgui_impl_sdlgpu3.h>
 
 #include "utilities/settings.hpp"
+#include "debuggers_defines_dmg.hpp"
+#include "debuggers_defines_cgb.hpp"
+#include "debuggers_defines_agb.hpp"
 
 bool MemoryEditor::init() {
     windowPositionX = settings.GetInt("Debuggers - Memory Editor", "position_x", 44);

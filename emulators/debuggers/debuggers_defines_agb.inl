@@ -1,13 +1,11 @@
-#ifndef VRITA_MEMORYEDITOR_AGB_INCLUDES
-#define VRITA_MEMORYEDITOR_AGB_INCLUDES
+#ifndef VRITA_DEBUGGERS_DEFINES_AGB_INL_INCLUDES
+#define VRITA_DEBUGGERS_DEFINES_AGB_INL_INCLUDES
 
 #include <array>
 #include <cstdint>
 #include <map>
 #include <stdint.h>
 #include <vector>
-
-#include "memory_editor_data.hpp"
 
 inline std::array<MemoryRegion, 11> MemoryMap_AGB_Default = { {
     {"BIOS", "Internal BIOS ROM", {0x00000000, 0x00003FFF}, 0x888888, false},

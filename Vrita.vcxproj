@@ -170,11 +170,10 @@
     <ClInclude Include="emulators\agb\agb.hpp" />
     <ClInclude Include="emulators\debuggers\debugger.hpp" />
     <ClInclude Include="emulators\debuggers\debuggers_defines.hpp" />
+    <ClInclude Include="emulators\debuggers\debuggers_defines_agb.hpp" />
+    <ClInclude Include="emulators\debuggers\debuggers_defines_cgb.hpp" />
+    <ClInclude Include="emulators\debuggers\debuggers_defines_dmg.hpp" />
     <ClInclude Include="emulators\debuggers\memory_editor.hpp" />
-    <ClInclude Include="emulators\debuggers\memory_editor_agb.hpp" />
-    <ClInclude Include="emulators\debuggers\memory_editor_cgb.hpp" />
-    <ClInclude Include="emulators\debuggers\memory_editor_data.hpp" />
-    <ClInclude Include="emulators\debuggers\memory_editor_dmg.hpp" />
     <ClInclude Include="emulators\debuggers\palette_viewer.hpp" />
     <ClInclude Include="emulators\debuggers\sprite_viewer.hpp" />
     <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp" />
@@ -198,6 +197,11 @@
     <ClInclude Include="utilities\files.hpp" />
     <ClInclude Include="utilities\logger.hpp" />
     <ClInclude Include="utilities\strings.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="emulators\debuggers\debuggers_defines_agb.inl" />
+    <None Include="emulators\debuggers\debuggers_defines_cgb.inl" />
+    <None Include="emulators\debuggers\debuggers_defines_dmg.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

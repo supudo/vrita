@@ -10,9 +10,7 @@
 #include <vector>
 
 #include "utilities/logger.hpp"
-#include "memory_editor_cgb.hpp"
-#include "memory_editor_dmg.hpp"
-#include "memory_editor_agb.hpp"
+#include "debuggers_defines.hpp"
 
 class Settings;
 

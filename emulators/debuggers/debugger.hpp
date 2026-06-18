@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
@@ -39,21 +40,27 @@ private:
 
     float memoryPanelHeight = 260.0f;
 
-    bool running;
+    bool running = false;
     int selectedMemoryRegion = 0;
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();
-    
+
     void renderRest();
     void renderRestMemory();
     void renderRestCustomExpression();
     void renderRestBreakpoints();
     void renderRestOverlays();
     void renderMemoryRegion();
-    uint8_t getAddressValue8(uint32_t address) const;
-    
+
     void renderRegisters(DMGCpuRegisters& registers);
+    void renderRegisterNode(DebuggerRegisterTreeNode* node, bool isRoot = false);
+    void renderRegisterValue(DebuggerRegisterTreeNode* node);
+
+    std::vector<DebuggerRegisterTreeNode> registerNodes;
+    uint8_t getAddressValue8(uint32_t address) const;
+    void renderFlags(DebuggerRegisterTreeNode* node);
+
     void renderCPULoad();
 };
 

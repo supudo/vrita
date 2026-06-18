@@ -51,7 +51,7 @@ private:
     void renderRestBreakpoints();
     void renderRestOverlays();
     void renderMemoryRegion();
-    const char* getAddressValue(uint32_t address) const;
+    uint8_t getAddressValue(uint32_t address) const;
     
     void renderRegisters();
     void renderCPULoad();

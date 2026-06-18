@@ -220,9 +220,7 @@ void Debugger::release() {
     settings.Save();
 }
 
-void Debugger::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
-    memoryData = data;
-    memorySize = size;
+void Debugger::setMemory(const char* emulatorType) {
     if (strcmp(emulatorType, "dmg") == 0) {
         this->emulatorType = 1;
     }
@@ -246,7 +244,7 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
 
-    if (!memoryData) {
+    if (this->emulatorType) {
         ImGui::Text("No file loaded. Memory is empty.");
         ImGui::End();
         return;

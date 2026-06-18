@@ -207,6 +207,11 @@ bool Debugger::init() {
     return true;
 }
 
+void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+    memoryRead = read8;
+    memoryWrite = write8;
+}
+
 void Debugger::release() {
     settings.Set("Debuggers - Debugger", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Debugger", "position_y", (int)lastWindowPosition.y);
@@ -447,9 +452,9 @@ void Debugger::renderMemoryRegion() {
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
-                        uint8_t b = memoryData[addr + col];
+                        uint8_t b = memoryRead(addr + col);
                         ImGui::TextColored(ImVec4(1, 1, 1, 1), "%02X", b);
-                        uint8_t final_b = memoryData[addr + col];
+                        uint8_t final_b = memoryRead(addr + col);
                         ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
                     }
                 }
@@ -463,7 +468,7 @@ void Debugger::renderMemoryRegion() {
                         uint32_t current_addr = addr + col;
                         if (current_addr >= memorySize)
                             break;
-                        uint8_t value = memoryData[current_addr];
+                        uint8_t value = memoryRead(current_addr);
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
@@ -483,9 +488,7 @@ void Debugger::renderMemoryRegion() {
 // region: Registers quadrant
 
 uint8_t Debugger::getAddressValue8(uint32_t address) const {
-    if (address >= memorySize)
-        return 0;
-    return memoryData[address];
+    return memoryRead(address);
 }
 
 void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {

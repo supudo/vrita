@@ -42,7 +42,7 @@ private:
     bool running;
     int selectedMemoryRegion = 0;
 
-    void renderPerspective();
+    void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();
     
     void renderRest();
@@ -51,9 +51,9 @@ private:
     void renderRestBreakpoints();
     void renderRestOverlays();
     void renderMemoryRegion();
-    uint8_t getAddressValue(uint32_t address) const;
+    uint8_t getAddressValue8(uint32_t address) const;
     
-    void renderRegisters();
+    void renderRegisters(DMGCpuRegisters& registers);
     void renderCPULoad();
 };
 

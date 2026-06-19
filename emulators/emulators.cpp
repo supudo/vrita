@@ -123,11 +123,11 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
                 emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
             }
         );
-        debuggerDebugger->setMemory("dmg");
+        debuggerDebugger->setMemory("dmg", DMG_MMU::MEMORY_SIZE);
     }
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);
-        debuggerDebugger->setMemory("agb");
+        debuggerDebugger->setMemory("agb", 0);
     }
 
     if (debuggersMemoryEditorVisible)

@@ -20,7 +20,7 @@ public:
 
     bool init();
     void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
-    void setMemory(const char* emulatorType);
+    void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
 
@@ -38,6 +38,7 @@ private:
     std::function<uint8_t(uint32_t)> memoryRead;
     std::function<void(uint32_t, uint8_t)> memoryWrite;
 
+    uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
 
     float memoryPanelHeight = 260.0f;

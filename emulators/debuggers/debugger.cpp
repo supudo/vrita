@@ -160,7 +160,7 @@ bool Debugger::init() {
         { nullptr, "Noise counter", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // Cartridge
-        { nullptr, "Cartridge", 0, 107, 3, NDT_Hex8, NVS_None, 0, true, true },
+        { nullptr, "Cartridge", 0, 107, 3, NDT_Hex8, NVS_None, 0, false, true },
         { nullptr, "Title", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "Type", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "ROM Bank", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
@@ -220,7 +220,8 @@ void Debugger::release() {
     settings.Save();
 }
 
-void Debugger::setMemory(const char* emulatorType) {
+void Debugger::setMemory(const char* emulatorType, uint32_t size) {
+    memorySize = size;
     if (strcmp(emulatorType, "dmg") == 0) {
         this->emulatorType = 1;
     }
@@ -244,7 +245,7 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
 
-    if (this->emulatorType) {
+    if ((int)this->emulatorType == 0) {
         ImGui::Text("No file loaded. Memory is empty.");
         ImGui::End();
         return;
@@ -486,6 +487,8 @@ void Debugger::renderMemoryRegion() {
 // region: Registers quadrant
 
 uint8_t Debugger::getAddressValue8(uint32_t address) const {
+    if (address > memorySize)
+        return 0x0000;
     return memoryRead(address);
 }
 

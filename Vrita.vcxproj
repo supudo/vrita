@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="emulators\agb\agb.cpp" />
     <ClCompile Include="emulators\debuggers\debugger.cpp" />
+    <ClCompile Include="emulators\debuggers\debugger_registers.cpp" />
     <ClCompile Include="emulators\debuggers\memory_editor.cpp" />
     <ClCompile Include="emulators\debuggers\palette_viewer.cpp" />
     <ClCompile Include="emulators\debuggers\sprite_viewer.cpp" />

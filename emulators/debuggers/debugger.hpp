@@ -56,6 +56,7 @@ private:
     void renderRestOverlays();
     void renderMemoryRegion();
 
+    void initRegisters();
     void renderRegisters(DMGCpuRegisters& registers);
     void renderRegisterNode(DebuggerRegisterTreeNode* node, bool isRoot = false);
     void renderRegisterValue(DebuggerRegisterTreeNode* node);

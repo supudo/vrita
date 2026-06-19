@@ -184,16 +184,6 @@ void Debugger::initRegisters() {
     };
 }
 
-uint8_t Debugger::getAddressValue8(uint32_t address) const {
-    if (address > memorySize)
-        return 0x0000;
-    return memoryRead(address);
-}
-
-void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {
-    ImGui::Text("F - Z -");
-}
-
 void Debugger::renderRegisterValue(DebuggerRegisterTreeNode* node) {
     if (node->Type == NDT_Custom && node->renderCustom)
         node->renderCustom(node);
@@ -263,4 +253,18 @@ void Debugger::renderRegisters(DMGCpuRegisters& registers) {
 
         ImGui::EndTable();
     }
+}
+
+uint8_t Debugger::getAddressValue8(uint32_t address) const {
+    if (address > memorySize)
+        return 0x0000;
+    return memoryRead(address);
+}
+
+void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {
+    bool is_zero = cpuGetFlag(FLAG_ZERO);
+    bool is_substract = cpuGetFlag(FLAG_SUBTRACT);
+    bool is_half_carry = cpuGetFlag(FLAG_HALF_CARRY);
+    bool is_carry = cpuGetFlag(FLAG_CARRY);
+    ImGui::Text("%s %s %s %s", (is_zero ? "Z" : "-"), (is_substract ? "S" : "-"), (is_half_carry ? "H" : "-"), (is_carry ? "C" : "-"));
 }

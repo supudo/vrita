@@ -19,7 +19,7 @@ public:
     Debugger(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
     bool init();
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<bool(uint8_t)> getFlag);
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -37,6 +37,7 @@ private:
 
     std::function<uint8_t(uint32_t)> memoryRead;
     std::function<void(uint32_t, uint8_t)> memoryWrite;
+    std::function<bool(uint8_t)> cpuGetFlag;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;

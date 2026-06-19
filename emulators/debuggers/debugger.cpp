@@ -29,9 +29,10 @@ bool Debugger::init() {
     return true;
 }
 
-void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<bool(uint8_t)> getFlag) {
     memoryRead = read8;
     memoryWrite = write8;
+    cpuGetFlag = getFlag;
 }
 
 void Debugger::release() {

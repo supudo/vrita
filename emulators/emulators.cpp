@@ -121,6 +121,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             },
             [&] (uint32_t addr, uint8_t value) {
                 emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
+            },
+            [&] (uint8_t flag) {
+                return emulatorDMG->managerCPU->getFlag(flag);
             }
         );
         debuggerDebugger->setMemory("dmg", DMG_MMU::MEMORY_SIZE);

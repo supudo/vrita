@@ -29,10 +29,14 @@ bool Debugger::init() {
     return true;
 }
 
-void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<bool(uint8_t)> getFlag) {
-    memoryRead = read8;
-    memoryWrite = write8;
-    cpuGetFlag = getFlag;
+void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                            std::function<void(uint16_t, uint8_t)> write8,
+                            std::function<bool(uint8_t)> getFlag,
+                            std::function<bool(uint8_t)> interruptsEnabled) {
+    funcMemoryRead = read8;
+    funcMemoryWrite = write8;
+    funcCpuGetFlag = getFlag;
+    funcInterruptsEnabled = interruptsEnabled;
 }
 
 void Debugger::release() {
@@ -230,6 +234,8 @@ void Debugger::renderRestBreakpoints() {}
 void Debugger::renderRestOverlays() {}
 
 void Debugger::renderMemoryRegion() {
+    if (!funcMemoryRead)
+        ImGui::TextDisabled("N/A");
     MemoryRegion region = MemoryMap_DMG_Default.data()[selectedMemoryRegion];
     uint32_t regionStart = region.range.start;
     uint32_t regionEnd = region.range.end;
@@ -274,9 +280,9 @@ void Debugger::renderMemoryRegion() {
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
-                        uint8_t b = memoryRead(addr + col);
+                        uint8_t b = funcMemoryRead(addr + col);
                         ImGui::TextColored(ImVec4(1, 1, 1, 1), "%02X", b);
-                        uint8_t final_b = memoryRead(addr + col);
+                        uint8_t final_b = funcMemoryRead(addr + col);
                         ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
                     }
                 }
@@ -290,7 +296,7 @@ void Debugger::renderMemoryRegion() {
                         uint32_t current_addr = addr + col;
                         if (current_addr >= memorySize)
                             break;
-                        uint8_t value = memoryRead(current_addr);
+                        uint8_t value = funcMemoryRead(current_addr);
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';

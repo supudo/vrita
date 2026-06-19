@@ -124,6 +124,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             },
             [&] (uint8_t flag) {
                 return emulatorDMG->managerCPU->getFlag(flag);
+            },
+            [&] (uint8_t flag) {
+                return emulatorDMG->managerInterrupts->isInterruptEnabled(flag);
             }
         );
         debuggerDebugger->setMemory("dmg", DMG_MMU::MEMORY_SIZE);
@@ -143,7 +146,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerSpriteViewer->render(&debuggerSpriteViewerVisible);
     if (debuggerPaletteViewerVisible)
         debuggerPaletteViewer->render(&debuggerPaletteViewerVisible);
-    if (debuggerDebuggerVisible) {
+    if (debuggerDebuggerVisible && emulatorDMG && emulatorDMG->managerCPU && emulatorDMG && emulatorDMG->managerInterrupts) {
         debuggerDebugger->render(&debuggerDebuggerVisible, emulatorDMG->managerCPU->Registers);
     }
 }

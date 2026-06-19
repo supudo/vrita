@@ -12,8 +12,8 @@ void Debugger::initRegisters() {
         { nullptr, "AF", 0, -1, 0, NDT_Hex16, NVS_RegAF, 0, false },
         { nullptr, "SP", 0, -1, 0, NDT_Hex16, NVS_RegSP, 0, false },
         { nullptr, "PC", 0, -1, 0, NDT_Hex16, NVS_RegPC, 0, false },
-        { [this](DebuggerRegisterTreeNode* n){ renderFlags(n); }, "Flags", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { nullptr, "Interrupts", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderFlags(n); }, "Flags", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterrupts(n); }, "Interrupts", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // PPU
         { nullptr, "PPU", 0, 10, 11, NDT_Hex8, NVS_None, 0, true, true },
@@ -49,10 +49,10 @@ void Debugger::initRegisters() {
         { nullptr, "Bit 1 - Mode flag", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // APU
-        { nullptr, "APU", 0, 36, 23, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "APU", 0, 36, 26, NDT_Hex8, NVS_None, 0, false, true },
 
         { nullptr, "NR50 ($FF24)", 0xFF24, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "NR51 ($FF25)", 0xFF25, 58, 2, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "NR51 ($FF25)", 0xFF25, 62, 2, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR52 ($FF26)", 0xFF26, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR10 ($FF10)", 0xFF10, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR11 ($FF11)", 0xFF11, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -72,11 +72,11 @@ void Debugger::initRegisters() {
         { nullptr, "NR42 ($FF21)", 0xFF21, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR43 ($FF22)", 0xFF22, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR44 ($FF23)", 0xFF23, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "Wave pattern", 0, 60, 16, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 1 (SQ1)", 0, 76, 10, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 2 (SQ2)", 0, 86, 7, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 3 (WAV)", 0, 93, 5, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 4 (NOI)", 0, 98, 8, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Wave pattern", 0, 64, 16, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Channel 1 (SQ1)", 0, 80, 10, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Channel 2 (SQ2)", 0, 90, 7, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Channel 3 (WAV)", 0, 97, 5, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Channel 4 (NOI)", 0, 102, 8, NDT_Hex8, NVS_None, 0, false },
 
         // APU STAT children
         { nullptr, "Channels left", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
@@ -139,17 +139,17 @@ void Debugger::initRegisters() {
         { nullptr, "Noise counter", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // Cartridge
-        { nullptr, "Cartridge", 0, 107, 3, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "Cartridge", 0, 111, 3, NDT_Hex8, NVS_None, 0, true, true },
         { nullptr, "Title", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "Type", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "ROM Bank", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // GameBoy
-        { nullptr, "GameBoy", 0, 111, 9, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "GameBoy", 0, 115, 10, NDT_Hex8, NVS_None, 0, false, true },
 
-        { nullptr, "Input", 0, 120, 8, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "IE ($FFFF)", 0xFFFF, 128, 5, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "IF ($FF0F)", 0xFF0F, 133, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "Input", 0, 125, 8, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "IE ($FFFF)", 0xFFFF, 133, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "IF ($FF0F)", 0xFF0F, 138, 5, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "DIV ($FF04)", 0xFF04, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TIMA ($FF05)", 0xFF05, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TMA ($FF06)", 0xFF06, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -258,13 +258,26 @@ void Debugger::renderRegisters(DMGCpuRegisters& registers) {
 uint8_t Debugger::getAddressValue8(uint32_t address) const {
     if (address > memorySize)
         return 0x0000;
-    return memoryRead(address);
+    return funcMemoryRead(address);
 }
 
 void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {
-    bool is_zero = cpuGetFlag(FLAG_ZERO);
-    bool is_substract = cpuGetFlag(FLAG_SUBTRACT);
-    bool is_half_carry = cpuGetFlag(FLAG_HALF_CARRY);
-    bool is_carry = cpuGetFlag(FLAG_CARRY);
+    if (!funcCpuGetFlag) { 
+        ImGui::TextDisabled("N/A"); 
+        return; 
+    }
+    bool is_zero = funcCpuGetFlag(FLAG_ZERO);
+    bool is_substract = funcCpuGetFlag(FLAG_SUBTRACT);
+    bool is_half_carry = funcCpuGetFlag(FLAG_HALF_CARRY);
+    bool is_carry = funcCpuGetFlag(FLAG_CARRY);
     ImGui::Text("%s %s %s %s", (is_zero ? "Z" : "-"), (is_substract ? "S" : "-"), (is_half_carry ? "H" : "-"), (is_carry ? "C" : "-"));
+}
+
+void Debugger::renderInterrupts(DebuggerRegisterTreeNode* node) {
+    if (!funcInterruptsEnabled) { 
+        ImGui::TextDisabled("N/A");
+        return; 
+    }
+    bool interrupt_enabled = funcInterruptsEnabled(node->Address);
+    ImGui::Text("%s", interrupt_enabled ? "Enabled" : "Disabled");
 }

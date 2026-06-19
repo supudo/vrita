@@ -19,7 +19,10 @@ public:
     Debugger(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
     bool init();
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<bool(uint8_t)> getFlag);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                      std::function<void(uint16_t, uint8_t)> write8,
+                      std::function<bool(uint8_t)> getFlag,
+                      std::function<bool(uint8_t)> interruptsEnabled);
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -35,9 +38,10 @@ private:
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
-    std::function<uint8_t(uint32_t)> memoryRead;
-    std::function<void(uint32_t, uint8_t)> memoryWrite;
-    std::function<bool(uint8_t)> cpuGetFlag;
+    std::function<uint8_t(uint32_t)> funcMemoryRead;
+    std::function<void(uint32_t, uint8_t)> funcMemoryWrite;
+    std::function<bool(uint8_t)> funcCpuGetFlag;
+    std::function<bool(uint8_t)> funcInterruptsEnabled;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
@@ -65,6 +69,7 @@ private:
     std::vector<DebuggerRegisterTreeNode> registerNodes;
     uint8_t getAddressValue8(uint32_t address) const;
     void renderFlags(DebuggerRegisterTreeNode* node);
+    void renderInterrupts(DebuggerRegisterTreeNode* node);
 
     void renderCPULoad();
 };

@@ -71,6 +71,7 @@ private:
     void renderFlags(DebuggerRegisterTreeNode* node);
     void renderInterrupts(DebuggerRegisterTreeNode* node);
     void renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit);
+    void renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit);
 
     void renderCPULoad();
 };

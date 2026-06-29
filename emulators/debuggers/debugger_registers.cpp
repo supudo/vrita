@@ -41,12 +41,12 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // STAT children
-        { nullptr, "Bit 6 - LYC=LY coincidence interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 5 - Mode 2 OAM interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 4 - Mode 1 V-Blank interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 3 - Mode 0 H-Blank interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 2 - Coincidence flag", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 1 - Mode flag", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 3); }, "Bit 3 - Mode 0 H-Blank interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 2); }, "Bit 2 - Coincidence flag", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // APU
         { nullptr, "APU", 0, 36, 26, NDT_Hex8, NVS_None, 0, false, true },
@@ -308,6 +308,41 @@ void Debugger::renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
             break;
         case 0:
             ImGui::Text("%s", (addressValue & (1 << 0)) == 0 ? "Off" : "On");
+            break;
+    }
+}
+
+void Debugger::renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
+    uint8_t addressValue = funcMemoryRead(node->Address);
+    switch (bit) {
+        case 6:
+            ImGui::Text("%s", (addressValue & (1 << 6)) == 0 ? "Disabled" : "Enabled");
+            break;
+        case 5:
+            ImGui::Text("%s", (addressValue & (1 << 5)) == 0 ? "Disabled" : "Enabled");
+            break;
+        case 4:
+            ImGui::Text("%s", (addressValue & (1 << 4)) == 0 ? "Disabled" : "Enabled");
+            break;
+        case 3:
+            ImGui::Text("%s", (addressValue & (1 << 3)) == 0 ? "Disabled" : "Enabled");
+            break;
+        case 2:
+            ImGui::Text("%s", (addressValue & (1 << 2)) == 1 ? "LY == LYC" : "LY <> LYC");
+            break;
+        case 1:
+            uint8_t ppu_mode = addressValue & (1 << 1);
+            switch (ppu_mode) {
+                case 3:
+                    ImGui::Text("Mode 3 (Drawing pixels)");
+                    break;
+                case 2:
+                    ImGui::Text("Mode 2 (OAM scan)");
+                    break;
+                case 0:
+                    ImGui::Text("Mode 0 (H-Blank)");
+                    break;
+            }
             break;
     }
 }

@@ -284,55 +284,56 @@ void Debugger::renderInterrupts(DebuggerRegisterTreeNode* node) {
 
 void Debugger::renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
     uint8_t addressValue = funcMemoryRead(node->Address);
+    uint8_t bitValue = (addressValue & (1 << bit));
     switch (bit) {
         case 7:
-            ImGui::Text("%s", (addressValue & (1 << 7)) == 0 ? "On" : "Off");
+            ImGui::Text("%s", bitValue == 0 ? "On" : "Off");
             break;
         case 6:
-            ImGui::Text("%s", (addressValue & (1 << 6)) == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
+            ImGui::Text("%s", bitValue == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
             break;
         case 5:
-            ImGui::Text("%s", (addressValue & (1 << 5)) == 0 ? "Off" : "On");
+            ImGui::Text("%s", bitValue == 0 ? "Off" : "On");
             break;
         case 4:
-            ImGui::Text("%s", (addressValue & (1 << 4)) == 0 ? "$8800 - $97FF" : "$8000 - $8FFF");
+            ImGui::Text("%s", bitValue == 0 ? "$8800 - $97FF" : "$8000 - $8FFF");
             break;
         case 3:
-            ImGui::Text("%s", (addressValue & (1 << 3)) == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
+            ImGui::Text("%s", bitValue == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
             break;
         case 2:
-            ImGui::Text("%s", (addressValue & (1 << 2)) == 0 ? "8 x 8" : "8 x 16");
+            ImGui::Text("%s", bitValue == 0 ? "8 x 8" : "8 x 16");
             break;
         case 1:
-            ImGui::Text("%s", (addressValue & (1 << 1)) == 0 ? "Off" : "On");
+            ImGui::Text("%s", bitValue == 0 ? "Off" : "On");
             break;
         case 0:
-            ImGui::Text("%s", (addressValue & (1 << 0)) == 0 ? "Off" : "On");
+            ImGui::Text("%s", bitValue == 0 ? "Off" : "On");
             break;
     }
 }
 
 void Debugger::renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
     uint8_t addressValue = funcMemoryRead(node->Address);
+    uint8_t bitValue = (addressValue & (1 << bit));
     switch (bit) {
         case 6:
-            ImGui::Text("%s", (addressValue & (1 << 6)) == 0 ? "Disabled" : "Enabled");
+            ImGui::Text("%s", bitValue == 0 ? "Disabled" : "Enabled");
             break;
         case 5:
-            ImGui::Text("%s", (addressValue & (1 << 5)) == 0 ? "Disabled" : "Enabled");
+            ImGui::Text("%s", bitValue == 0 ? "Disabled" : "Enabled");
             break;
         case 4:
-            ImGui::Text("%s", (addressValue & (1 << 4)) == 0 ? "Disabled" : "Enabled");
+            ImGui::Text("%s", bitValue == 0 ? "Disabled" : "Enabled");
             break;
         case 3:
-            ImGui::Text("%s", (addressValue & (1 << 3)) == 0 ? "Disabled" : "Enabled");
+            ImGui::Text("%s", bitValue == 0 ? "Disabled" : "Enabled");
             break;
         case 2:
-            ImGui::Text("%s", (addressValue & (1 << 2)) == 1 ? "LY == LYC" : "LY <> LYC");
+            ImGui::Text("%s", bitValue == 1 ? "LY == LYC" : "LY <> LYC");
             break;
         case 1:
-            uint8_t ppu_mode = addressValue & (1 << 1);
-            switch (ppu_mode) {
+            switch (bitValue) {
                 case 3:
                     ImGui::Text("Mode 3 (Drawing pixels)");
                     break;

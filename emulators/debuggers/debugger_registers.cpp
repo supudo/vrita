@@ -31,14 +31,14 @@ void Debugger::initRegisters() {
         { nullptr, "WX ($FF4B)", 0xFF4B, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
 
         // LCDC children
-        { nullptr, "Bit 7 - LCD display enable", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 6 - Window tile map display select", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 5 - Window display enable", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 4 - BG & Window tile data select", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 3 - BG tile map display select", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 2 - OBJ (Sprite) size", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 1 - OBJ (Sprite) display enable", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Bit 0 - BG/Window display/priority", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 7); }, "Bit 7 - LCD display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 6); }, "Bit 6 - Window tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 5); }, "Bit 5 - Window display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 4); }, "Bit 4 - BG & Window tile data select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 3); }, "Bit 3 - BG tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 2); }, "Bit 2 - OBJ (Sprite) size", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 1); }, "Bit 1 - OBJ (Sprite) display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // STAT children
         { nullptr, "Bit 6 - LYC=LY coincidence interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
@@ -280,4 +280,34 @@ void Debugger::renderInterrupts(DebuggerRegisterTreeNode* node) {
     }
     bool interrupt_enabled = funcInterruptsEnabled(node->Address);
     ImGui::Text("%s", interrupt_enabled ? "Enabled" : "Disabled");
+}
+
+void Debugger::renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
+    uint8_t addressValue = funcMemoryRead(node->Address);
+    switch (bit) {
+        case 7:
+            ImGui::Text("%s", (addressValue & (1 << 7)) == 0 ? "On" : "Off");
+            break;
+        case 6:
+            ImGui::Text("%s", (addressValue & (1 << 6)) == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
+            break;
+        case 5:
+            ImGui::Text("%s", (addressValue & (1 << 5)) == 0 ? "Off" : "On");
+            break;
+        case 4:
+            ImGui::Text("%s", (addressValue & (1 << 4)) == 0 ? "$8800 - $97FF" : "$8000 - $8FFF");
+            break;
+        case 3:
+            ImGui::Text("%s", (addressValue & (1 << 3)) == 0 ? "$9800 - $9BFF" : "$9C00 - $9FFF");
+            break;
+        case 2:
+            ImGui::Text("%s", (addressValue & (1 << 2)) == 0 ? "8 x 8" : "8 x 16");
+            break;
+        case 1:
+            ImGui::Text("%s", (addressValue & (1 << 1)) == 0 ? "Off" : "On");
+            break;
+        case 0:
+            ImGui::Text("%s", (addressValue & (1 << 0)) == 0 ? "Off" : "On");
+            break;
+    }
 }

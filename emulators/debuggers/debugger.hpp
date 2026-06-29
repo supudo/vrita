@@ -70,6 +70,7 @@ private:
     uint8_t getAddressValue8(uint32_t address) const;
     void renderFlags(DebuggerRegisterTreeNode* node);
     void renderInterrupts(DebuggerRegisterTreeNode* node);
+    void renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit);
 
     void renderCPULoad();
 };

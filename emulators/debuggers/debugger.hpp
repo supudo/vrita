@@ -73,6 +73,7 @@ private:
     void renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit);
     void renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit);
     void renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit);
+    void renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit);
 
     void renderCPULoad();
 };

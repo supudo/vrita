@@ -169,18 +169,18 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 3); }, "DOWN", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // IE children
-        { nullptr, "V-Blank Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "LCD STAT Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Timer Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Serial Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Joypad Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 0); }, "V-Blank Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 1); }, "LCD STAT Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 2); }, "Timer Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 3); }, "Serial Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 4); }, "Joypad Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // IF children
-        { nullptr, "V-Blank Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "LCD STAT Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Timer Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Serial Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Joypad Interrupt", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 0); }, "V-Blank Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 1); }, "LCD STAT Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 2); }, "Timer Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 3); }, "Serial Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 4); }, "Joypad Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
     };
 }
 
@@ -361,4 +361,9 @@ void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_
             addressValue |= (1 << bit); // released = 1
         funcMemoryWrite(node->Address, addressValue);
     }
+}
+
+void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) {
+    uint8_t addressValue = funcMemoryRead(node->Address);
+    ImGui::Text("%d", ((addressValue & (1 << bit)) == 0) ? 0 : 1);
 }

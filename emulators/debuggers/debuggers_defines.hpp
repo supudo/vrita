@@ -49,7 +49,8 @@ enum DebuggerNodeValueSource : uint8_t {
 };
 
 enum DebuggerNodeDisplayType : uint8_t {
-    NDT_Custom = 0,
+    NDT_None = 0,
+    NDT_Custom = 1,
     NDT_Hex8 = 8,
     NDT_Hex16 = 16,
 };

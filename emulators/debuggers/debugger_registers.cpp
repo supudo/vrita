@@ -41,12 +41,12 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // STAT children
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 3); }, "Bit 3 - Mode 0 H-Blank interrupt", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 2); }, "Bit 2 - Coincidence flag", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 3); }, "Bit 3 - Mode 0 H-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 2); }, "Bit 2 - Coincidence flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // APU
         { nullptr, "APU", 0, 36, 26, NDT_Hex8, NVS_None, 0, false, true },

@@ -19,6 +19,7 @@
 #include "eyecandy/dots.hpp"
 #include "gui/filebrowser.hpp"
 #include "gui/log.hpp"
+#include "utilities/iconfonts/IconsFontAwesome7.h"
 
 SDL_Window* appWindow;
 
@@ -161,6 +162,25 @@ void saveAppSettings() {
     appSettings.Save();
 }
 
+void loadFonts() {
+    ImGuiIO& io = ImGui::GetIO();
+    float baseFontSize = 13.0f;
+    
+    ImFontConfig base_config;
+    base_config.SizePixels = baseFontSize;
+    io.Fonts->AddFontDefault(&base_config);
+
+    float iconFontSize = baseFontSize * 1.5f;
+    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+    ImFontConfig icons_config;
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = true;
+    icons_config.GlyphMinAdvanceX = iconFontSize;
+    icons_config.GlyphOffset = ImVec2(0.0f, 4.0f);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-regular-400.ttf", iconFontSize, &icons_config, icons_ranges);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSize, &icons_config, icons_ranges);
+}
+
 int main(int argc, char** argv) {
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
         printf("[VRITA] Error: SDL_Init(): %s\n", SDL_GetError());
@@ -238,6 +258,8 @@ int main(int argc, char** argv) {
     init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;
     init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
     ImGui_ImplSDLGPU3_Init(&init_info);
+
+    loadFonts();
 
     ImVec4 clear_color = ImVec4(188.0f / 255.0f, 190.0f / 255.0f, 194.0f / 255.0f, 1.00f);
 

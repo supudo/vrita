@@ -160,6 +160,9 @@
     <ClInclude Include="emulators\debuggers\debuggers_defines_cgb.hpp">
       <Filter>emulators\debuggers</Filter>
     </ClInclude>
+    <ClInclude Include="utilities\iconfonts\IconsFontAwesome7.h">
+      <Filter>utilities\iconfonts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">
@@ -183,6 +186,15 @@
     <Filter Include="emulators\debuggers">
       <UniqueIdentifier>{3b55912f-8868-482e-b45b-7f696fc7da7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resources">
+      <UniqueIdentifier>{3921aa0d-d845-4074-adca-e6814d6506f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resources\fonts">
+      <UniqueIdentifier>{5d868a07-b0b0-4a4d-97cb-9507db01d968}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utilities\iconfonts">
+      <UniqueIdentifier>{9e4189b8-a7eb-472a-b219-727fd674f98f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="emulators\debuggers\debuggers_defines_dmg.inl">
@@ -194,5 +206,13 @@
     <None Include="emulators\debuggers\debuggers_defines_cgb.inl">
       <Filter>emulators\debuggers</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\fonts\fa-regular-400.ttf">
+      <Filter>resources\fonts</Filter>
+    </Font>
+    <Font Include="resources\fonts\fa-solid-900.ttf">
+      <Filter>resources\fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>

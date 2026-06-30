@@ -122,6 +122,9 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
+    <PostBuildEvent>
+      <Command>xcopy /E /I /Y "$(ProjectDir)resources" "$(OutDir)resources"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -193,6 +196,7 @@
     <ClInclude Include="eyecandy\dots.hpp" />
     <ClInclude Include="gui\filebrowser.hpp" />
     <ClInclude Include="gui\log.hpp" />
+    <ClInclude Include="utilities\iconfonts\IconsFontAwesome7.h" />
     <ClInclude Include="utilities\settings.hpp" />
     <ClInclude Include="utilities\datetimes.hpp" />
     <ClInclude Include="utilities\files.hpp" />
@@ -203,6 +207,14 @@
     <None Include="emulators\debuggers\debuggers_defines_agb.inl" />
     <None Include="emulators\debuggers\debuggers_defines_cgb.inl" />
     <None Include="emulators\debuggers\debuggers_defines_dmg.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="resources\fonts\fa-regular-400.ttf">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </Font>
+    <Font Include="resources\fonts\fa-solid-900.ttf">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </Font>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

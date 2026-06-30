@@ -11,6 +11,8 @@
 
 #include "utilities/settings.hpp"
 #include "emulators/dmg/cpu_registers.hpp"
+#include "utilities/iconfonts/IconsFontAwesome7.h"
+
 #include "debuggers_defines_dmg.hpp"
 #include "debuggers_defines_dmg.inl"
 #include "debuggers_defines_cgb.hpp"
@@ -89,18 +91,24 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.5f, 0.5f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    const char* btnRunPause = gameIsRunning ? "Pause" : "Run";
-    if (ImGui::Button(btnRunPause, ImVec2(90, 26))) {
+    ImGui::SetItemTooltip(gameIsRunning ? "Pause" : "Run");
+    if (ImGui::Button(gameIsRunning ? ICON_FA_PAUSE : ICON_FA_PLAY, ImVec2(40, 32))) {
         gameIsRunning = !gameIsRunning;
         if (gameIsRunning) funcStartGame();
         else funcStopGame();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Step In", ImVec2(90, 26))) { }
+    ImGui::SetItemTooltip("Step Over");
+    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN, ImVec2(40, 32))) {
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Step Over", ImVec2(90, 26))) { }
+    ImGui::SetItemTooltip("Step Into");
+    if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(40, 32))) { 
+    }
     ImGui::SameLine();
-    if (ImGui::Button("Step Back", ImVec2(90, 26))) { }
+    ImGui::SetItemTooltip("Step Out");
+    if (ImGui::Button(ICON_FA_ARROW_UP, ImVec2(40, 32))) {
+    }
     ImGui::PopStyleColor(3);
 
     ImGui::Separator();

@@ -22,7 +22,10 @@ public:
     void setCallbacks(std::function<uint8_t(uint16_t)> read8,
                       std::function<void(uint16_t, uint8_t)> write8,
                       std::function<bool(uint8_t)> getFlag,
-                      std::function<bool(uint8_t)> interruptsEnabled);
+                      std::function<bool(uint8_t)> interruptsEnabled,
+                      std::function<bool()> isGameRunning,
+                      std::function<void()> stopGame,
+                      std::function<void()> startGame);
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -42,13 +45,16 @@ private:
     std::function<void(uint32_t, uint8_t)> funcMemoryWrite;
     std::function<bool(uint8_t)> funcCpuGetFlag;
     std::function<bool(uint8_t)> funcInterruptsEnabled;
+    std::function<bool()> funcIsGameRunning;
+    std::function<void()> funcStopGame;
+    std::function<void()> funcStartGame;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
 
     float memoryPanelHeight = 260.0f;
 
-    bool running = false;
+    bool gameIsRunning = false;
     int selectedMemoryRegion = 0;
 
     void renderPerspective(DMGCpuRegisters& registers);

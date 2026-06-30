@@ -127,6 +127,15 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             },
             [&] (uint8_t flag) {
                 return emulatorDMG->managerInterrupts->isInterruptEnabled(flag);
+            },
+            [&] () {
+                return emulatorDMG->isGameRunning();
+            },
+            [&] () {
+                return emulatorDMG->stopGame();
+            },
+            [&] () {
+                return emulatorDMG->startGame();
             }
         );
         debuggerDebugger->setMemory("dmg", DMG_MMU::MEMORY_SIZE);

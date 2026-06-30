@@ -32,11 +32,17 @@ bool Debugger::init() {
 void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                             std::function<void(uint16_t, uint8_t)> write8,
                             std::function<bool(uint8_t)> getFlag,
-                            std::function<bool(uint8_t)> interruptsEnabled) {
+                            std::function<bool(uint8_t)> interruptsEnabled,
+                            std::function<bool()> isGameRunning,
+                            std::function<void()> stopGame,
+                            std::function<void()> startGame) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcCpuGetFlag = getFlag;
     funcInterruptsEnabled = interruptsEnabled;
+    funcIsGameRunning = isGameRunning;
+    funcStopGame = stopGame;
+    funcStartGame = startGame;
 }
 
 void Debugger::release() {
@@ -49,15 +55,12 @@ void Debugger::release() {
 
 void Debugger::setMemory(const char* emulatorType, uint32_t size) {
     memorySize = size;
-    if (strcmp(emulatorType, "dmg") == 0) {
+    if (strcmp(emulatorType, "dmg") == 0)
         this->emulatorType = 1;
-    }
-    else if (strcmp(emulatorType, "agb") == 0) {
+    else if (strcmp(emulatorType, "agb") == 0)
         this->emulatorType = 2;
-    }
-    else {
+    else
         this->emulatorType = 0;
-    }
 }
 
 void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
@@ -78,18 +81,26 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
         return;
     }
 
+    if (!gameIsRunning && funcIsGameRunning)
+        funcStopGame();
+    else if (gameIsRunning && !funcIsGameRunning)
+        funcStartGame();
+
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.5f, 0.5f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    if (ImGui::Button("Step", ImVec2(80, 26))) { }
-    ImGui::SameLine();
-    if (ImGui::Button("Run", ImVec2(80, 26))) { 
-        running = true;
+    const char* btnRunPause = gameIsRunning ? "Pause" : "Run";
+    if (ImGui::Button(btnRunPause, ImVec2(90, 26))) {
+        gameIsRunning = !gameIsRunning;
+        if (gameIsRunning) funcStartGame();
+        else funcStopGame();
     }
     ImGui::SameLine();
-    if (ImGui::Button("Pause", ImVec2(80, 26))) { 
-        running = false;
-    }
+    if (ImGui::Button("Step In", ImVec2(90, 26))) { }
+    ImGui::SameLine();
+    if (ImGui::Button("Step Over", ImVec2(90, 26))) { }
+    ImGui::SameLine();
+    if (ImGui::Button("Step Back", ImVec2(90, 26))) { }
     ImGui::PopStyleColor(3);
 
     ImGui::Separator();
@@ -321,7 +332,7 @@ void Debugger::renderCPULoad() {
     static float values[90] = {};
     static int values_offset = 0;
     static double refresh_time = 0.0;
-    if (!running || refresh_time == 0.0)
+    if (gameIsRunning || refresh_time == 0.0)
         refresh_time = ImGui::GetTime();
     while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
     {

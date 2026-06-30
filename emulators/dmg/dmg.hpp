@@ -53,6 +53,9 @@ public:
     std::shared_ptr<DMG_PPU> managerPPU;
 
     bool ROMFileLoaded = false;
+    void stopGame();
+    void startGame();
+    bool isGameRunning();
 
 private:
     Logger& logger;
@@ -65,9 +68,9 @@ private:
     double renderingSpeed = 0.0;
     const double DMG_FPS = 59.7275;
 
-    void toggleGameState();
     std::string gameStateLabel = "Pause game";
     bool gameIsPaused = false;
+    void toggleGameState();
     std::string logCallsLabel = "Log CPU calls (OFF)";
 
     void stepCPU();

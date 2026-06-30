@@ -130,6 +130,20 @@ void DMG::toggleGameState() {
     gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
 }
 
+void DMG::stopGame() {
+    gameIsPaused = true;
+    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
+}
+
+void DMG::startGame() {
+    gameIsPaused = false;
+    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
+}
+
+bool DMG::isGameRunning() {
+    return !gameIsPaused;
+}
+
 #pragma region Rendering
 void DMG::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);

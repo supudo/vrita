@@ -91,24 +91,24 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.5f, 0.5f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    ImGui::SetItemTooltip(gameIsRunning ? "Pause" : "Run");
     if (ImGui::Button(gameIsRunning ? ICON_FA_PAUSE : ICON_FA_PLAY, ImVec2(40, 32))) {
         gameIsRunning = !gameIsRunning;
         if (gameIsRunning) funcStartGame();
         else funcStopGame();
     }
+    ImGui::SetItemTooltip(gameIsRunning ? "Pause" : "Run");
     ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(40, 32))) {
+    }
     ImGui::SetItemTooltip("Step Over");
+    ImGui::SameLine();
     if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN, ImVec2(40, 32))) {
     }
+    ImGui::SetItemTooltip("Step In");
     ImGui::SameLine();
-    ImGui::SetItemTooltip("Step Into");
-    if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(40, 32))) { 
-    }
-    ImGui::SameLine();
-    ImGui::SetItemTooltip("Step Out");
     if (ImGui::Button(ICON_FA_ARROW_UP, ImVec2(40, 32))) {
     }
+    ImGui::SetItemTooltip("Step Back");
     ImGui::PopStyleColor(3);
 
     ImGui::Separator();
@@ -340,7 +340,7 @@ void Debugger::renderCPULoad() {
     static float values[90] = {};
     static int values_offset = 0;
     static double refresh_time = 0.0;
-    if (gameIsRunning || refresh_time == 0.0)
+    if (!gameIsRunning || refresh_time == 0.0)
         refresh_time = ImGui::GetTime();
     while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
     {

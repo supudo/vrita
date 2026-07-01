@@ -388,11 +388,43 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
             break;
         }
         case 2: { // Type
-            char ctype[5];
-            for (int i = 0; i < 4; i++)
-                ctype[i] = static_cast<char>(funcMemoryRead(0x147 + i));
-            ctype[4] = '\0';
-            ImGui::Text("%s", ctype);
+            uint8_t typeVal = funcMemoryRead(0x0147);
+            const char* typeName = nullptr;
+            switch (typeVal) {
+                case 0x00: typeName = "ROM ONLY"; break;
+                case 0x01: typeName = "MBC1"; break;
+                case 0x02: typeName = "MBC1+RAM"; break;
+                case 0x03: typeName = "MBC1+RAM+BATTERY"; break;
+                case 0x05: typeName = "MBC2"; break;
+                case 0x06: typeName = "MBC2+BATTERY"; break;
+                case 0x08: typeName = "ROM+RAM"; break;
+                case 0x09: typeName = "ROM+RAM+BATTERY"; break;
+                case 0x0B: typeName = "MMM01"; break;
+                case 0x0C: typeName = "MMM01+RAM"; break;
+                case 0x0D: typeName = "MMM01+RAM+BATTERY"; break;
+                case 0x0F: typeName = "MBC3+TIMER+BATTERY"; break;
+                case 0x10: typeName = "MBC3+TIMER+RAM+BATTERY"; break;
+                case 0x11: typeName = "MBC3"; break;
+                case 0x12: typeName = "MBC3+RAM"; break;
+                case 0x13: typeName = "MBC3+RAM+BATTERY"; break;
+                case 0x19: typeName = "MBC5"; break;
+                case 0x1A: typeName = "MBC5+RAM"; break;
+                case 0x1B: typeName = "MBC5+RAM+BATTERY"; break;
+                case 0x1C: typeName = "MBC5+RUMBLE"; break;
+                case 0x1D: typeName = "MBC5+RUMBLE+RAM"; break;
+                case 0x1E: typeName = "MBC5+RUMBLE+RAM+BATTERY"; break;
+                case 0x20: typeName = "MBC6"; break;
+                case 0x22: typeName = "MBC7+SENSOR+RUMBLE+RAM+BATTERY"; break;
+                case 0xFC: typeName = "POCKET CAMERA"; break;
+                case 0xFD: typeName = "BANDAI TAMA5"; break;
+                case 0xFE: typeName = "HuC3"; break;
+                case 0xFF: typeName = "HuC1+RAM+BATTERY"; break;
+                default: typeName = nullptr; break;
+            }
+            if (typeName)
+                ImGui::Text("%s ($%02X)", typeName, typeVal);
+            else
+                ImGui::Text("Unknown ($%02X)", typeVal);
             break;
         }
         case 3: { // ROM bank

@@ -68,6 +68,9 @@
     <ClCompile Include="emulators\debuggers\debugger_registers.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\debuggers\debugger_assembly.cpp">
+      <Filter>emulators\debuggers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">

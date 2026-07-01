@@ -186,36 +186,30 @@ void Debugger::renderPerspective(DMGCpuRegisters& registers) {
     ImGui::EndChild();
 }
 
-// region: Assembly quadrant
-
-void Debugger::renderAssembly() {
-    ImGui::Text("Assembly");
-}
-
 // region: Rest quadrant
 
 void Debugger::renderRest() {
     if (ImGui::BeginTabBar("Rest", ImGuiTabBarFlags_None)) {
         if (ImGui::BeginTabItem("Memory")) {
-            ImGui::SetItemTooltip("View memory data");
             renderRestMemory();
             ImGui::EndTabItem();
         }
+        ImGui::SetItemTooltip("View memory data");
         if (ImGui::BeginTabItem("Expressions")) {
-            ImGui::SetItemTooltip("Type custom expression");
             renderRestCustomExpression();
             ImGui::EndTabItem();
         }
+        ImGui::SetItemTooltip("Type custom expression");
         if (ImGui::BeginTabItem("Breakpoints")) {
-            ImGui::SetItemTooltip("View and manage all breakpoints");
             renderRestBreakpoints();
             ImGui::EndTabItem();
         }
+            ImGui::SetItemTooltip("View and manage all breakpoints");
         if (ImGui::BeginTabItem("Overlays")) {
-            ImGui::SetItemTooltip("Add custom overlay");
             renderRestOverlays();
             ImGui::EndTabItem();
         }
+        ImGui::SetItemTooltip("Add custom overlay");
         ImGui::EndTabBar();
     }
 }

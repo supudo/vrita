@@ -60,6 +60,8 @@ private:
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();
 
+    void initAssambly();
+
     void renderRest();
     void renderRestMemory();
     void renderRestCustomExpression();

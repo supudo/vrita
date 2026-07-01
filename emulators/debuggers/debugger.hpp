@@ -60,8 +60,6 @@ private:
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();
 
-    void initAssambly();
-
     void renderRest();
     void renderRestMemory();
     void renderRestCustomExpression();
@@ -82,6 +80,7 @@ private:
     void renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit);
     void renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit);
     void renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit);
+    void renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type);
 
     void renderCPULoad();
 };

@@ -139,15 +139,16 @@ void Debugger::initRegisters() {
         { nullptr, "Noise counter", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // Cartridge
-        { nullptr, "Cartridge", 0, 111, 3, NDT_Hex8, NVS_None, 0, true, true },
-        { nullptr, "Title", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Type", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "ROM Bank", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Cartridge", 0, 111, 4, NDT_None, NVS_None, 0, true, true },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 0); }, "Title", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 1); }, "Manufactuter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 2); }, "Type", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 3); }, "ROM Bank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // GameBoy
-        { nullptr, "GameBoy", 0, 115, 10, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "GameBoy", 0, 116, 10, NDT_Hex8, NVS_None, 0, false, true },
 
-        { nullptr, "Input", 0, 125, 8, NDT_None, NVS_None, 0, false },
+        { nullptr, "Input", 0, 126, 8, NDT_None, NVS_None, 0, false },
         { nullptr, "IE ($FFFF)", 0xFFFF, 133, 5, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "IF ($FF0F)", 0xFF0F, 138, 5, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "DIV ($FF04)", 0xFF04, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -366,4 +367,39 @@ void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_
 void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) {
     uint8_t addressValue = funcMemoryRead(node->Address);
     ImGui::Text("%d", ((addressValue & (1 << bit)) == 0) ? 0 : 1);
+}
+
+void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type) {
+    switch (type) {
+        case 0: { // title
+            char title[17];
+            for (int i = 0; i < 16; i++)
+                title[i] = static_cast<char>(funcMemoryRead(0x134 + i));
+            title[16] = '\0';
+            ImGui::Text("%s", title);
+            break;
+        }
+        case 1: { // Manufacturer Code
+            char mcode[5];
+            for (int i = 0; i < 4; i++)
+                mcode[i] = static_cast<char>(funcMemoryRead(0x13F + i));
+            mcode[4] = '\0';
+            ImGui::Text("%s", mcode);
+            break;
+        }
+        case 2: { // Type
+            char ctype[5];
+            for (int i = 0; i < 4; i++)
+                ctype[i] = static_cast<char>(funcMemoryRead(0x147 + i));
+            ctype[4] = '\0';
+            ImGui::Text("%s", ctype);
+            break;
+        }
+        case 3: { // ROM bank
+            ImGui::Text("..");
+            break;
+        }
+        default:
+            break;
+    }
 }

@@ -29,6 +29,7 @@ private:
     std::vector<uint8_t> ram;
 
     std::string romTitle;
+    std::string romManufacturerCode;
     bool cgbGame = false;
     uint8_t mbcType = 0x0;
     int romBanksCount = 0;

@@ -36,8 +36,15 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
     }
     romBanksCount = (int)(size / 0x4000);
     ramBanksCount = getRamBanksCount(mmu.memory[0x149]);
+    
+    // title
     const char* titlePtr = reinterpret_cast<const char*>(mmu.memory + 0x134);
     romTitle = std::string(titlePtr, strnlen(titlePtr, 16));
+
+    // manufacturer code
+    const char* manufacturerCodePtr = reinterpret_cast<const char*>(mmu.memory + 0x13F);
+    romManufacturerCode = std::string(manufacturerCodePtr, strnlen(manufacturerCodePtr, 4));
+
     mbcType = mmu.memory[0x147]; // the address of the mbc type - 0x147
     printCartridgeInfo();
 }
@@ -76,6 +83,7 @@ int DMG_CARTRIDGE::getRamBanksCount(uint8_t type) {
 
 void DMG_CARTRIDGE::printCartridgeInfo() {
     logger.log("[DMG-CARTRIDGE] Rom Title: %s", romTitle.c_str());
+    logger.log("[DMG-CARTRIDGE] Manufacturer Code: %s", romManufacturerCode.c_str());
     logger.log("[DMG-CARTRIDGE] CGB Game: %s", (cgbGame ? "Yes" : "No"));
     logger.log("[DMG-CARTRIDGE] MBC: %i", +mbcType);
     logger.log("[DMG-CARTRIDGE] ROM Banks: %i", romBanksCount);

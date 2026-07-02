@@ -1,11 +1,12 @@
 #include "debugger.hpp"
 
 #include "emulators/dmg/cpu_registers.hpp"
+#include "debuggers_defines_dmg.inl"
 
 void Debugger::initRegisters() {
     registerNodes = {
         // Registers
-        { nullptr, "Registers", 0, 1, 8, NDT_Hex8, NVS_None, 0, true, true },
+        { nullptr, "Registers", 0, 1, 8, NDT_Hex8, NVS_None, 0, false, true },
         { nullptr, "BC", 0, -1, 0, NDT_Hex16, NVS_RegBC, 0, false },
         { nullptr, "DE", 0, -1, 0, NDT_Hex16, NVS_RegDE, 0, false },
         { nullptr, "HL", 0, -1, 0, NDT_Hex16, NVS_RegHL, 0, false },
@@ -16,7 +17,7 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderInterrupts(n); }, "Interrupts", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // PPU
-        { nullptr, "PPU", 0, 10, 11, NDT_Hex8, NVS_None, 0, true, true },
+        { nullptr, "PPU", 0, 10, 11, NDT_Hex8, NVS_None, 0, false, true },
 
         { nullptr, "LCDC ($FF40)", 0xFF40, 21, 8, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "STAT ($FF41)", 0xFF41, 29, 6, NDT_Hex8, NVS_Memory, 0, false },
@@ -139,18 +140,28 @@ void Debugger::initRegisters() {
         { nullptr, "Noise counter", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
 
         // Cartridge
-        { nullptr, "Cartridge", 0, 111, 4, NDT_None, NVS_None, 0, true, true },
+        { nullptr, "Cartridge", 0, 111, 14, NDT_None, NVS_None, 0, true, true },
         { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 0); }, "Title", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 1); }, "Manufactuter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 2); }, "Type", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 3); }, "ROM Bank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 2); }, "CGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 3); }, "New Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 4); }, "SGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 5); }, "Type", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 6); }, "ROM Bank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 7); }, "ROM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 8); }, "RAM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 9); }, "Destination", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 10); }, "Old Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 11); }, "Mask ROM ver", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 12); }, "Header checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 13); }, "Global checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // GameBoy
-        { nullptr, "GameBoy", 0, 116, 10, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "GameBoy", 0, 126, 10, NDT_Hex8, NVS_None, 0, false, true },
 
-        { nullptr, "Input", 0, 126, 8, NDT_None, NVS_None, 0, false },
-        { nullptr, "IE ($FFFF)", 0xFFFF, 133, 5, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "IF ($FF0F)", 0xFF0F, 138, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "Input", 0, 136, 8, NDT_None, NVS_None, 0, false },
+        { nullptr, "IE ($FFFF)", 0xFFFF, 144, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "IF ($FF0F)", 0xFF0F, 149, 5, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "DIV ($FF04)", 0xFF04, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TIMA ($FF05)", 0xFF05, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TMA ($FF06)", 0xFF06, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -371,10 +382,10 @@ void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uin
 
 void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type) {
     switch (type) {
-        case 0: { // title
+        case 0: { // Title
             char title[17];
             for (int i = 0; i < 16; i++)
-                title[i] = static_cast<char>(funcMemoryRead(0x134 + i));
+                title[i] = static_cast<char>(funcMemoryRead(0x0134 + i));
             title[16] = '\0';
             ImGui::Text("%s", title);
             break;
@@ -382,53 +393,90 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
         case 1: { // Manufacturer Code
             char mcode[5];
             for (int i = 0; i < 4; i++)
-                mcode[i] = static_cast<char>(funcMemoryRead(0x13F + i));
+                mcode[i] = static_cast<char>(funcMemoryRead(0x013F + i));
             mcode[4] = '\0';
             ImGui::Text("%s", mcode);
             break;
         }
-        case 2: { // Type
-            uint8_t typeVal = funcMemoryRead(0x0147);
-            const char* typeName = nullptr;
-            switch (typeVal) {
-                case 0x00: typeName = "ROM ONLY"; break;
-                case 0x01: typeName = "MBC1"; break;
-                case 0x02: typeName = "MBC1+RAM"; break;
-                case 0x03: typeName = "MBC1+RAM+BATTERY"; break;
-                case 0x05: typeName = "MBC2"; break;
-                case 0x06: typeName = "MBC2+BATTERY"; break;
-                case 0x08: typeName = "ROM+RAM"; break;
-                case 0x09: typeName = "ROM+RAM+BATTERY"; break;
-                case 0x0B: typeName = "MMM01"; break;
-                case 0x0C: typeName = "MMM01+RAM"; break;
-                case 0x0D: typeName = "MMM01+RAM+BATTERY"; break;
-                case 0x0F: typeName = "MBC3+TIMER+BATTERY"; break;
-                case 0x10: typeName = "MBC3+TIMER+RAM+BATTERY"; break;
-                case 0x11: typeName = "MBC3"; break;
-                case 0x12: typeName = "MBC3+RAM"; break;
-                case 0x13: typeName = "MBC3+RAM+BATTERY"; break;
-                case 0x19: typeName = "MBC5"; break;
-                case 0x1A: typeName = "MBC5+RAM"; break;
-                case 0x1B: typeName = "MBC5+RAM+BATTERY"; break;
-                case 0x1C: typeName = "MBC5+RUMBLE"; break;
-                case 0x1D: typeName = "MBC5+RUMBLE+RAM"; break;
-                case 0x1E: typeName = "MBC5+RUMBLE+RAM+BATTERY"; break;
-                case 0x20: typeName = "MBC6"; break;
-                case 0x22: typeName = "MBC7+SENSOR+RUMBLE+RAM+BATTERY"; break;
-                case 0xFC: typeName = "POCKET CAMERA"; break;
-                case 0xFD: typeName = "BANDAI TAMA5"; break;
-                case 0xFE: typeName = "HuC3"; break;
-                case 0xFF: typeName = "HuC1+RAM+BATTERY"; break;
-                default: typeName = nullptr; break;
-            }
-            if (typeName)
-                ImGui::Text("%s ($%02X)", typeName, typeVal);
-            else
-                ImGui::Text("Unknown ($%02X)", typeVal);
+        case 2: { // CGB Flag
+            uint8_t val = funcMemoryRead(0x0143);
+            const char* name = (val == 0xC0) ? "CGB Only" : (val == 0x80) ? "CGB Supported" : "None";
+            ImGui::Text("%s ($%02X)", name, val);
             break;
         }
-        case 3: { // ROM bank
-            ImGui::Text("..");
+        case 3: { // New Licensee Code
+            uint8_t code0 = funcMemoryRead(0x0144);
+            uint8_t code1 = funcMemoryRead(0x0145);
+            char code[2] = { static_cast<char>(code0), static_cast<char>(code1) };
+            std::string_view sv(code, 2);
+            ImGui::Text("%s (%c%c)", DMG_GetNewLicneseeCode(sv).data(), (code0 >= 32 && code0 <= 126) ? code0 : '?', (code1 >= 32 && code1 <= 126) ? code1 : '?');
+            break;
+        }
+        case 4: { // SGB Flag
+            uint8_t val = funcMemoryRead(0x0146);
+            ImGui::Text("%s ($%02X)", val == 0x03 ? "Supported" : "No SGB", val);
+            break;
+        }
+        case 5: { // Cartridge Type
+            uint8_t typeVal = funcMemoryRead(0x0147);
+            std::string_view name = DMG_MBC_Types[typeVal];
+            if (name.empty())
+                ImGui::Text("Unknown ($%02X)", typeVal);
+            else
+                ImGui::Text("%s ($%02X)", name.data(), typeVal);
+            break;
+        }
+        case 6: { // ROM Bank (runtime MBC state)
+            ImGui::TextDisabled("N/A");
+            break;
+        }
+        case 7: { // ROM Size
+            uint8_t val = funcMemoryRead(0x0148);
+            static const char* names[] = { "32 KiB", "64 KiB", "128 KiB", "256 KiB", "512 KiB", "1 MiB", "2 MiB", "4 MiB", "8 MiB" };
+            if (val < 9)
+                ImGui::Text("%s ($%02X)", names[val], val);
+            else
+                ImGui::Text("Unknown ($%02X)", val);
+            break;
+        }
+        case 8: { // RAM Size
+            uint8_t val = funcMemoryRead(0x0149);
+            const char* name = nullptr;
+            switch (val) {
+                case 0x00: name = "None"; break;
+                case 0x01: name = "2 KiB"; break;
+                case 0x02: name = "8 KiB"; break;
+                case 0x03: name = "32 KiB"; break;
+                case 0x04: name = "128 KiB"; break;
+                case 0x05: name = "64 KiB"; break;
+                default: name = nullptr; break;
+            }
+            if (name)
+                ImGui::Text("%s ($%02X)", name, val);
+            else
+                ImGui::Text("Unknown ($%02X)", val);
+            break;
+        }
+        case 9: { // Destination
+            uint8_t val = funcMemoryRead(0x014A);
+            ImGui::Text("%s ($%02X)", val == 0x00 ? "Japan" : "Overseas", val);
+            break;
+        }
+        case 10: { // Old Licensee
+            ImGui::Text("$%02X", funcMemoryRead(0x014B));
+            break;
+        }
+        case 11: { // Mask ROM version
+            ImGui::Text("$%02X", funcMemoryRead(0x014C));
+            break;
+        }
+        case 12: { // Header checksum
+            ImGui::Text("$%02X", funcMemoryRead(0x014D));
+            break;
+        }
+        case 13: { // Global checksum
+            uint16_t checksum = (static_cast<uint16_t>(funcMemoryRead(0x014E)) << 8) | funcMemoryRead(0x014F);
+            ImGui::Text("$%04X", checksum);
             break;
         }
         default:

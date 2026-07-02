@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <map>
 #include <stdint.h>
+#include <string_view>
 #include <vector>
 
 #include "debuggers_defines.hpp"
@@ -87,5 +88,143 @@ inline MemoryTree MemoryMap_DMG_ByUnitTree = {
         }}
     }}
 };
+
+inline std::array<PaletteColor, 4> DMG_Palette_DMG = { {
+    { 0.88f, 0.97f, 0.82f },
+    { 0.55f, 0.75f, 0.42f },
+    { 0.22f, 0.42f, 0.18f },
+    { 0.06f, 0.15f, 0.06f }
+} };
+
+inline std::array<PaletteColor, 4> DMG_Palette_CGB = { {
+    { 0.61f, 0.74f, 0.06f },
+    { 0.55f, 0.67f, 0.06f },
+    { 0.19f, 0.38f, 0.19f },
+    { 0.06f, 0.22f, 0.06f }
+} };
+
+inline std::array<PaletteColor, 4> DMG_Palette_MGB = { {
+    { 0.77f, 0.81f, 0.63f },
+    { 0.55f, 0.58f, 0.43f },
+    { 0.30f, 0.33f, 0.24f },
+    { 0.12f, 0.12f, 0.12f }
+} };
+
+inline std::array<PaletteColor, 4> DMG_Palette_MGL = { {
+    { 0.11f, 0.87f, 0.81f },
+    { 0.10f, 0.78f, 0.70f },
+    { 0.09f, 0.65f, 0.59f },
+    { 0.04f, 0.48f, 0.43f }
+} };
+
+constexpr std::array<std::string_view, 256> DMG_MBC_Types = [] {
+    std::array<std::string_view, 256> a{};
+    a[0x00] = "ROM ONLY";
+    a[0x01] = "MBC1";
+    a[0x02] = "MBC1 + RAM";
+    a[0x03] = "MBC1 + RAM + BATTERY";
+    a[0x05] = "MBC2";
+    a[0x06] = "MBC2 + BATTERY";
+    a[0x08] = "ROM + RAM";
+    a[0x09] = "ROM + RAM + BATTERY";
+    a[0x0B] = "MMM01";
+    a[0x0C] = "MMM01 + RAM";
+    a[0x0D] = "MMM01 + RAM + BATTERY";
+    a[0x0F] = "MBC3 + TIMER + BATTERY";
+    a[0x10] = "MBC3 + TIMER + RAM + BATTERY";
+    a[0x11] = "MBC3";
+    a[0x12] = "MBC3 + RAM";
+    a[0x13] = "MBC3 + RAM + BATTERY";
+    a[0x19] = "MBC5";
+    a[0x1A] = "MBC5 + RAM";
+    a[0x1B] = "MBC5 + RAM + BATTERY";
+    a[0x1C] = "MBC5 + RUMBLE";
+    a[0x1D] = "MBC5 + RUMBLE + RAM";
+    a[0x1E] = "MBC5 + RUMBLE + RAM + BATTERY";
+    a[0x20] = "MBC6";
+    a[0x22] = "MBC7 + SENSOR + RUMBLE + RAM + BATTERY";
+    a[0xFC] = "POCKET CAMERA";
+    a[0xFD] = "BANDAI TAMA5";
+    a[0xFE] = "HuC3";
+    a[0xFF] = "HuC1 + RAM + BATTERY";
+    return a;
+}();
+
+using namespace std::string_view_literals;
+
+constexpr std::array<std::pair<std::string_view, std::string_view>, 64> DMG_NewLicenseeCodes { {
+    { "00"sv, "None"sv },
+    { "01"sv, "Nintendo Research & Development 1"sv },
+    { "08"sv, "Capcom"sv },
+    { "13"sv, "EA(Electronic Arts)"sv },
+    { "18"sv, "Hudson Soft"sv },
+    { "19"sv, "B-AI"sv },
+    { "20"sv, "KSS"sv },
+    { "22"sv, "Planning Office WADA"sv },
+    { "24"sv, "PCM Complete"sv },
+    { "25"sv, "San-X"sv },
+    { "28"sv, "Kemco"sv },
+    { "29"sv, "SETA Corporation"sv },
+    { "30"sv, "Viacom"sv },
+    { "31"sv, "Nintendo"sv },
+    { "32"sv, "Bandai"sv },
+    { "33"sv, "Ocean Software / Acclaim Entertainment"sv },
+    { "34"sv, "Konami"sv },
+    { "35"sv, "HectorSoft"sv },
+    { "37"sv, "Taito"sv },
+    { "38"sv, "Hudson Soft"sv },
+    { "39"sv, "Banpresto"sv },
+    { "41"sv, "Ubi Soft1"sv },
+    { "42"sv, "Atlus"sv },
+    { "44"sv, "Malibu Interactive"sv },
+    { "46"sv, "Angel"sv },
+    { "47"sv, "Bullet-Proof Software"sv },
+    { "49"sv, "Irem"sv },
+    { "50"sv, "Absolute"sv },
+    { "51"sv, "Acclaim Entertainment"sv },
+    { "52"sv, "Activision"sv },
+    { "53"sv, "Sammy USA Corporation"sv },
+    { "54"sv, "Konami"sv },
+    { "55"sv, "Hi Tech Expressions"sv },
+    { "56"sv, "LJN"sv },
+    { "57"sv, "Matchbox"sv },
+    { "58"sv, "Mattel"sv },
+    { "59"sv, "Milton Bradley Company"sv },
+    { "60"sv, "Titus Interactive"sv },
+    { "61"sv, "Virgin Games Ltd."sv },
+    { "64"sv, "Lucasfilm Games"sv },
+    { "67"sv, "Ocean Software"sv },
+    { "69"sv, "EA(Electronic Arts)"sv },
+    { "70"sv, "Infogrames"sv },
+    { "71"sv, "Interplay Entertainment"sv },
+    { "72"sv, "Broderbund"sv },
+    { "73"sv, "Sculptured Software"sv },
+    { "75"sv, "The Sales Curve Limited"sv },
+    { "78"sv, "THQ"sv },
+    { "79"sv, "Accolade"sv },
+    { "80"sv, "Misawa Entertainment"sv },
+    { "83"sv, "LOZC G."sv },
+    { "86"sv, "Tokuma Shoten"sv },
+    { "87"sv, "Tsukuda Original"sv },
+    { "91"sv, "Chunsoft Co."sv },
+    { "92"sv, "Video System"sv },
+    { "93"sv, "Ocean Software / Acclaim Entertainment"sv },
+    { "95"sv, "Varie"sv },
+    { "96"sv, "Yonezawa10 / S'Pal"sv },
+    { "97"sv, "Kaneko"sv },
+    { "99"sv, "Pack-In-Video"sv },
+    { "9H"sv, "Bottom Up"sv },
+    { "A4"sv, "Konami (Yu-Gi- Oh!)"sv },
+    { "BL"sv, "MTO"sv },
+    { "DK"sv, "Kodansha"sv },
+} };
+
+constexpr std::string_view DMG_GetNewLicneseeCode(std::string_view code) {
+    for (const auto& [key, value] : DMG_NewLicenseeCodes) {
+        if (key == code)
+            return value;
+    }
+    return "Unknown";
+}
 
 #endif

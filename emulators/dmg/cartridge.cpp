@@ -2,7 +2,7 @@
 
 void DMG_CARTRIDGE::loadROM(std::streamsize size) {
     ram.assign(0x8000, 0);
-    uint8_t type = mmu.memory[0x147];
+    uint8_t type = mmu.memory[0x147]; // cartridge number
     switch (type) {
         case 0x00:
             mbc = std::make_unique<DMG_MBC0>(mmu.memory, size, ram);

@@ -432,26 +432,17 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
         }
         case 7: { // ROM Size
             uint8_t val = funcMemoryRead(0x0148);
-            static const char* names[] = { "32 KiB", "64 KiB", "128 KiB", "256 KiB", "512 KiB", "1 MiB", "2 MiB", "4 MiB", "8 MiB" };
-            if (val < 9)
-                ImGui::Text("%s ($%02X)", names[val], val);
+            std::string_view name = DMG_ROM_Sizes[val];
+            if (name.empty())
+                ImGui::Text("%s ($%02X)", name, val);
             else
                 ImGui::Text("Unknown ($%02X)", val);
             break;
         }
         case 8: { // RAM Size
             uint8_t val = funcMemoryRead(0x0149);
-            const char* name = nullptr;
-            switch (val) {
-                case 0x00: name = "None"; break;
-                case 0x01: name = "2 KiB"; break;
-                case 0x02: name = "8 KiB"; break;
-                case 0x03: name = "32 KiB"; break;
-                case 0x04: name = "128 KiB"; break;
-                case 0x05: name = "64 KiB"; break;
-                default: name = nullptr; break;
-            }
-            if (name)
+            std::string_view name = DMG_RAM_Sizes[val];
+            if (name.empty())
                 ImGui::Text("%s ($%02X)", name, val);
             else
                 ImGui::Text("Unknown ($%02X)", val);
@@ -463,7 +454,8 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
             break;
         }
         case 10: { // Old Licensee
-            ImGui::Text("$%02X", funcMemoryRead(0x014B));
+            uint8_t code = funcMemoryRead(0x014B);
+            ImGui::Text("%s (0x%02X)", DMG_GetOldLicneseeCode(code).data(), code);
             break;
         }
         case 11: { // Mask ROM version

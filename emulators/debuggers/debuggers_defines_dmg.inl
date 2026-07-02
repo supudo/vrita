@@ -227,4 +227,190 @@ constexpr std::string_view DMG_GetNewLicneseeCode(std::string_view code) {
     return "Unknown";
 }
 
+constexpr std::array<std::string_view, 256> DMG_ROM_Sizes = [] {
+    std::array<std::string_view, 256> a{};
+    a[0x00] = "32 KiB - 2 (no banking)";
+    a[0x01] = "64 KiB - 4";
+    a[0x02] = "128 KiB - 8";
+    a[0x03] = "256 KiB - 16";
+    a[0x04] = "512 KiB - 32";
+    a[0x05] = "1 MiB - 64";
+    a[0x06] = "2 MiB - 128";
+    a[0x07] = "4 MiB - 256";
+    a[0x08] = "8 MiB - 512";
+    a[0x52] = "1.1 MiB - 72 13";
+    a[0x53] = "1.2 MiB - 80 13";
+    a[0x54] = "1.5 MiB - 96 13";
+    return a;
+}();
+
+constexpr std::array<std::string_view, 256> DMG_RAM_Sizes = [] {
+    std::array<std::string_view, 256> a{};
+    a[0x00] = "0 - sNo RAM";
+    a[0x01] = "- - Unused";
+    a[0x02] = "8 KiB - 1 bank";
+    a[0x03] = "32 KiB - 4 banks of 8 KiB each";
+    a[0x04] = "128 KiB - 16 banks of 8 KiB each";
+    a[0x05] = "64 KiB - 8 banks of 8 KiB each";
+    return a;
+}();
+
+constexpr std::array<std::pair<uint8_t, std::string_view>, 147> DMG_OldLicenseeCodes{ {
+    { 0x00, "None"sv },
+    { 0x01, "Nintendo"sv },
+    { 0x08, "Capcom"sv },
+    { 0x09, "HOT-B"sv },
+    { 0x0A, "Jaleco"sv },
+    { 0x0B, "Coconuts Japan"sv },
+    { 0x0C, "Elite Systems"sv },
+    { 0x13, "EA (Electronic Arts)"sv },
+    { 0x18, "Hudson Soft"sv },
+    { 0x19, "ITC Entertainment"sv },
+    { 0x1A, "Yanoman"sv },
+    { 0x1D, "Japan Clary"sv },
+    { 0x1F, "Virgin Games Ltd."sv },
+    { 0x24, "PCM Complete"sv },
+    { 0x25, "San-X"sv },
+    { 0x28, "Kemco"sv },
+    { 0x29, "SETA Corporation"sv },
+    { 0x30, "Infogrames"sv },
+    { 0x31, "Nintendo"sv },
+    { 0x32, "Bandai"sv },
+    { 0x33, "<See new licensee code>."sv },
+    { 0x34, "Konami"sv },
+    { 0x35, "HectorSoft"sv },
+    { 0x38, "Capcom"sv },
+    { 0x39, "Banpresto"sv },
+    { 0x3C, "Entertainment Interactive(stub)"sv },
+    { 0x3E, "Gremlin"sv },
+    { 0x41, "Ubi Soft"sv },
+    { 0x42, "Atlus"sv },
+    { 0x44, "Malibu Interactive"sv },
+    { 0x46, "Angel"sv },
+    { 0x47, "Spectrum HoloByte"sv },
+    { 0x49, "Irem"sv },
+    { 0x4A, "Virgin Games Ltd."sv },
+    { 0x4D, "Malibu Interactive"sv },
+    { 0x4F, "U.S.Gold"sv },
+    { 0x50, "Absolute"sv },
+    { 0x51, "Acclaim Entertainment"sv },
+    { 0x52, "Activision"sv },
+    { 0x53, "Sammy USA Corporation"sv },
+    { 0x54, "GameTek"sv },
+    { 0x55, "Park Place"sv },
+    { 0x56, "LJN"sv },
+    { 0x57, "Matchbox"sv },
+    { 0x59, "Milton Bradley Company"sv },
+    { 0x5A, "Mindscape"sv },
+    { 0x5B, "Romstar"sv },
+    { 0x5C, "Naxat Soft"sv },
+    { 0x5D, "Tradewest"sv },
+    { 0x60, "Titus Interactive"sv },
+    { 0x61, "Virgin Games Ltd."sv },
+    { 0x67, "Ocean Software"sv },
+    { 0x69, "EA (Electronic Arts)"sv },
+    { 0x6E, "Elite Systems"sv },
+    { 0x6F, "Electro Brain"sv },
+    { 0x70, "Infogrames"sv },
+    { 0x71, "Interplay Entertainment"sv },
+    { 0x72, "Broderbund"sv },
+    { 0x73, "Sculptured Software"sv },
+    { 0x75, "The Sales Curve Limited"sv },
+    { 0x78, "THQ"sv },
+    { 0x79, "Accolade"sv },
+    { 0x7A, "Triffix Entertainment"sv },
+    { 0x7C, "MicroProse"sv },
+    { 0x7F, "Kemco"sv },
+    { 0x80, "Misawa Entertainment"sv },
+    { 0x83, "LOZC G."sv },
+    { 0x86, "Tokuma Shoten"sv },
+    { 0x8B, "Bullet-Proof Software"sv },
+    { 0x8C, "Vic Tokai Corp."sv },
+    { 0x8E, "Ape Inc."sv },
+    { 0x8F, "I'Max"sv },
+    { 0x91, "Chunsoft Co."sv },
+    { 0x92, "Video System"sv },
+    { 0x93, "Tsubaraya Productions"sv },
+    { 0x95, "Varie"sv },
+    { 0x96, "Yonezawa/S'Pal"sv },
+    { 0x97, "Kemco"sv },
+    { 0x99, "Arc"sv },
+    { 0x9A, "Nihon Bussan"sv },
+    { 0x9B, "Tecmo"sv },
+    { 0x9C, "Imagineer"sv },
+    { 0x9D, "Banpresto"sv },
+    { 0x9F, "Nova"sv },
+    { 0xA1, "Hori Electric"sv },
+    { 0xA2, "Bandai"sv },
+    { 0xA4, "Konami"sv },
+    { 0xA6, "Kawada"sv },
+    { 0xA7, "Takara"sv },
+    { 0xA9, "Technos Japan"sv },
+    { 0xAA, "Broderbund"sv },
+    { 0xAC, "Toei Animation"sv },
+    { 0xAD, "Toho"sv },
+    { 0xAF, "Namco"sv },
+    { 0xB0, "Acclaim Entertainment"sv },
+    { 0xB1, "ASCII Corporation or Nexsoft"sv },
+    { 0xB2, "Bandai"sv },
+    { 0xB4, "Square Enix"sv },
+    { 0xB6, "HAL Laboratory"sv },
+    { 0xB7, "SNK"sv },
+    { 0xB9, "Pony Canyon"sv },
+    { 0xBA, "Culture Brain"sv },
+    { 0xBB, "Sunsoft"sv },
+    { 0xBD, "Sony Imagesoft"sv },
+    { 0xBF, "Sammy Corporation"sv },
+    { 0xC0, "Taito"sv },
+    { 0xC2, "Kemco"sv },
+    { 0xC3, "Square"sv },
+    { 0xC4, "Tokuma Shoten"sv },
+    { 0xC5, "Data East"sv },
+    { 0xC6, "Tonkin House"sv },
+    { 0xC8, "Koei"sv },
+    { 0xC9, "UFL"sv },
+    { 0xCA, "Ultra Games"sv },
+    { 0xCB, "VAP, Inc."sv },
+    { 0xCC, "Use Corporation"sv },
+    { 0xCD, "Meldac"sv },
+    { 0xCE, "Pony Canyon"sv },
+    { 0xCF, "Angel"sv },
+    { 0xD0, "Taito"sv },
+    { 0xD1, "SOFEL(Software Engineering Lab)"sv },
+    { 0xD2, "Quest"sv },
+    { 0xD3, "Sigma Enterprises"sv },
+    { 0xD4, "ASK Kodansha Co."sv },
+    { 0xD6, "Naxat Soft"sv },
+    { 0xD7, "Copya System"sv },
+    { 0xD9, "Banpresto"sv },
+    { 0xDA, "Tomy"sv },
+    { 0xDB, "LJN"sv },
+    { 0xDD, "Nippon Computer Systems"sv },
+    { 0xDE, "Human Ent."sv },
+    { 0xDF, "Altron"sv },
+    { 0xE0, "Jaleco"sv },
+    { 0xE1, "Towa Chiki"sv },
+    { 0xE2, "Yutaka"sv },
+    { 0xE3, "Varie"sv },
+    { 0xE5, "Epoch"sv },
+    { 0xE7, "Athena"sv },
+    { 0xE8, "Asmik Ace Entertainment"sv },
+    { 0xE9, "Natsume"sv },
+    { 0xEA, "King Records"sv },
+    { 0xEB, "Atlus"sv },
+    { 0xEC, "Epic / Sony Records"sv },
+    { 0xEE, "IGS"sv },
+    { 0xF0, "A Wave"sv },
+    { 0xF3, "Extreme Entertainment"sv },
+    { 0xFF, "LJN"sv }
+} };
+
+constexpr std::string_view DMG_GetOldLicneseeCode(uint8_t code) {
+    for (const auto& [key, value] : DMG_OldLicenseeCodes) {
+        if (key == code)
+            return value;
+    }
+    return "Unknown";
+}
+
 #endif

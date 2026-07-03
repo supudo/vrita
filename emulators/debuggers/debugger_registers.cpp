@@ -463,7 +463,11 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
             break;
         }
         case 12: { // Header checksum
-            ImGui::Text("$%02X", funcMemoryRead(0x014D));
+            uint8_t checksum = 0;
+            for (uint16_t address = 0x0134; address <= 0x014C; address++) {
+                checksum = checksum - funcMemoryRead(address) - 1;
+            }
+            ImGui::Text("$%02X", checksum);
             break;
         }
         case 13: { // Global checksum

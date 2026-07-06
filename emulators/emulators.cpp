@@ -93,7 +93,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
 
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->managerCPU && emulatorDMG->ROMFileLoaded) {
-        debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory, DMG_MMU::MEMORY_SIZE);
+        debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->memorySize);
         debuggerMemoryEditor->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
@@ -114,7 +114,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
-        debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory);
+        debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
@@ -138,7 +138,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
                 return emulatorDMG->startGame();
             }
         );
-        debuggerDebugger->setMemory("dmg", DMG_MMU::MEMORY_SIZE);
+        debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);
     }
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);

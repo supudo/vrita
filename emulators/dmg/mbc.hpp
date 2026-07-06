@@ -52,16 +52,26 @@ public:
         }
     }
     void write(uint16_t addr, uint8_t value) override {
-        if (addr < 0x2000)
-            ramEnabled = ((value & 0x0F) == 0x0A);
-        else if (addr < 0x4000) {
-            romBank = value & 0x1F;
-            if (romBank == 0) romBank = 1;
+        if (addr < 0x2000) {
+            bool en = ((value & 0x0F) == 0x0A);
+            if (en != ramEnabled) printf("[MBC1] RAM %s\n", en ? "enabled" : "disabled");
+            ramEnabled = en;
         }
-        else if (addr < 0x6000)
-            ramBank = value & 0x03;
-        else if (addr < 0x8000)
-            bankingMode = value & 0x01;
+        else if (addr < 0x4000) {
+            uint8_t nb = value & 0x1F; if (nb == 0) nb = 1;
+            if (nb != romBank) printf("[MBC1] ROM bank: %u -> %u\n", romBank, nb);
+            romBank = nb;
+        }
+        else if (addr < 0x6000) {
+            uint8_t nb = value & 0x03;
+            if (nb != ramBank) printf("[MBC1] RAM bank: %u -> %u\n", ramBank, nb);
+            ramBank = nb;
+        }
+        else if (addr < 0x8000) {
+            bool nm = value & 0x01;
+            if (nm != bankingMode) printf("[MBC1] Banking mode: %s\n", nm ? "RAM" : "ROM");
+            bankingMode = nm;
+        }
     }
 };
 
@@ -99,14 +109,20 @@ public:
         return rom[(romBank * 0x4000) + (addr - 0x4000)];
     }
     void write(uint16_t addr, uint8_t value) override {
-        if (addr < 0x2000)
-            ramRTCEnabled = ((value & 0x0F) == 0x0A);
-        else if (addr < 0x4000) {
-            romBank = value & 0x7F;
-            if (romBank == 0) romBank = 1;
+        if (addr < 0x2000) {
+            bool en = ((value & 0x0F) == 0x0A);
+            if (en != ramRTCEnabled) printf("[MBC3] RAM/RTC %s\n", en ? "enabled" : "disabled");
+            ramRTCEnabled = en;
         }
-        else if (addr < 0x6000)
+        else if (addr < 0x4000) {
+            uint8_t nb = value & 0x7F; if (nb == 0) nb = 1;
+            if (nb != romBank) printf("[MBC3] ROM bank: %u -> %u\n", romBank, nb);
+            romBank = nb;
+        }
+        else if (addr < 0x6000) {
+            if (value != ramBank) printf("[MBC3] RAM/RTC bank: %u -> %u%s\n", ramBank, value, value > 0x03 ? " (RTC reg)" : "");
             ramBank = value;
+        }
         else if (addr >= 0xA000 && addr < 0xC000) {
             if (ramRTCEnabled && ramBank <= 0x03)
                 ram[ramBank * 0x2000 + (addr - 0xA000)] = value;
@@ -128,14 +144,26 @@ public:
         return rom[(romBank * 0x4000) + (addr - 0x4000)];
     }
     void write(uint16_t addr, uint8_t value) override {
-        if (addr < 0x2000)
-            ramEnabled = ((value & 0x0F) == 0x0A);
-        else if (addr < 0x3000)
-            romBank = (romBank & 0x100) | value;
-        else if (addr < 0x4000)
-            romBank = (romBank & 0xFF) | ((value & 0x01) << 8);
-        else if (addr < 0x6000)
-            ramBank = value & 0x0F;
+        if (addr < 0x2000) {
+            bool en = ((value & 0x0F) == 0x0A);
+            if (en != ramEnabled) printf("[MBC5] RAM %s\n", en ? "enabled" : "disabled");
+            ramEnabled = en;
+        }
+        else if (addr < 0x3000) {
+            uint16_t nb = (romBank & 0x100) | value;
+            if (nb != romBank) printf("[MBC5] ROM bank low byte: %u -> %u\n", romBank, nb);
+            romBank = nb;
+        }
+        else if (addr < 0x4000) {
+            uint16_t nb = (romBank & 0xFF) | ((value & 0x01) << 8);
+            if (nb != romBank) printf("[MBC5] ROM bank (9-bit): %u -> %u\n", romBank, nb);
+            romBank = nb;
+        }
+        else if (addr < 0x6000) {
+            uint8_t nb = value & 0x0F;
+            if (nb != ramBank) printf("[MBC5] RAM bank: %u -> %u\n", ramBank, nb);
+            ramBank = nb;
+        }
     }
 };
 

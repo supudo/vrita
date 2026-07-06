@@ -2,6 +2,7 @@
 #define VRITA_DMG_MMU_INCLUDES
 
 #include <stdint.h>
+#include <vector>
 
 class Logger;
 class DMG_APU;
@@ -16,10 +17,11 @@ public:
     void setUnits(Logger& logger, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu);
     void clearMemory();
     void clearResources();
+    void resetRegisters();
     void tick(uint32_t cycles);
 
-    static const uint32_t MEMORY_SIZE = 0x10000; // 64 KB
-    uint8_t memory[MEMORY_SIZE] = {};
+    uint32_t memorySize;
+    std::vector<uint8_t> memory;
 
     bool isHalted = false;
     bool triggerHaltBug = false;

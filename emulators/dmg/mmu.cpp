@@ -18,12 +18,7 @@ void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_
     managerAPU = &apu;
 }
 
-void DMG_MMU::clearMemory() {
-    for (uint32_t i = 0; i < MEMORY_SIZE; i++) {
-        memory[i] = 0;
-    }
-
-    // hardware registers
+void DMG_MMU::resetRegisters() {
     memory[0xFF00] = 0xCF; // JOYP
     memory[0xFF01] = 0x00; // SB
     memory[0xFF02] = 0x7E; // SC
@@ -78,6 +73,12 @@ void DMG_MMU::clearMemory() {
     memory[0xFFFF] = 0x00; // IE
 }
 
+void DMG_MMU::clearMemory() {
+    memorySize = 0x10000;
+    memory.assign(memorySize, 0);
+    resetRegisters();
+}
+
 void DMG_MMU::clearResources() {
     totalCycles = 0;
     clearMemory();
@@ -95,6 +96,11 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
         return;
     }
     if (address > 0xA000 && address < 0xC000) { // external cartridge RAM
+        static bool firstRAMWrite = true;
+        if (firstRAMWrite) {
+            logger->log("[MMU] First external RAM write @ 0x%04X\n", address);
+            firstRAMWrite = false;
+        }
         managerCartridge->write(address, value);
         return;
     }

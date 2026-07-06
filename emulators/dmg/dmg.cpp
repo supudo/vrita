@@ -66,29 +66,32 @@ std::string DMG::loadROM(const char* path) {
         logger.log("[DMG-CPU] WARNING: Failed to open ROM: %s", path);
         return "Failed to open ROM";
     }
-    std::streamsize size = file.tellg();
-    if (size <= 0 || size > 0x8000) {
-        logger.log("[DMG-CPU] WARNING: Invalid ROM size: %i", (int)size, " bytes");
-        file.close();
-        return "Invalid ROM size";
-    }
     clear();
     for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
         gFramebuffer[i] = 0xFF9BBC0F;
+    std::streamsize size = file.tellg();
+    std::streamsize memNeeded = std::max(size, (std::streamsize)0x10000);
+    logger.log("[DMG] Loading ROM: %s", path);
+    logger.log("[DMG] ROM size: %lld bytes (0x%llX), buffer: %lld bytes", (long long)size, (long long)size, (long long)memNeeded);
+    managerMMU->memory.resize((size_t)memNeeded, 0);
+    logger.log("[DMG] Memory buffer resized to %zu bytes", managerMMU->memory.size());
     file.seekg(0, std::ios::beg);
-    if (!file.read(reinterpret_cast<char*>(managerMMU->memory), size)) {
+    if (!file.read(reinterpret_cast<char*>(managerMMU->memory.data()), size)) {
         logger.log("[DMG-CPU] WARNING: Failed to read ROM data!");
         file.close();
         return "Failed to read ROM data";
     }
     file.close();
+    logger.log("[DMG] ROM read into memory. Type byte @ 0x147: 0x%02X", managerMMU->memory[0x147]);
+    managerCartridge->loadROM(size);
+    managerMMU->resetRegisters();
+    logger.log("[DMG] Hardware registers restored. ROM loaded.");
     ROMFileLoaded = true;
     gameIsPaused = false;
     gameStateLabel = "Pause game";
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
-    managerCartridge->loadROM(size);
     return "";
 }
 

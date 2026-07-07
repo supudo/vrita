@@ -163,7 +163,7 @@ bool DMG::createTexture(SDL_GPUDevice* device) {
     info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
     gTexture = SDL_CreateGPUTexture(device, &info);
     if (!gTexture) {
-        printf("[DMG] Failed to create DMG texture: %s\n", SDL_GetError());
+        logger.log("[DMG] Failed to create DMG texture: %s", SDL_GetError());
         return false;
     }
     return true;
@@ -191,7 +191,7 @@ void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer
     SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
 
     if (!transferBuffer) {
-        printf("[DMG] Failed to create transfer buffer\n");
+        logger.log("[DMG] Failed to create transfer buffer");
         return;
     }
 

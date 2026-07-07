@@ -98,7 +98,7 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
     if (address > 0xA000 && address < 0xC000) { // external cartridge RAM
         static bool firstRAMWrite = true;
         if (firstRAMWrite) {
-            logger->log("[MMU] First external RAM write @ 0x%04X\n", address);
+            logger->log("[MMU] First external RAM write @ 0x%04X", address);
             firstRAMWrite = false;
         }
         managerCartridge->write(address, value);

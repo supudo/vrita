@@ -7,8 +7,9 @@
 #include "interrupt.hpp"
 #include "ppu.hpp"
 #include "apu.hpp"
+#include "joypad.hpp"
 
-void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu) {
+void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad) {
     logger = &log;
     managerCartridge = &cartridge;
     managerCPU = &cpu;
@@ -16,10 +17,10 @@ void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_
     managerInterrupts = &interrupts;
     managerPPU = &ppu;
     managerAPU = &apu;
+    managerJoypad = &joypad;
 }
 
 void DMG_MMU::resetRegisters() {
-    memory[0xFF00] = 0xCF; // JOYP
     memory[0xFF01] = 0x00; // SB
     memory[0xFF02] = 0x7E; // SC
 
@@ -87,6 +88,8 @@ void DMG_MMU::clearResources() {
 uint8_t DMG_MMU::read8(uint16_t address) const {
     if (address < 0x8000 || (address > 0xA000 && address < 0xC000))
         return managerCartridge->read(address);
+    if (address == 0xFF00)
+        return managerJoypad->read();
     return memory[address];
 }
 
@@ -102,6 +105,10 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
             firstRAMWrite = false;
         }
         managerCartridge->write(address, value);
+        return;
+    }
+    if (address == 0xFF00) {
+        managerJoypad->write(value);
         return;
     }
     memory[address] = value;

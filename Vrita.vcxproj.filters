@@ -71,6 +71,9 @@
     <ClCompile Include="emulators\debuggers\debugger_assembly.cpp">
       <Filter>emulators\debuggers</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\dmg\joypad.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -165,6 +168,9 @@
     </ClInclude>
     <ClInclude Include="utilities\iconfonts\IconsFontAwesome7.h">
       <Filter>utilities\iconfonts</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\joypad.hpp">
+      <Filter>emulators\dmg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -237,19 +237,19 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             {
                 uint8_t tmp_val = mmu.read8(Registers.HL);
                 dec("0x35 - DEC (HL)", &tmp_val);
-                mmu.write16(Registers.HL, tmp_val);
+                mmu.write8(Registers.HL, tmp_val);
             }
             break;
         case 0x34: // INC (HL)
             {
                 uint8_t tmp_val = mmu.read8(Registers.HL);
                 inc("0x34 - INC (HL)", &tmp_val);
-                mmu.write16(Registers.HL, tmp_val);
+                mmu.write8(Registers.HL, tmp_val);
             }
             break;
         case 0x36: // LD (HL), n
             logCall(true, "0x36 LD (HL), n");
-            mmu.write16(Registers.HL, mmu.read16(Registers.PC++));
+            mmu.write8(Registers.HL, mmu.read8(Registers.PC++));
             break;
         case 0x37: // SCF
             logCall(true, "0x37 SCF");
@@ -847,7 +847,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xE0: // LD ($FF00+n), A
             logCall(true, "0xE0 LD ($FF00+n), A");
-            mmu.write16(0xff00 + mmu.read8(Registers.PC++), Registers.A);
+            mmu.write8(0xff00 + mmu.read8(Registers.PC++), Registers.A);
             break;
         case 0xE1: // POP HL
             logCall(true, "0xE1 POP HL");
@@ -881,7 +881,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xEA: // LD (nn), A
             logCall(true, "0xEA LD (nn), A");
-            mmu.write16(mmu.read16(Registers.PC), Registers.A);
+            mmu.write8(mmu.read16(Registers.PC), Registers.A);
             Registers.PC += 2;
             break;
         case 0xEE: // XOR n

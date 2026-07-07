@@ -162,6 +162,7 @@
     <ClCompile Include="emulators\dmg\cpu_extended.cpp" />
     <ClCompile Include="emulators\dmg\cpu_normal.cpp" />
     <ClCompile Include="emulators\dmg\interrupt.cpp" />
+    <ClCompile Include="emulators\dmg\joypad.cpp" />
     <ClCompile Include="emulators\dmg\mmu.cpp" />
     <ClCompile Include="emulators\dmg\ppu.cpp" />
     <ClCompile Include="emulators\dmg\timer.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="emulators\dmg\cpu_registers.hpp" />
     <ClInclude Include="emulators\dmg\dmg.hpp" />
     <ClInclude Include="emulators\dmg\interrupt.hpp" />
+    <ClInclude Include="emulators\dmg\joypad.hpp" />
     <ClInclude Include="emulators\dmg\mbc.hpp" />
     <ClInclude Include="emulators\dmg\mmu.hpp" />
     <ClInclude Include="emulators\dmg\ppu.hpp" />

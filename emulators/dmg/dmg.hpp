@@ -24,6 +24,7 @@ GameBoy (DMG)
 #include "mmu.hpp"
 #include "ppu.hpp"
 #include "timer.hpp"
+#include "joypad.hpp"
 
 class DMG {
 public:
@@ -51,6 +52,7 @@ public:
     std::shared_ptr<DMG_APU> managerAPU;
     std::shared_ptr<DMG_MMU> managerMMU;
     std::shared_ptr<DMG_PPU> managerPPU;
+    std::shared_ptr<DMG_JOYPAD> managerJoypad;
 
     bool ROMFileLoaded = false;
     void stopGame();

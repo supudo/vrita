@@ -32,10 +32,11 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerPPU->setFramebuffer(gFramebuffer);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
+    managerJoypad = std::make_shared<DMG_JOYPAD>(logger, *managerMMU);
     
     managerTimer->reset();
 
-    managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU);
+    managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
     managerInterrupts->setCPURegisters(managerCPU->Registers);
 
     return true;
@@ -106,6 +107,7 @@ void DMG::clear() {
     managerAPU->clearResources();
     managerTimer->reset();
     managerCartridge->clearResources();
+    managerJoypad->clearResources();
 }
 
 void DMG::stepCPU() {

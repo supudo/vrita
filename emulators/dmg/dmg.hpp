@@ -66,6 +66,8 @@ private:
 
     void stepAll();
 
+    void renderJoypadUI();
+
     uint32_t renderingFrames = 0;
     double renderingFPS = 0.0;
     double renderingSpeed = 0.0;
@@ -86,6 +88,8 @@ private:
     int windowHeight = 300;
     static const uint32_t WIDTH = 160;
     static const uint32_t HEIGHT = 144;
+    static constexpr float JOYPAD_UI_WIDTH = 440.0f;
+    static constexpr float JOYPAD_UI_HEIGHT = 250.0f;
     uint32_t gFramebuffer[WIDTH * HEIGHT];
     SDL_GPUTexture* gTexture = nullptr;
     int windowScale = 1;

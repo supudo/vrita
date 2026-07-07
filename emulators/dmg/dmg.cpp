@@ -222,7 +222,10 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     float imgH = (float)(DMG::HEIGHT * windowScale);
 
     ImGuiStyle& style = ImGui::GetStyle();
-    float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
+    static float lastDecorH = 150.0f;
+    static float lastBelowImageH = 300.0f;
+    float decorH = lastDecorH;
+    float belowImageH = lastBelowImageH;
     float padX = style.WindowPadding.x * 2.0f;
 
     if (windowScale != lastWindowScale) {
@@ -287,12 +290,11 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
-    float statsReserve = ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y + 1.0f;
     float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
     float dispW = avail.x;
     float dispH = dispW / aspect;
-    if (dispH > avail.y - statsReserve) {
-        dispH = avail.y - statsReserve;
+    if (dispH > avail.y - belowImageH) {
+        dispH = avail.y - belowImageH;
         dispW = dispH * aspect;
     }
     float offX = (avail.x - dispW) * 0.5f;
@@ -318,8 +320,116 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
+    float cursorYAfterImage = ImGui::GetCursorPosY();
+
     ImGui::Separator();
+
+    renderJoypadUI();
+
+    ImGui::Separator();
+
     ImGui::Text("FPS: %.2f, Speed: %.2f%%", renderingFPS, renderingSpeed);
 
+    lastBelowImageH = ImGui::GetCursorPosY() - cursorYAfterImage;
+    lastDecorH = ImGui::GetWindowSize().y - dispH;
+
     ImGui::End();
+}
+
+void DMG::renderJoypadUI() {
+    ImVec2 size(JOYPAD_UI_WIDTH, JOYPAD_UI_HEIGHT);
+
+    float offX = (ImGui::GetContentRegionAvail().x - size.x) * 0.5f;
+    if (offX > 0.0f)
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
+
+    ImGui::BeginChild("##joypad", size, ImGuiChildFlags_None);
+
+    ImDrawList* draw = ImGui::GetWindowDrawList();
+    ImVec2 origin = ImGui::GetCursorScreenPos();
+
+    ImU32 bodyColor = IM_COL32(197, 199, 183, 255);
+    ImU32 buttonColor = IM_COL32(45, 45, 45, 255);
+    ImU32 buttonPressed = IM_COL32(20, 20, 20, 255);
+    ImU32 purple = IM_COL32(93, 53, 95, 255);
+    ImU32 purplePressed = IM_COL32(65, 35, 70, 255);
+    ImU32 textColor = IM_COL32(25, 25, 25, 255);
+
+    draw->AddRectFilled(origin, origin + size, bodyColor, 18.0f);
+
+    // d-pad
+
+    ImVec2 dCenter = origin + ImVec2(90, 95);
+
+    auto DrawPadPiece = [&](const char* id, ImVec2 pos, ImVec2 sz, const char* icon) {
+        ImGui::SetCursorScreenPos(pos);
+        ImGui::InvisibleButton(id, sz);
+        bool down = ImGui::IsItemActive();
+        draw->AddRectFilled(pos, pos + sz, down ? buttonPressed : buttonColor, 5);
+        ImVec2 iconSize = ImGui::CalcTextSize(icon);
+        draw->AddText(pos + (sz - iconSize) * 0.5f, IM_COL32_WHITE, icon);
+    };
+
+    constexpr float PAD_GAP = 2.0f;
+    DrawPadPiece("UP", dCenter + ImVec2(-15, -60), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_UP);
+    DrawPadPiece("DOWN", dCenter + ImVec2(-15, 15 + PAD_GAP), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_DOWN);
+    DrawPadPiece("LEFT", dCenter + ImVec2(-60, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_LEFT);
+    DrawPadPiece("RIGHT", dCenter + ImVec2(15 + PAD_GAP, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_RIGHT);
+    draw->AddRectFilled(dCenter + ImVec2(-15, -15), dCenter + ImVec2(15, 15), buttonColor, 4);
+
+    // button B
+
+    ImVec2 bPos = origin + ImVec2(300, 115);
+    ImGui::SetCursorScreenPos(bPos - ImVec2(28, 28));
+    ImGui::InvisibleButton("B", ImVec2(56, 56));
+    bool bHeld = ImGui::IsItemActive();
+    draw->AddCircleFilled(bPos, 28, bHeld ? purplePressed : purple, 40);
+
+    float letterFontSize = ImGui::GetFontSize() * 1.8f;
+    ImVec2 bLetterSize = ImGui::GetFont()->CalcTextSizeA(letterFontSize, FLT_MAX, 0.0f, ICON_FA_B);
+    draw->AddText(ImGui::GetFont(), letterFontSize, bPos - bLetterSize * 0.5f, IM_COL32_WHITE, ICON_FA_B);
+
+    // button A
+
+    ImVec2 aPos = origin + ImVec2(370, 80);
+
+    ImGui::SetCursorScreenPos(aPos - ImVec2(28, 28));
+    ImGui::InvisibleButton("A", ImVec2(56, 56));
+
+    bool aHeld = ImGui::IsItemActive();
+
+    draw->AddCircleFilled(aPos, 28, aHeld ? purplePressed : purple, 40);
+    ImVec2 aLetterSize = ImGui::GetFont()->CalcTextSizeA(letterFontSize, FLT_MAX, 0.0f, ICON_FA_A);
+    draw->AddText(ImGui::GetFont(), letterFontSize, aPos - aLetterSize * 0.5f, IM_COL32_WHITE, ICON_FA_A);
+
+    // buttons SELECT and START
+
+    auto DrawPill = [&](const char* id, ImVec2 center, const char* label) {
+        ImVec2 p = center - ImVec2(28, 16);
+        ImGui::SetCursorScreenPos(p);
+        ImGui::InvisibleButton(id, ImVec2(56, 32));
+        bool held = ImGui::IsItemActive();
+        draw->AddRectFilled(p, p + ImVec2(56, 32), held ? buttonPressed : buttonColor, 8);
+        float labelX = (56.0f - ImGui::CalcTextSize(label).x) * 0.5f;
+        draw->AddText(p + ImVec2(labelX, 38), textColor, label);
+    };
+    DrawPill("SELECT", origin + ImVec2(170, 190), "SELECT");
+    DrawPill("START", origin + ImVec2(260, 190), "START");
+
+    // speaker lines
+
+    //ImVec2 dirRaw(18.0f, 6.0f);
+    //float dirLen = sqrtf(dirRaw.x * dirRaw.x + dirRaw.y * dirRaw.y);
+    //ImVec2 dirUnit(dirRaw.x / dirLen, dirRaw.y / dirLen);
+    //ImVec2 perpUnit(-dirUnit.y, dirUnit.x);
+    //constexpr float LINE_SPACING = 10.0f;
+    //constexpr float EXTEND = 40.0f;
+    //for (int i = 0; i < 6; i++) {
+    //    ImVec2 base = origin + ImVec2(355, 180) + perpUnit * (i * LINE_SPACING);
+    //    ImVec2 lineStart = base - dirUnit * EXTEND;
+    //    ImVec2 lineEnd = base + dirRaw + dirUnit * EXTEND;
+    //    draw->AddLine(lineStart, lineEnd, IM_COL32(120, 120, 120, 255), 2.0f);
+    //}
+
+    ImGui::EndChild();
 }

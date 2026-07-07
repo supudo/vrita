@@ -25,7 +25,8 @@ public:
                       std::function<bool(uint8_t)> interruptsEnabled,
                       std::function<bool()> isGameRunning,
                       std::function<void()> stopGame,
-                      std::function<void()> startGame);
+                      std::function<void()> startGame,
+                      std::function<void(bool)> logCPUCalls);
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -48,6 +49,7 @@ private:
     std::function<bool()> funcIsGameRunning;
     std::function<void()> funcStopGame;
     std::function<void()> funcStartGame;
+    std::function<void(bool)> funcLogCPUCalls;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
@@ -56,6 +58,8 @@ private:
 
     bool gameIsRunning = false;
     int selectedMemoryRegion = 0;
+
+    bool logCPUCalls = false;
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();

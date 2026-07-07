@@ -58,6 +58,7 @@ public:
     void stopGame();
     void startGame();
     bool isGameRunning();
+    void logCPUCalls(bool isOn);
 
 private:
     Logger& logger;
@@ -70,10 +71,8 @@ private:
     double renderingSpeed = 0.0;
     const double DMG_FPS = 59.7275;
 
-    std::string gameStateLabel = "Pause game";
     bool gameIsPaused = false;
     void toggleGameState();
-    std::string logCallsLabel = "Log CPU calls (OFF)";
 
     void stepCPU();
     void stepMMU(uint32_t cycles);

@@ -9,10 +9,10 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlgpu3.h>
 
+#include "utilities/iconfonts/IconsFontAwesome7.h"
+
 bool DMG::initialize(int x, int y, int width, int height) {
     gameIsPaused = false;
-    gameStateLabel = "Pause game";
-    logCallsLabel = "Log CPU calls (OFF)";
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
@@ -89,7 +89,6 @@ std::string DMG::loadROM(const char* path) {
     logger.log("[DMG] Hardware registers restored. ROM loaded.");
     ROMFileLoaded = true;
     gameIsPaused = false;
-    gameStateLabel = "Pause game";
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
@@ -132,24 +131,24 @@ void DMG::stepAPU(uint32_t cycles) {
 
 void DMG::toggleGameState() {
     gameIsPaused = !gameIsPaused;
-    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
 }
 
 void DMG::stopGame() {
     gameIsPaused = true;
-    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
 }
 
 void DMG::startGame() {
     gameIsPaused = false;
-    gameStateLabel = gameIsPaused ? "Run Game" : "Pause Game";
 }
 
 bool DMG::isGameRunning() {
     return !gameIsPaused;
 }
 
-#pragma region Rendering
+void DMG::logCPUCalls(bool isOn) {
+    managerCPU->logCalls = isOn;
+}
+
 void DMG::release(SDL_GPUDevice* device) {
     SDL_ReleaseGPUTexture(device, gTexture);
 }
@@ -258,8 +257,10 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
         onFocused("dmg");
-    if (ImGui::Button("Recent Files"))
+
+    if (ImGui::Button(ICON_FA_BOX_ARCHIVE, ImVec2(40, 32)))
         ImGui::OpenPopup("recentFiles");
+    ImGui::SetItemTooltip("Recent Files");
     ImGui::SameLine();
 
     if (ImGui::BeginPopupContextItem("recentFiles")) {
@@ -271,50 +272,27 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         ImGui::EndPopup();
     }
 
-    if (ImGui::Button("Load ROM file"))
+    if (ImGui::Button(ICON_FA_ARROWS_DOWN_TO_LINE, ImVec2(40, 32)))
         showFileBrowser("dmg");
+    ImGui::SetItemTooltip("Load ROM file");
     ImGui::SameLine();
-    if (ImGui::Button("Eject ROM file"))
+    if (ImGui::Button(ICON_FA_EJECT, ImVec2(40, 32)))
         ROMFileLoaded = false;
-    
-    ImGui::Separator();
+    ImGui::SetItemTooltip("Eject ROM file");
+    ImGui::SameLine();
 
-    if (ImGui::Button(gameStateLabel.c_str(), ImVec2(60, 0)))
+    if (ImGui::Button(gameIsPaused ? ICON_FA_PLAY : ICON_FA_PAUSE, ImVec2(40, 32)))
         toggleGameState();
-    ImGui::SameLine();
-
-    ImGui::Separator();
-
-    ImGui::SameLine();
-    ImGui::Text("Game Speed");
-    ImGui::SameLine();
-    ImGui::Button("0.5x");
-    ImGui::SameLine();
-    ImGui::Button("1x");
-    ImGui::SameLine();
-    ImGui::Button("2x");
-
-    ImGui::SameLine();
-    ImGui::Separator();
-    ImGui::SameLine();
-
-    if (ImGui::Button(logCallsLabel.c_str())) {
-        managerCPU->logCalls = !managerCPU->logCalls;
-        logCallsLabel = managerCPU->logCalls ? "Log CPU calls (ON)" : "Log CPU calls (OFF)";
-    }
-
-    ImGui::Separator();
-
-    ImGui::Text("FPS: %.2f, Speed: %.2f%%", renderingFPS, renderingSpeed);
     
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();
+    float statsReserve = ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y + 1.0f;
     float aspect = (float)DMG::WIDTH / (float)DMG::HEIGHT;
     float dispW = avail.x;
     float dispH = dispW / aspect;
-    if (dispH > avail.y) {
-        dispH = avail.y;
+    if (dispH > avail.y - statsReserve) {
+        dispH = avail.y - statsReserve;
         dispW = dispH * aspect;
     }
     float offX = (avail.x - dispW) * 0.5f;
@@ -340,6 +318,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
 
+    ImGui::Separator();
+    ImGui::Text("FPS: %.2f, Speed: %.2f%%", renderingFPS, renderingSpeed);
+
     ImGui::End();
 }
-#pragma endregion

@@ -136,6 +136,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             },
             [&] () {
                 return emulatorDMG->startGame();
+            },
+            [&] (bool val) {
+                return emulatorDMG->logCPUCalls(val);
             }
         );
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);

@@ -28,6 +28,8 @@ bool Debugger::init() {
 
     initRegisters();
 
+    logCPUCalls = false;
+
     return true;
 }
 
@@ -37,7 +39,8 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                             std::function<bool(uint8_t)> interruptsEnabled,
                             std::function<bool()> isGameRunning,
                             std::function<void()> stopGame,
-                            std::function<void()> startGame) {
+                            std::function<void()> startGame,
+                            std::function<void(bool)> logCPUCalls) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcCpuGetFlag = getFlag;
@@ -45,6 +48,7 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcIsGameRunning = isGameRunning;
     funcStopGame = stopGame;
     funcStartGame = startGame;
+    funcLogCPUCalls = logCPUCalls;
 }
 
 void Debugger::release() {
@@ -109,6 +113,12 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
     if (ImGui::Button(ICON_FA_ARROW_UP, ImVec2(40, 32))) {
     }
     ImGui::SetItemTooltip("Step Back");
+    ImGui::SameLine();
+    if (ImGui::Button(logCPUCalls ? "Log CPU Calls OFF" : "Log CPU Calls ON", ImVec2(120, 32))) {
+        logCPUCalls = !logCPUCalls;
+        funcLogCPUCalls(logCPUCalls);
+    }
+    ImGui::SetItemTooltip("Log CPU calls");
     ImGui::PopStyleColor(3);
 
     ImGui::Separator();

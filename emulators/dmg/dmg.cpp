@@ -285,7 +285,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::SetItemTooltip("Load ROM file");
     ImGui::SameLine();
 
-    if (!ROMFileLoaded)
+    bool localRomFileLoaded = ROMFileLoaded;
+    if (!localRomFileLoaded)
         ImGui::BeginDisabled();
 
     if (ImGui::Button(ICON_FA_EJECT, ImVec2(40, 32)))
@@ -301,7 +302,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         renderJoypad = !renderJoypad;
     ImGui::SetItemTooltip("Toggle D-Pad");
 
-    if (!ROMFileLoaded)
+    if (!localRomFileLoaded)
         ImGui::EndDisabled();
     
     ImGui::Separator();

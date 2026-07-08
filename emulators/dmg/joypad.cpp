@@ -72,6 +72,9 @@ void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
 
     bool isPressed = !(buttonsVal & mask);
 
+    dpadState = buttonsVal & 0x0F;
+    buttonsState = (buttonsVal >> 4) & 0x0F;
+
     if (!wasPressed && isPressed)
         managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 

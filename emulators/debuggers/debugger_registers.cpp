@@ -171,14 +171,14 @@ void Debugger::initRegisters() {
         { nullptr, "SC ($FF02)", 0xFF02, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
 
         // Input children
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 0); }, "A", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 1); }, "B", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 2); }, "SELECT", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 3); }, "START", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 0); }, "RIGHT", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 1); }, "LEFT", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 2); }, "UP", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 3); }, "DOWN", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 0); }, "A", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 1); }, "B", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 2); }, "SELECT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 3); }, "START", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 0); }, "RIGHT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 1); }, "LEFT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 2); }, "UP", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 3); }, "DOWN", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // IE children
         { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 0); }, "V-Blank Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
@@ -362,17 +362,17 @@ void Debugger::renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
 }
 
 void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit) {
-    uint8_t addressValue = funcMemoryRead(node->Address);
-    char checkboxId[12];
-    snprintf(checkboxId, sizeof(checkboxId), "##input%d%d", (isButton ? 0 : 1), bit);
-    bool checked = ((addressValue & (1 << bit)) == 0);
-    if (ImGui::Checkbox(checkboxId, &checked)) {
-        if (checked)
-            addressValue &= ~(1 << bit); // pressed = 0
-        else
-            addressValue |= (1 << bit); // released = 1
-        funcMemoryWrite(node->Address, addressValue);
-    }
+    uint8_t orig = funcMemoryRead(0xFF00);
+    uint8_t select = isButton ? ((orig | 0x10) & ~0x20) : ((orig | 0x20) & ~0x10);
+    funcMemoryWrite(0xFF00, select);
+    uint8_t joyp = funcMemoryRead(0xFF00);
+    funcMemoryWrite(0xFF00, orig);
+    bool pressed = (joyp & (1 << bit)) == 0; // active low
+    char id[12];
+    snprintf(id, sizeof(id), "##input%d%d", (isButton ? 0 : 1), bit);
+    ImGui::BeginDisabled();
+    ImGui::Checkbox(id, &pressed);
+    ImGui::EndDisabled();
 }
 
 void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) {

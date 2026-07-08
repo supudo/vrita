@@ -7,29 +7,37 @@
 
 void DMG_JOYPAD::clearResources() {
     selectBits = 0x30;
-    dpadState = 0x0F;
-    buttonsState = 0x0F;
+    stateDPad = 0x0F;
+    stateButtons = 0x0F;
+}
+
+uint8_t DMG_JOYPAD::computeLowNibble(uint8_t sel) const {
+    uint8_t lowNibble = 0x0F;
+    if (!(sel & 0x10))
+        lowNibble &= stateDPad;
+    if (!(sel & 0x20))
+        lowNibble &= stateButtons;
+    return lowNibble;
 }
 
 uint8_t DMG_JOYPAD::read() const {
-    uint8_t lowNibble = 0x0F;
-    if (!(selectBits & 0x10))
-        lowNibble &= dpadState;
-    if (!(selectBits & 0x20))
-        lowNibble &= buttonsState;
-    return 0xC0 | selectBits | lowNibble;
+    return 0xC0 | selectBits | computeLowNibble(selectBits);
 }
 
 void DMG_JOYPAD::write(uint8_t value) {
+    uint8_t oldLow = computeLowNibble(selectBits);
     selectBits = value & 0x30;
+    uint8_t newLow = computeLowNibble(selectBits);
+    if (oldLow & ~newLow & 0x0F)
+        managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 }
 
 void DMG_JOYPAD::setDpadState(uint8_t state) { 
-    dpadState = state & 0x0F; 
+    stateDPad = state & 0x0F; 
 }
 
 void DMG_JOYPAD::setButtonsState(uint8_t state) { 
-    buttonsState = state & 0x0F; 
+    stateButtons = state & 0x0F; 
 }
 
 void DMG_JOYPAD::handleKey(uint32_t type, uint32_t key) {
@@ -64,7 +72,8 @@ void DMG_JOYPAD::handleKey(uint32_t type, uint32_t key) {
 void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
     uint8_t mask = 1 << button;
     bool wasPressed = !(buttonsVal & mask);
-    
+    uint8_t oldLow = computeLowNibble(selectBits);
+
     if (keyDown)
         buttonsVal &= ~mask;
     else
@@ -72,10 +81,11 @@ void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
 
     bool isPressed = !(buttonsVal & mask);
 
-    dpadState = buttonsVal & 0x0F;
-    buttonsState = (buttonsVal >> 4) & 0x0F;
+    stateDPad = buttonsVal & 0x0F;
+    stateButtons = (buttonsVal >> 4) & 0x0F;
 
-    if (!wasPressed && isPressed)
+    uint8_t newLow = computeLowNibble(selectBits);
+    if (oldLow & ~newLow & 0x0F)
         managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 
     if (wasPressed != isPressed)

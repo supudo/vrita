@@ -34,8 +34,8 @@ private:
 
     uint8_t buttonsVal = 0xFF;
     uint8_t selectBits = 0x30; // bits 4-5 of JOYP; 1 = group not selected
-    uint8_t dpadState = 0x0F; // bits 0-3: Right,Left,Up,Down
-    uint8_t buttonsState = 0x0F; // bits 0-3: A,B,Select,Start
+    uint8_t stateDPad = 0x0F; // bits 0-3: Right, Left, Up, Down
+    uint8_t stateButtons = 0x0F; // bits 0-3: A, B, Select, Start
 
     static constexpr uint8_t JOYPAD_RIGHT = 0;
     static constexpr uint8_t JOYPAD_LEFT = 1;
@@ -47,6 +47,7 @@ private:
     static constexpr uint8_t JOYPAD_START = 7;
 
     void setButton(uint8_t button, bool keyDown);
+    uint8_t computeLowNibble(uint8_t sel) const;
 };
 
 #endif

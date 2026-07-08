@@ -52,6 +52,8 @@ public:
     std::shared_ptr<Debugger> debuggerDebugger;
     bool debuggerDebuggerVisible = false;
 
+    void handleKey(uint32_t type, uint32_t key);
+
 private:
     Logger& logger;
 

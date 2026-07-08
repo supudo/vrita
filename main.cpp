@@ -238,9 +238,6 @@ int main(int argc, char** argv) {
 
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
-
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
     io.IniFilename = "gui_options.ini";
 
     ImGui::StyleColorsDark();
@@ -269,10 +266,10 @@ int main(int argc, char** argv) {
             ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT)
                 vritaRunning = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED &&
-                event.window.windowID == SDL_GetWindowID(appWindow)) {
+            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(appWindow))
                 vritaRunning = true;
-            }
+            if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+                managerEmulators->handleKey(event.type, event.key.key);
         }
 
         if (SDL_GetWindowFlags(appWindow) & SDL_WINDOW_MINIMIZED) {

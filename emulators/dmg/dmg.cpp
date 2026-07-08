@@ -32,7 +32,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerPPU->setFramebuffer(gFramebuffer);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
-    managerJoypad = std::make_shared<DMG_JOYPAD>(logger, *managerMMU);
+    managerJoypad = std::make_shared<DMG_JOYPAD>(logger, *managerMMU, *managerInterrupts);
     
     managerTimer->reset();
 
@@ -147,6 +147,11 @@ bool DMG::isGameRunning() {
 
 void DMG::logCPUCalls(bool isOn) {
     managerCPU->logCalls = isOn;
+}
+
+void DMG::handleKey(uint32_t type, uint32_t key) {
+    if (ROMFileLoaded)
+        managerJoypad->handleKey(type, key);
 }
 
 void DMG::release(SDL_GPUDevice* device) {
@@ -279,6 +284,10 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         showFileBrowser("dmg");
     ImGui::SetItemTooltip("Load ROM file");
     ImGui::SameLine();
+
+    if (!ROMFileLoaded)
+        ImGui::BeginDisabled();
+
     if (ImGui::Button(ICON_FA_EJECT, ImVec2(40, 32)))
         ROMFileLoaded = false;
     ImGui::SetItemTooltip("Eject ROM file");
@@ -286,6 +295,14 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     if (ImGui::Button(gameIsPaused ? ICON_FA_PLAY : ICON_FA_PAUSE, ImVec2(40, 32)))
         toggleGameState();
+    ImGui::SameLine();
+
+    if (ImGui::Button(ICON_FA_MOBILE_SCREEN_BUTTON, ImVec2(40, 32)))
+        renderJoypad = !renderJoypad;
+    ImGui::SetItemTooltip("Toggle D-Pad");
+
+    if (!ROMFileLoaded)
+        ImGui::EndDisabled();
     
     ImGui::Separator();
 
@@ -322,9 +339,16 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     float cursorYAfterImage = ImGui::GetCursorPosY();
 
+    if (renderJoypad) {
+        ImGui::Separator();
+        renderJoypadUI();
+    }
+
     ImGui::Separator();
 
-    renderJoypadUI();
+    ImGui::Text("START = <Enter>, SELECT = <space>");
+    ImGui::Text("D-Pad = <arrow keys>");
+    ImGui::Text("A = <A>, B = <B>");
 
     ImGui::Separator();
 

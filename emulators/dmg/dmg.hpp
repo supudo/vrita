@@ -60,12 +60,15 @@ public:
     bool isGameRunning();
     void logCPUCalls(bool isOn);
 
+    void handleKey(uint32_t type, uint32_t key);
+
 private:
     Logger& logger;
     Settings& settings;
 
     void stepAll();
 
+    bool renderJoypad;
     void renderJoypadUI();
 
     uint32_t renderingFrames = 0;

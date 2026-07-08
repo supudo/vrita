@@ -208,3 +208,7 @@ std::string Emulators::loadROM(const char* romFilePath) {
         result = emulatorAGB->loadROM(romFilePath);
     return result;
 }
+
+void Emulators::handleKey(uint32_t type, uint32_t key) {
+    emulatorDMG->handleKey(type, key);
+}

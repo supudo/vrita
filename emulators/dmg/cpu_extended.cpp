@@ -1,121 +1,104 @@
-#include "cpu.hpp"
+﻿#include "cpu.hpp"
 
 void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
     if (!ROMFileLoaded) return;
 
     switch (opcode) {
         case 0x00: // RLC B
-            rlc("0x00 - RLC B", &Registers.B);
+            rotateLeft("0x00 - RLC B", &Registers.B, false);
             break;
         case 0x01: // RLC C
-            rlc("0x01 - RLC C", &Registers.B);
-            rlc("0x01 - RLC C", &Registers.C);
+            rotateLeft("0x01 - RLC C", &Registers.C, false);
             break;
         case 0x02: // RLC D
-            rlc("0x02 - RLC D", &Registers.D);
+            rotateLeft("0x02 - RLC D", &Registers.D, false);
             break;
         case 0x03: // RLC E
-            rlc("0x03 - RLC E", &Registers.E);
+            rotateLeft("0x03 - RLC E", &Registers.E, false);
             break;
         case 0x04: // RLC H
-            rlc("0x04 - RLC H", &Registers.H);
+            rotateLeft("0x04 - RLC H", &Registers.H, false);
             break;
         case 0x05: // RLC L
-            rlc("0x05 - RLC L", &Registers.L);
+            rotateLeft("0x05 - RLC L", &Registers.L, false);
             break;
         case 0x06: // RLC (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                rlc("0x06 - RLC (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { rotateLeft("0x06 - RLC (HL)", &value, false); });
             break;
         case 0x07: // RLC A
-            rlc("0x07 - RLC A", &Registers.A);
+            rotateLeft("0x07 - RLC A", &Registers.A, false);
             break;
         case 0x08: // RRC B
-            rrc("0x08 - RRC B", &Registers.B);
+            rotateRight("0x08 - RRC B", &Registers.B, false);
             break;
         case 0x09: // RRC C
-            rrc("0x09 - RRC C", &Registers.C);
+            rotateRight("0x09 - RRC C", &Registers.C, false);
             break;
         case 0x0A: // RRC D
-            rrc("0x0A - RRC D", &Registers.D);
+            rotateRight("0x0A - RRC D", &Registers.D, false);
             break;
         case 0x0B: // RRC E
-            rrc("0x0B - RRC E", &Registers.E);
+            rotateRight("0x0B - RRC E", &Registers.E, false);
             break;
         case 0x0C: // RRC H
-            rrc("0x0C - RRC H", &Registers.H);
+            rotateRight("0x0C - RRC H", &Registers.H, false);
             break;
         case 0x0D: // RRC L
-            rrc("0x0D - RRC L", &Registers.L);
+            rotateRight("0x0D - RRC L", &Registers.L, false);
             break;
         case 0x0E: // RRC (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                rrc("0x0E - RRC (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { rotateRight("0x0E - RRC (HL)", &value, false); });
             break;
         case 0x0F: // RRC A
-            rrc("0x0F - RRC A", &Registers.A);
+            rotateRight("0x0F - RRC A", &Registers.A, false);
             break;
         case 0x10: // RL B
-            rl("0x10 - RL B", &Registers.B);
+            rotateLeft("0x10 - RL B", &Registers.B, true);
             break;
         case 0x11: // RL C
-            rl("0x11 - RL C", &Registers.C);
+            rotateLeft("0x11 - RL C", &Registers.C, true);
             break;
         case 0x12: // RL D
-            rl("0x12 - RL D", &Registers.D);
+            rotateLeft("0x12 - RL D", &Registers.D, true);
             break;
         case 0x13: // RL E
-            rl("0x13 - RL E", &Registers.E);
+            rotateLeft("0x13 - RL E", &Registers.E, true);
             break;
         case 0x14: // RL H
-            rl("0x14 - RL H", &Registers.H);
+            rotateLeft("0x14 - RL H", &Registers.H, true);
             break;
         case 0x15: // RL L
-            rl("0x15 - RL L", &Registers.L);
+            rotateLeft("0x15 - RL L", &Registers.L, true);
             break;
         case 0x16: // RL (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                rl("0x16 - RL (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { rotateLeft("0x16 - RL (HL)", &value, true); });
             break;
         case 0x17: // RL A
-            rl("0x17 - RL A", &Registers.A);
+            rotateLeft("0x17 - RL A", &Registers.A, true);
             break;
         case 0x18: // RR B
-            rr("0x18 - RR B", &Registers.B);
+            rotateRight("0x18 - RR B", &Registers.B, true);
             break;
         case 0x19: // RR C
-            rr("0x19 - RR C", &Registers.C);
+            rotateRight("0x19 - RR C", &Registers.C, true);
             break;
         case 0x1A: // RR D
-            rr("0x1A - RR D", &Registers.D);
+            rotateRight("0x1A - RR D", &Registers.D, true);
             break;
         case 0x1B: // RR E
-            rr("0x1B - RR E", &Registers.E);
+            rotateRight("0x1B - RR E", &Registers.E, true);
             break;
         case 0x1C: // RR H
-            rr("0x1C - RR H", &Registers.H);
+            rotateRight("0x1C - RR H", &Registers.H, true);
             break;
         case 0x1D: // RR L
-            rr("0x1D - RR L", &Registers.L);
+            rotateRight("0x1D - RR L", &Registers.L, true);
             break;
         case 0x1E: // RR (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                rr("0x1E - RR (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { rotateRight("0x1E - RR (HL)", &value, true); });
             break;
         case 0x1F: // RR A
-            rr("0x1F - RR A", &Registers.A);
+            rotateRight("0x1F - RR A", &Registers.A, true);
             break;
         case 0x20: // SLA B
             sla("0x20 - SLA B", &Registers.B);
@@ -136,14 +119,10 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             sla("0x25 - SLA L", &Registers.L);
             break;
         case 0x26: // SLA (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                sla("0x26 - SLA (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { sla("0x26 - SLA (HL)", &value); });
             break;
-        case 0x27: // SRA A // TODO: check validity
-            sra("0x27 - SRA A", &Registers.A);
+        case 0x27: // SLA A
+            sla("0x27 - SLA A", &Registers.A);
             break;
         case 0x28: // SRA B
             sra("0x28 - SRA B", &Registers.B);
@@ -164,11 +143,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             sra("0x2D - SRA L", &Registers.L);
             break;
         case 0x2E: // SRA (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                sra("0x2E - SRA (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { sra("0x2E - SRA (HL)", &value); });
             break;
         case 0x2F: // SRA A
             sra("0x2F - SRA A", &Registers.A);
@@ -192,11 +167,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             swap("0x35 - SWAP L", &Registers.L);
             break;
         case 0x36: // SWAP (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                swap("0x36 - SWAP (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { swap("0x36 - SWAP (HL)", &value); });
             break;
         case 0x37: // SWAP A
             swap("0x37 - SWAP A", &Registers.A);
@@ -220,11 +191,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             srl("0x3D - SRL L", &Registers.L);
             break;
         case 0x3E: // SRL (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                srl("0x3E - SRL (HL)", &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { srl("0x3E - SRL (HL)", &value); });
             break;
         case 0x3F: // SRL A
             srl("0x3F - SRL A", &Registers.A);
@@ -440,11 +407,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0x85 - RES 0, L", 1 << 0, &Registers.L);
             break;
         case 0x86: // RES 0, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0x86 - RES 0, (HL)", 1 << 0, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0x86 - RES 0, (HL)", 1 << 0, &value); });
             break;
         case 0x87: // RES 0, A
             res("0x87 - RES 0, A", 1 << 0, &Registers.A);
@@ -468,11 +431,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0x8D - RES 1, L", 1 << 1, &Registers.L);
             break;
         case 0x8E: // RES 1, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0x8E - RES 1, (HL)", 1 << 1, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0x8E - RES 1, (HL)", 1 << 1, &value); });
             break;
         case 0x8F: // RES 1, A
             res("0x8F - RES 1, A", 1 << 1, &Registers.A);
@@ -496,11 +455,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0x95 - RES 2, L", 1 << 2, &Registers.L);
             break;
         case 0x96: // RES 2, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0x96 - RES 2, (HL)", 1 << 2, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0x96 - RES 2, (HL)", 1 << 2, &value); });
             break;
         case 0x97: // RES 2, A
             res("0x97 - RES 2, A", 1 << 2, &Registers.A);
@@ -524,11 +479,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0x9D - RES 3, L", 1 << 3, &Registers.L);
             break;
         case 0x9E: // RES 3, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0x9E - RES 3, (HL)", 1 << 3, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0x9E - RES 3, (HL)", 1 << 3, &value); });
             break;
         case 0x9F: // RES 3, A
             res("0x9F - RES 3, A", 1 << 3, &Registers.A);
@@ -552,11 +503,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0xA5 - RES 4, L", 1 << 4, &Registers.L);
             break;
         case 0xA6: // RES 4, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0xA6 - RES 4, (HL)", 1 << 4, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0xA6 - RES 4, (HL)", 1 << 4, &value); });
             break;
         case 0xa7: // RES 4, A
             res("0xa7 - RES 4, A", 1 << 4, &Registers.A);
@@ -580,11 +527,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0xAD - RES 5, L", 1 << 5, &Registers.L);
             break;
         case 0xAE: // RES 5, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0xAE - RES 5, (HL)", 1 << 5, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0xAE - RES 5, (HL)", 1 << 5, &value); });
             break;
         case 0xAF: // RES 5, A
             res("0xAF - RES 5, A", 1 << 5, &Registers.A);
@@ -608,11 +551,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0xB5 - RES 6, L", 1 << 6, &Registers.L);
             break;
         case 0xB6: // RES 6, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0xB6 - RES 6, (HL)", 1 << 6, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0xB6 - RES 6, (HL)", 1 << 6, &value); });
             break;
         case 0xb7: // RES 6, A
             res("0xb7 - RES 6, A", 1 << 6, &Registers.A);
@@ -636,11 +575,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             res("0xBD - RES 7, L", 1 << 7, &Registers.L);
             break;
         case 0xBE: // RES 7, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                res("0xBE - RES 7, (HL)", 1 << 7, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { res("0xBE - RES 7, (HL)", 1 << 7, &value); });
             break;
         case 0xBF: // RES 7, A
             res("0xBF - RES 7, A", 1 << 7, &Registers.A);
@@ -664,11 +599,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xC5 - SET 0, L", 1 << 0, &Registers.L);
             break;
         case 0xC6: // SET 0, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xC6 - SET 0, (HL)", 1 << 0, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xC6 - SET 0, (HL)", 1 << 0, &value); });
             break;
         case 0xc7: // SET 0, A
             set("0xc7 - SET 0, A", 1 << 0, &Registers.A);
@@ -692,11 +623,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xCD - SET 1, L", 1 << 1, &Registers.L);
             break;
         case 0xCE: // SET 1, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xCE - SET 1, (HL)", 1 << 1, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xCE - SET 1, (HL)", 1 << 1, &value); });
             break;
         case 0xCF: // SET 1, A
             set("0xCF - SET 1, A", 1 << 1, &Registers.A);
@@ -720,11 +647,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xD5 - SET 2, L", 1 << 2, &Registers.L);
             break;
         case 0xD6: // SET 2, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xD6 - SET 2, (HL)", 1 << 2, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xD6 - SET 2, (HL)", 1 << 2, &value); });
             break;
         case 0xD7: // SET 2, A
             set("0xD7 - SET 2, A", 1 << 2, &Registers.A);
@@ -748,11 +671,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xDD - SET 3, L", 1 << 3, &Registers.L);
             break;
         case 0xDE: // SET 3, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xDE - SET 3, (HL)", 1 << 3, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xDE - SET 3, (HL)", 1 << 3, &value); });
             break;
         case 0xDF: // SET 3, A
             set("0xDF - SET 3, A", 1 << 3, &Registers.A);
@@ -776,11 +695,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xE5 - SET 4, L", 1 << 4, &Registers.L);
             break;
         case 0xE6: // SET 4, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xE6 - SET 4, (HL)", 1 << 4, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xE6 - SET 4, (HL)", 1 << 4, &value); });
             break;
         case 0xE7: // SET 4, A
             set("0xE7 - SET 4, A", 1 << 4, &Registers.A);
@@ -804,11 +719,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xED - SET 5, L", 1 << 5, &Registers.L);
             break;
         case 0xEE: // SET 5, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xEE - SET 5, (HL)", 1 << 5, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xEE - SET 5, (HL)", 1 << 5, &value); });
             break;
         case 0xEF: // SET 5, A
             set("0xEF - SET 5, A", 1 << 5, &Registers.A);
@@ -832,11 +743,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xF5 - SET 6, L", 1 << 6, &Registers.L);
             break;
         case 0xF6: // SET 6, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xF6 - SET 6, (HL)", 1 << 6, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xF6 - SET 6, (HL)", 1 << 6, &value); });
             break;
         case 0xF7: // SET 6, A
             set("0xF7 - SET 6, A", 1 << 6, &Registers.A);
@@ -860,11 +767,7 @@ void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
             set("0xFD - SET 7, L", 1 << 7, &Registers.L);
             break;
         case 0xFE: // SET 7, (HL)
-            {
-                uint8_t value = mmu.read8(Registers.HL);
-                set("0xFE - SET 7, (HL)", 1 << 7, &value);
-                mmu.write8(Registers.HL, value);
-            }
+            modifyHL([this](uint8_t& value) { set("0xFE - SET 7, (HL)", 1 << 7, &value); });
             break;
         case 0xFF: // SET 7, A
             set("0xFF - SET 7, A", 1 << 7, &Registers.A);

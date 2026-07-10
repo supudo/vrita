@@ -123,7 +123,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
                 emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
             },
             [&] (uint8_t flag) {
-                return emulatorDMG->managerCPU->getFlag(flag);
+                return emulatorDMG->managerCPU->isFlagSet(flag);
             },
             [&] (uint8_t flag) {
                 return emulatorDMG->managerInterrupts->isInterruptEnabled(flag);

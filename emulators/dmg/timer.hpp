@@ -44,7 +44,6 @@ private:
     static constexpr uint16_t addressTIMA = 0xFF05; // TIMA - timer counter
     static constexpr uint16_t addressTMA = 0xFF06; // TMA - timer modulo
     static constexpr uint16_t addressTAC = 0xFF07; // TAC - timer control
-    static constexpr uint8_t addressTIMER_INTERRUPT = 0x04; // timer interrupt
 
     void incrementTIMA();
 };

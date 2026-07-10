@@ -27,6 +27,7 @@ public:
     bool isHalted = false;
     bool triggerHaltBug = false;
     uint64_t totalCycles = 0;
+    bool firstRAMWrite = true;
 
     uint8_t read8(uint16_t address) const;
     void write8(uint16_t address, uint8_t value);

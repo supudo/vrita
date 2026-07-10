@@ -82,27 +82,18 @@ void DMG_CPU::add(const char* logMessage, uint16_t* destination, uint16_t value)
     setFlag(FLAG_SUBTRACT, false);
 }
 
-void DMG_CPU::add(const char* logMessage, uint16_t* destination, int8_t value) {
-    logCall(true, logMessage, " - add 16-8");
-    uint16_t result = *destination + value;
-    setFlag(FLAG_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x100) == 0x100);
-    setFlag(FLAG_HALF_CARRY, ((Registers.SP ^ value ^ (result & 0xFFFF)) & 0x10) == 0x10);
-    *destination = result & 0xFFFF;
-    setFlag(FLAG_SUBTRACT | FLAG_ZERO, false);
-}
-
-void DMG_CPU::ldhl(const char* logMessage, int8_t value) {
-    logCall(true, logMessage, " - ldhl");
+uint16_t DMG_CPU::addSignedToSP(const char* logMessage, int8_t value) {
+    logCall(true, logMessage, " - addSignedToSP");
     uint16_t result = Registers.SP + value;
     setFlag(FLAG_CARRY, ((Registers.SP ^ value ^ result) & 0x100) == 0x100);
     setFlag(FLAG_HALF_CARRY, ((Registers.SP ^ value ^ result) & 0x10) == 0x10);
-    Registers.HL = result;
     setFlag(FLAG_SUBTRACT | FLAG_ZERO, false);
+    return result;
 }
 
 void DMG_CPU::adc(const char* logMessage, uint8_t value) {
     logCall(true, logMessage, " - adc");
-    int carry = getFlag(FLAG_CARRY) ? 1 : 0;
+    int carry = isFlagSet(FLAG_CARRY) ? 1 : 0;
     int result = Registers.A + value + carry;
     setFlag(FLAG_ZERO, !(int8_t)result);
     setFlag(FLAG_CARRY, result > 0xff);
@@ -113,7 +104,7 @@ void DMG_CPU::adc(const char* logMessage, uint8_t value) {
 
 void DMG_CPU::sbc(const char* logMessage, uint8_t value) {
     logCall(true, logMessage, " - sbc");
-    bool is_carry = getFlag(FLAG_CARRY);
+    bool is_carry = isFlagSet(FLAG_CARRY);
     setFlag(FLAG_CARRY, (value + is_carry) > Registers.A);
     setFlag(FLAG_HALF_CARRY, ((value & 0x0f) + is_carry) > (Registers.A & 0x0f));
     Registers.A -= (value + is_carry);
@@ -186,13 +177,6 @@ void DMG_CPU::jump_add(const char* logMessage, bool condition) {
     }
 }
 
-void DMG_CPU::cp_n(const char* logMessage, uint8_t value) {
-    logCall(true, logMessage, " - cp_n");
-    setFlag(FLAG_SUBTRACT, true);
-    setFlag(FLAG_ZERO, Registers.A == value);
-    setFlag(FLAG_CARRY, value > Registers.A);
-    setFlag(FLAG_HALF_CARRY, (value & 0x0f) > (Registers.A & 0x0f));
-}
 #pragma endregion
 
 #pragma region extended instructions
@@ -213,42 +197,24 @@ void DMG_CPU::set(const char* logMessage, uint8_t bit, uint8_t* rgst) {
     *rgst |= bit;
 }
 
-void DMG_CPU::rl(const char* logMessage, uint8_t* value) {
-    logCall(false, logMessage, " - rl");
-    int carry = getFlag(FLAG_CARRY);
-    setFlag(FLAG_CARRY, *value & (1 << 7));
+void DMG_CPU::rotateLeft(const char* logMessage, uint8_t* value, bool throughCarry) {
+    logCall(false, logMessage, " - rotateLeft");
+    int oldBit7 = (*value >> 7) & 0x01;
+    int newBit0 = throughCarry ? (isFlagSet(FLAG_CARRY) ? 1 : 0) : oldBit7;
+    setFlag(FLAG_CARRY, oldBit7);
     *value <<= 1;
-    *value += carry;
+    *value += newBit0;
     setFlag(FLAG_ZERO, !*value);
     setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
 }
 
-void DMG_CPU::rlc(const char* logMessage, uint8_t* value) {
-    logCall(false, logMessage, " - rlc");
-    int carry = (*value >> 7) & 0x01;
-    setFlag(FLAG_CARRY, *value & (1 << 7));
-    *value <<= 1;
-    *value += carry;
-    setFlag(FLAG_ZERO, !*value);
-    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
-}
-
-void DMG_CPU::rr(const char* logMessage, uint8_t* value) {
-    logCall(false, logMessage, " - rr");
-    int carry = getFlag(FLAG_CARRY);
-    setFlag(FLAG_CARRY, *value & 0x01);
+void DMG_CPU::rotateRight(const char* logMessage, uint8_t* value, bool throughCarry) {
+    logCall(false, logMessage, " - rotateRight");
+    int oldBit0 = *value & 0x01;
+    int newBit7 = throughCarry ? (isFlagSet(FLAG_CARRY) ? 1 : 0) : oldBit0;
+    setFlag(FLAG_CARRY, oldBit0);
     *value >>= 1;
-    *value |= (carry << 7);
-    setFlag(FLAG_ZERO, !*value);
-    setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
-}
-
-void DMG_CPU::rrc(const char* logMessage, uint8_t* value) {
-    logCall(false, logMessage, " - rrc");
-    int carry = *value & 0x01;
-    setFlag(FLAG_CARRY, carry);
-    *value >>= 1;
-    *value |= (carry << 7);
+    *value |= (newBit7 << 7);
     setFlag(FLAG_ZERO, !*value);
     setFlag(FLAG_SUBTRACT | FLAG_HALF_CARRY, false);
 }

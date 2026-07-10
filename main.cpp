@@ -182,7 +182,7 @@ void loadFonts() {
 }
 
 int main(int argc, char** argv) {
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
         printf("[VRITA] Error: SDL_Init(): %s\n", SDL_GetError());
         return 1;
     }

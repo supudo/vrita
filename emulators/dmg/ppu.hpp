@@ -36,6 +36,7 @@ private:
     void renderWindow(uint8_t ly);
     void renderSprites(uint8_t ly);
     uint32_t applyPalette(uint8_t paletteReg, uint8_t colorId) const;
+    uint8_t tileColorId(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const;
 
     static constexpr uint32_t DMG_COLORS[4] = { 0xFF9BBC0F, 0xFF8BAC0F, 0xFF306230, 0xFF0F380F };
 

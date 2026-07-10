@@ -65,7 +65,10 @@ public:
 private:
     Logger& logger;
     Settings& settings;
+    SDL_AudioDeviceID audioDevice = 0;
+    SDL_AudioStream* audioStream = nullptr;
 
+    bool initAudio();
     void stepAll();
 
     bool renderJoypad;

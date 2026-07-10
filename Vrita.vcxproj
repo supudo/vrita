@@ -156,6 +156,11 @@
     <ClCompile Include="emulators\debuggers\tilemap_viewer.cpp" />
     <ClCompile Include="emulators\debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
+    <ClCompile Include="emulators\dmg\apu_mixer.cpp" />
+    <ClCompile Include="emulators\dmg\apu_noise.cpp" />
+    <ClCompile Include="emulators\dmg\apu_pulse.cpp" />
+    <ClCompile Include="emulators\dmg\apu_registers.cpp" />
+    <ClCompile Include="emulators\dmg\apu_wave.cpp" />
     <ClCompile Include="emulators\dmg\cartridge.cpp" />
     <ClCompile Include="emulators\dmg\cpu.cpp" />
     <ClCompile Include="emulators\dmg\dmg.cpp" />
@@ -185,6 +190,7 @@
     <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp" />
     <ClInclude Include="emulators\debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
+    <ClInclude Include="emulators\dmg\apu_structs.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />
     <ClInclude Include="emulators\dmg\cpu_registers.hpp" />

@@ -1,4 +1,4 @@
-#include "cpu.hpp"
+﻿#include "cpu.hpp"
 
 void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
     if (!ROMFileLoaded) return;
@@ -32,7 +32,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.B = mmu.read8(Registers.PC++);
             break;
         case 0x07: // RLCA
-            rlc("0x07 - RLCA", &Registers.A);
+            rotateLeft("0x07 - RLCA", &Registers.A, false);
             setFlag(FLAG_ZERO, false);
             break;
         case 0x08: // LD (nn), SP
@@ -65,7 +65,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.C = mmu.read8(Registers.PC++);
             break;
         case 0x0F: // RRCA
-            rrc("0x0F - RRCA", &Registers.A);
+            rotateRight("0x0F - RRCA", &Registers.A, false);
             setFlag(FLAG_ZERO, false);
             break;
         case 0x10: // STOP
@@ -96,7 +96,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.D = mmu.read8(Registers.PC++);
             break;
         case 0x17: // RLA
-            rl("0x17 - RLA", &Registers.A);
+            rotateLeft("0x17 - RLA", &Registers.A, true);
             setFlag(FLAG_ZERO, false);
             break;
         case 0x18: // JR nn
@@ -131,7 +131,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.E = mmu.read8(Registers.PC++);
             break;
         case 0x1F: // RRA
-            rr("0x1F - RRA", &Registers.A);
+            rotateRight("0x1F - RRA", &Registers.A, true);
             setFlag(FLAG_ZERO, false);
             break;
         case 0x20: // JR NZ, *
@@ -234,18 +234,10 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             mmu.tick(4);
             break;
         case 0x35: // DEC (HL)
-            {
-                uint8_t tmp_val = mmu.read8(Registers.HL);
-                dec("0x35 - DEC (HL)", &tmp_val);
-                mmu.write8(Registers.HL, tmp_val);
-            }
+            modifyHL([this](uint8_t& tmp_val) { dec("0x35 - DEC (HL)", &tmp_val); });
             break;
         case 0x34: // INC (HL)
-            {
-                uint8_t tmp_val = mmu.read8(Registers.HL);
-                inc("0x34 - INC (HL)", &tmp_val);
-                mmu.write8(Registers.HL, tmp_val);
-            }
+            modifyHL([this](uint8_t& tmp_val) { inc("0x34 - INC (HL)", &tmp_val); });
             break;
         case 0x36: // LD (HL), n
             logCall(true, "0x36 LD (HL), n");
@@ -463,7 +455,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.L = Registers.H;
             break;
         case 0x6D: // LD L, L
-            logCall(true, "break LD L, L");
+            logCall(true, "0x6D LD L, L");
             break;
         case 0x6E: // LD L, (HL)
             logCall(true, "0x6E LD L, (HL)");
@@ -769,10 +761,6 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
         case 0xCA: // JP Z, nn
             jump("0xCA - JP Z, nn", isFlagSet(FLAG_ZERO));
             break;
-        // handled in cpu
-        //case 0xCB:
-        //    executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
-        //    break;
         case 0xCC: // CALL Z, nn
             call("0xCC - CALL Z, nn", isFlagSet(FLAG_ZERO));
             break;
@@ -872,7 +860,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.PC = 0x0020;
             break;
         case 0xE8: // ADD SP, n
-            add("0xE8 - ADD SP, n", &Registers.SP, (int8_t)mmu.read8(Registers.PC++));
+            Registers.SP = addSignedToSP("0xE8 - ADD SP, n", (int8_t)mmu.read8(Registers.PC++));
             mmu.tick(4);
             break;
         case 0xE9: // JP HL
@@ -925,7 +913,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             Registers.PC = 0x0030;
             break;
         case 0xF8: // LDHL SP, n
-            ldhl("0xF8 - LDHL SP, n", mmu.read8(Registers.PC++));
+            Registers.HL = addSignedToSP("0xF8 - LDHL SP, n", (int8_t)mmu.read8(Registers.PC++));
             mmu.tick(4);
             break;
         case 0xF9: // LD SP, HL
@@ -943,7 +931,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             interrupts.setIME(true);
             break;
         case 0xFE: // CP n
-            cp_n("0xFE - CP n", mmu.read8(Registers.PC++));
+            cp("0xFE - CP n", mmu.read8(Registers.PC++));
             break;
         case 0xFF: // RST $38
             logCall(true, "0xFF RST $38");
@@ -957,8 +945,6 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             printFlags();
             printRegisters();
             logger.log("[DMG-CPU] Unsupported opcode: 0x%02X at 0x%04X", opcode, Registers.PC);
-            logger.log("[DMG-CPU] DIV: 0x%02X at 0x%04X", opcode, Registers.PC);
-            logger.log("[DMG-CPU] cycles: 0x%02X at 0x%04X", opcode, Registers.PC);
             logger.log("[DMG-CPU] ==================================================");
             return;
             break;

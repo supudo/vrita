@@ -32,14 +32,6 @@ void DMG_JOYPAD::write(uint8_t value) {
         managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 }
 
-void DMG_JOYPAD::setDpadState(uint8_t state) { 
-    stateDPad = state & 0x0F; 
-}
-
-void DMG_JOYPAD::setButtonsState(uint8_t state) { 
-    stateButtons = state & 0x0F; 
-}
-
 void DMG_JOYPAD::handleKey(uint32_t type, uint32_t key) {
     switch (key) {
         case SDLK_RETURN:

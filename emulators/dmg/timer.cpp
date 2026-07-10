@@ -54,14 +54,6 @@ void DMG_TIMER::incrementTIMA() {
         ++registerTIMA;
 }
 
-namespace {
-    constexpr uint16_t DIV_ADDR = 0xFF04;
-    constexpr uint16_t TIMA_ADDR = 0xFF05;
-    constexpr uint16_t TMA_ADDR = 0xFF06;
-    constexpr uint16_t TAC_ADDR = 0xFF07;
-    constexpr uint8_t TIMER_INTERRUPT = 0x04;
-}
-
 uint8_t DMG_TIMER::read(uint16_t address) const {
     switch (address) {
         case addressDIV: return registerDIV;
@@ -74,17 +66,17 @@ uint8_t DMG_TIMER::read(uint16_t address) const {
 
 void DMG_TIMER::write(uint16_t address, uint8_t value) {
     switch (address) {
-        case DIV_ADDR:
+        case addressDIV:
             registerDIV = 0;
             internalDivCounter = 0;
             break;
-        case TIMA_ADDR:
+        case addressTIMA:
             registerTIMA = value;
             break;
-        case TMA_ADDR:
+        case addressTMA:
             registerTMA = value;
             break;
-        case TAC_ADDR:
+        case addressTAC:
             registerTAC = value & 0x07;
             break;
     }

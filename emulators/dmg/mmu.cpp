@@ -82,6 +82,7 @@ void DMG_MMU::clearMemory() {
 
 void DMG_MMU::clearResources() {
     totalCycles = 0;
+    firstRAMWrite = true;
     clearMemory();
 }
 
@@ -90,6 +91,10 @@ uint8_t DMG_MMU::read8(uint16_t address) const {
         return managerCartridge->read(address);
     if (address == 0xFF00)
         return managerJoypad->read();
+    if (address >= 0xFF04 && address <= 0xFF07)
+        return managerTimer->read(address);
+    if (address >= 0xFF10 && address <= 0xFF3F)
+        return managerAPU->readRegister(address);
     return memory[address];
 }
 
@@ -99,7 +104,6 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
         return;
     }
     if (address > 0xA000 && address < 0xC000) { // external cartridge RAM
-        static bool firstRAMWrite = true;
         if (firstRAMWrite) {
             logger->log("[MMU] First external RAM write @ 0x%04X", address);
             firstRAMWrite = false;
@@ -109,6 +113,21 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
     }
     if (address == 0xFF00) {
         managerJoypad->write(value);
+        return;
+    }
+    if (address >= 0xFF04 && address <= 0xFF07) {
+        managerTimer->write(address, value);
+        return;
+    }
+    if (address >= 0xFF10 && address <= 0xFF3F) {
+        managerAPU->writeRegister(address, value);
+        return;
+    }
+    if (address == 0xFF46) {
+        memory[address] = value;
+        uint16_t source = (uint16_t)value << 8;
+        for (uint16_t i = 0; i < 0xA0; i++)
+            memory[0xFE00 + i] = read8(source + i);
         return;
     }
     memory[address] = value;

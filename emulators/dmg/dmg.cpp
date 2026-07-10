@@ -27,7 +27,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
 
     managerInterrupts = std::make_shared<DMG_INTERRUPT>(*managerMMU);
     managerTimer = std::make_shared<DMG_TIMER>(logger, *managerInterrupts);
-    managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts, false, 0);
+    managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU = std::make_shared<DMG_PPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU->setFramebuffer(gFramebuffer);
     managerAPU = std::make_shared<DMG_APU>(*managerMMU);
@@ -39,7 +39,31 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
     managerInterrupts->setCPURegisters(managerCPU->Registers);
 
+    initAudio();
+
     return true;
+}
+
+bool DMG::initAudio() {
+    SDL_AudioSpec audioSpec{};
+    audioSpec.format = SDL_AUDIO_S16;
+    audioSpec.channels = 2;
+    audioSpec.freq = 44100;
+    audioDevice = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audioSpec);
+    if (!audioDevice)
+        logger.log("[DMG-APU] Cannot create audio device!");
+    audioStream = SDL_CreateAudioStream(&audioSpec, &audioSpec);
+    if (!audioStream)
+        logger.log("[DMG-APU] Cannot create audio stream!");
+    SDL_BindAudioStream(audioDevice, audioStream);
+    bool result = SDL_ResumeAudioDevice(audioDevice);
+    if (!result)
+        logger.log("[DMG-APU] Cannot create audio device!");
+    else if (audioStream)
+        managerAPU->initAudioStream(audioStream);
+    else
+        logger.log("[DMG-APU] Cannot create audio stream!");
+    return result;
 }
 
 ImVec2 DMG::getWindowPosition() {
@@ -68,6 +92,7 @@ std::string DMG::loadROM(const char* path) {
         return "Failed to open ROM";
     }
     clear();
+    initAudio();
     for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
         gFramebuffer[i] = 0xFF9BBC0F;
     std::streamsize size = file.tellg();
@@ -75,6 +100,7 @@ std::string DMG::loadROM(const char* path) {
     logger.log("[DMG] Loading ROM: %s", path);
     logger.log("[DMG] ROM size: %lld bytes (0x%llX), buffer: %lld bytes", (long long)size, (long long)size, (long long)memNeeded);
     managerMMU->memory.resize((size_t)memNeeded, 0);
+    managerMMU->memorySize = (uint32_t)managerMMU->memory.size();
     logger.log("[DMG] Memory buffer resized to %zu bytes", managerMMU->memory.size());
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(managerMMU->memory.data()), size)) {
@@ -107,6 +133,14 @@ void DMG::clear() {
     managerTimer->reset();
     managerCartridge->clearResources();
     managerJoypad->clearResources();
+    if (audioStream) {
+        SDL_DestroyAudioStream(audioStream);
+        audioStream = nullptr;
+    }
+    if (audioDevice) {
+        SDL_CloseAudioDevice(audioDevice);
+        audioDevice = 0;
+    }
 }
 
 void DMG::stepCPU() {

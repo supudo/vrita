@@ -1,6 +1,10 @@
 #include "cartridge.hpp"
 
 void DMG_CARTRIDGE::loadROM(std::streamsize size) {
+    // Each MBC below captures mmu.memory.data() as a raw pointer. This is only safe
+    // because DMG::loadROM() always calls managerMMU->clearResources() (which resizes,
+    // and thus reallocates, memory) before this constructs a new MBC. If that call
+    // order ever changes, these pointers can end up stale.
     ram.assign(0x8000, 0);
     uint8_t type = mmu.memory[0x147]; // cartridge number
     logger.log("[DMG-CARTRIDGE] Cartridge type byte: 0x%02X", type);

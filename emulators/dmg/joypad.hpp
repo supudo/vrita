@@ -22,9 +22,6 @@ public:
     uint8_t read() const;
     void write(uint8_t value);
 
-    void setDpadState(uint8_t state);
-    void setButtonsState(uint8_t state);
-
     void handleKey(uint32_t type, uint32_t key);
 
 private:

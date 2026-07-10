@@ -23,7 +23,7 @@ GameBoy (DMG)
 
 class DMG_CPU {
 public:
-    DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts, bool halted, uint64_t cycles) : logger(logger), mmu(mmu), interrupts(interrupts) {}
+    DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts) : logger(logger), mmu(mmu), interrupts(interrupts) {}
     void step(bool ROMFileLoaded);
     void clearResources();
 
@@ -39,8 +39,7 @@ public:
     }
 
     inline void setFlag(uint8_t flag, bool enabled) { if (enabled) Registers.F |= flag; else Registers.F &= ~flag; Registers.F &= 0xF0; }
-    inline bool getFlag(uint8_t flag) const { return (Registers.F & flag) != 0; }
-    inline bool isFlagSet(uint8_t flag) const { return Registers.F & (flag); }
+    inline bool isFlagSet(uint8_t flag) const { return (Registers.F & flag) != 0; }
     inline void printFlags() { logger.log("[DMG-CPU] Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
     bool logCalls = false;
 
@@ -52,6 +51,14 @@ private:
     void executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode);
     void executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode);
 
+    // read-modify-write (HL): read, apply operation, write back
+    template<typename Fn>
+    void modifyHL(Fn&& operation) {
+        uint8_t value = mmu.read8(Registers.HL);
+        operation(value);
+        mmu.write8(Registers.HL, value);
+    }
+
     // instructions
     void ret(const char* logMessage, bool condition);
     void xor_(const char* logMessage, uint8_t value);
@@ -59,8 +66,7 @@ private:
     void dec(const char* logMessage, uint8_t* value);
     void add(const char* logMessage, uint8_t* destination, uint8_t value);
     void add(const char* logMessage, uint16_t* destination, uint16_t value);
-    void add(const char* logMessage, uint16_t* destination, int8_t value);
-    void ldhl(const char* logMessage, int8_t value);
+    uint16_t addSignedToSP(const char* logMessage, int8_t value);
     void adc(const char* logMessage, uint8_t value);
     void sbc(const char* logMessage, uint8_t value);
     void sub(const char* logMessage, uint8_t value);
@@ -70,16 +76,13 @@ private:
     void call(const char* logMessage, bool condition);
     void jump(const char* logMessage, bool condition);
     void jump_add(const char* logMessage, bool condition);
-    void cp_n(const char* logMessage, uint8_t value);
 
     // extended instructions
     void bit(const char* logMessage, uint8_t bit, uint8_t value);
     void res(const char* logMessage, uint8_t bit, uint8_t* rgst);
     void set(const char* logMessage, uint8_t bit, uint8_t* rgst);
-    void rl(const char* logMessage, uint8_t* value);
-    void rlc(const char* logMessage, uint8_t* value);
-    void rr(const char* logMessage, uint8_t* value);
-    void rrc(const char* logMessage, uint8_t* value);
+    void rotateLeft(const char* logMessage, uint8_t* value, bool throughCarry);
+    void rotateRight(const char* logMessage, uint8_t* value, bool throughCarry);
     void sla(const char* logMessage, uint8_t* value);
     void sra(const char* logMessage, uint8_t* value);
     void srl(const char* logMessage, uint8_t* value);

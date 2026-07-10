@@ -56,6 +56,21 @@ uint32_t DMG_PPU::applyPalette(uint8_t paletteReg, uint8_t colorId) const {
     return DMG_COLORS[(paletteReg >> (colorId * 2)) & 0x03];
 }
 
+uint8_t DMG_PPU::tileColorId(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const {
+    uint8_t tileIndex = mmu.memory[tilemapBase + tileRow * 32 + tileCol];
+
+    uint16_t tileAddr;
+    if (signedAddr)
+        tileAddr = (uint16_t)(0x9000 + (int8_t)tileIndex * 16);
+    else
+        tileAddr = addressVRAMStart + tileIndex * 16;
+
+    uint8_t low = mmu.memory[tileAddr + pixelRow * 2];
+    uint8_t high = mmu.memory[tileAddr + pixelRow * 2 + 1];
+    uint8_t bit = 7 - pixelCol;
+    return (((high >> bit) & 1) << 1) | ((low >> bit) & 1);
+}
+
 void DMG_PPU::renderScanline(uint8_t ly) {
     renderBackground(ly);
     renderWindow(ly);
@@ -78,22 +93,7 @@ void DMG_PPU::renderBackground(uint8_t ly) {
     for (int x = 0; x < 160; x++) {
         uint8_t mapX = (scx + x) & 0xFF;
         uint8_t mapY = (scy + ly) & 0xFF;
-        uint8_t tileCol = mapX / 8;
-        uint8_t tileRow = mapY / 8;
-        uint8_t tileIndex = mmu.memory[tilemapBase + tileRow * 32 + tileCol];
-
-        uint16_t tileAddr;
-        if (signedAddr)
-            tileAddr = (uint16_t)(0x9000 + (int8_t)tileIndex * 16);
-        else
-            tileAddr = addressVRAMStart + tileIndex * 16;
-
-        uint8_t pixelRow = mapY % 8;
-        uint8_t low = mmu.memory[tileAddr + pixelRow * 2];
-        uint8_t high = mmu.memory[tileAddr + pixelRow * 2 + 1];
-        uint8_t bit = 7 - (mapX % 8);
-        uint8_t colorId = (((high >> bit) & 1) << 1) | ((low >> bit) & 1);
-
+        uint8_t colorId = tileColorId(tilemapBase, signedAddr, mapX / 8, mapY / 8, mapY % 8, mapX % 8);
         framebuffer[ly * 160 + x] = applyPalette(bgp, colorId);
     }
 }
@@ -119,22 +119,7 @@ void DMG_PPU::renderWindow(uint8_t ly) {
     for (int x = (wx < 0 ? 0 : wx); x < 160; x++) {
         int winX = x - wx;
         int winY = windowLine;
-        uint8_t tileCol = winX / 8;
-        uint8_t tileRow = winY / 8;
-        uint8_t tileIndex = mmu.memory[tilemapBase + tileRow * 32 + tileCol];
-
-        uint16_t tileAddr;
-        if (signedAddr)
-            tileAddr = (uint16_t)(0x9000 + (int8_t)tileIndex * 16);
-        else
-            tileAddr = addressVRAMStart + tileIndex * 16;
-
-        uint8_t pixelRow = winY % 8;
-        uint8_t low = mmu.memory[tileAddr + pixelRow * 2];
-        uint8_t high = mmu.memory[tileAddr + pixelRow * 2 + 1];
-        uint8_t bit = 7 - (winX % 8);
-        uint8_t colorId = (((high >> bit) & 1) << 1) | ((low >> bit) & 1);
-
+        uint8_t colorId = tileColorId(tilemapBase, signedAddr, winX / 8, winY / 8, winY % 8, winX % 8);
         framebuffer[ly * 160 + x] = applyPalette(bgp, colorId);
         drewAnyPixel = true;
     }

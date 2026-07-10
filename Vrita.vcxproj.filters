@@ -74,6 +74,21 @@
     <ClCompile Include="emulators\dmg\joypad.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\dmg\apu_mixer.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\apu_noise.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\apu_pulse.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\apu_registers.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="emulators\dmg\apu_wave.cpp">
+      <Filter>emulators\dmg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -170,6 +185,9 @@
       <Filter>utilities\iconfonts</Filter>
     </ClInclude>
     <ClInclude Include="emulators\dmg\joypad.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="emulators\dmg\apu_structs.hpp">
       <Filter>emulators\dmg</Filter>
     </ClInclude>
   </ItemGroup>

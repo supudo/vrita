@@ -60,6 +60,11 @@ public:
     bool isGameRunning();
     void logCPUCalls(bool isOn);
 
+    void setVolume(uint8_t volume);
+    uint8_t getVolume() const;
+    void setMuted(bool muted);
+    bool isMuted() const;
+
     void handleKey(uint32_t type, uint32_t key);
 
 private:

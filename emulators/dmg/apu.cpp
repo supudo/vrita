@@ -9,7 +9,11 @@ void DMG_APU::clearResources() {
     ch2 = PulseChannel{ .hasSweep = false };
     wave = WaveChannel{};
     noise = NoiseChannel{};
+    uint8_t userVolume = mixer.userVolume;
+    bool userMuted = mixer.userMuted;
     mixer = Mixer{};
+    mixer.userVolume = userVolume;
+    mixer.userMuted = userMuted;
     frame = FrameSequencer{};
     output.buffer.clear();
     output.sampleAccumulator = 0;

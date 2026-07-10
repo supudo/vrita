@@ -39,6 +39,9 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
     managerInterrupts->setCPURegisters(managerCPU->Registers);
 
+    managerAPU->setUserVolume((uint8_t)settings.GetInt("Emulators - DMG", "volume", 100));
+    managerAPU->setMuted(settings.GetBool("Emulators - DMG", "muted", false));
+
     initAudio();
 
     return true;
@@ -181,6 +184,28 @@ bool DMG::isGameRunning() {
 
 void DMG::logCPUCalls(bool isOn) {
     managerCPU->logCalls = isOn;
+}
+
+void DMG::setVolume(uint8_t volume) {
+    if (volume > 100)
+        volume = 100;
+    managerAPU->setUserVolume(volume);
+    settings.Set("Emulators - DMG", "volume", (int)volume);
+    settings.Save();
+}
+
+uint8_t DMG::getVolume() const {
+    return managerAPU->getUserVolume();
+}
+
+void DMG::setMuted(bool muted) {
+    managerAPU->setMuted(muted);
+    settings.Set("Emulators - DMG", "muted", muted);
+    settings.Save();
+}
+
+bool DMG::isMuted() const {
+    return managerAPU->isMuted();
 }
 
 void DMG::handleKey(uint32_t type, uint32_t key) {
@@ -335,6 +360,22 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (ImGui::Button(ICON_FA_MOBILE_SCREEN_BUTTON, ImVec2(40, 32)))
         renderJoypad = !renderJoypad;
     ImGui::SetItemTooltip("Toggle D-Pad");
+
+    ImGui::SameLine();
+
+    if (ImGui::Button(isMuted() ? ICON_FA_VOLUME_XMARK : ICON_FA_VOLUME_HIGH, ImVec2(40, 32)))
+        ImGui::OpenPopup("volumePopup");
+    if (ImGui::BeginPopup("volumePopup")) {
+        if (ImGui::Button(isMuted() ? "Unmute" : "Mute"))
+            setMuted(!isMuted());
+        ImGui::Separator();
+        ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 40);
+        int sliderVolume = (int)getVolume();
+        if (ImGui::VSliderInt("##volume", ImVec2(40, 160), &sliderVolume, 0, 100, "%d%%"))
+            setVolume((uint8_t)sliderVolume);
+        ImGui::PopStyleVar();
+        ImGui::EndPopup();
+    }
 
     if (!localRomFileLoaded)
         ImGui::EndDisabled();

@@ -23,7 +23,7 @@ uint8_t DMG_APU::channelOutput(uint8_t channel) {
 
 // Mix a stereo sample pair
 void DMG_APU::mixSample(int16_t& left, int16_t& right) {
-    if (!(registers.NR52 & 0x80)) {
+    if (!(registers.NR52 & 0x80) || mixer.userMuted) {
         left = 0;
         right = 0;
         return;
@@ -51,6 +51,27 @@ void DMG_APU::mixSample(int16_t& left, int16_t& right) {
     // (max per side: 4 channels * 15 amplitude * 8 volume = 480; 480*68 ~= 32640)
     l *= 68;
     r *= 68;
+
+    // Vrita volume control (0-100%)
+    l = l * mixer.userVolume / 100;
+    r = r * mixer.userVolume / 100;
+
     left = static_cast<int16_t>(std::clamp(l, -32768, 32767));
     right = static_cast<int16_t>(std::clamp(r, -32768, 32767));
+}
+
+void DMG_APU::setUserVolume(uint8_t volume) {
+    mixer.userVolume = std::min<uint8_t>(volume, 100);
+}
+
+uint8_t DMG_APU::getUserVolume() const {
+    return mixer.userVolume;
+}
+
+void DMG_APU::setMuted(bool muted) {
+    mixer.userMuted = muted;
+}
+
+bool DMG_APU::isMuted() const {
+    return mixer.userMuted;
 }

@@ -43,6 +43,10 @@ struct Mixer {
 
     bool vinLeft = false;
     bool vinRight = false;
+
+    // user volume
+    uint8_t userVolume = 100;
+    bool userMuted = false;
 };
 
 struct LengthCounter {

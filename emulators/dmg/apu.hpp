@@ -22,6 +22,11 @@ public:
     uint8_t readRegister(uint16_t address);
     void writeRegister(uint16_t address, uint8_t value);
 
+    void setUserVolume(uint8_t volume);
+    uint8_t getUserVolume() const;
+    void setMuted(bool muted);
+    bool isMuted() const;
+
 private:
     DMG_MMU& mmu;
     SDL_AudioStream* audioStream = nullptr;

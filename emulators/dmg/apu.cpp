@@ -5,6 +5,15 @@ void DMG_APU::initAudioStream(SDL_AudioStream* audioStream) {
 }
 
 void DMG_APU::clearResources() {
+    ch1 = PulseChannel{ .hasSweep = true };
+    ch2 = PulseChannel{ .hasSweep = false };
+    wave = WaveChannel{};
+    noise = NoiseChannel{};
+    mixer = Mixer{};
+    frame = FrameSequencer{};
+    output.buffer.clear();
+    output.sampleAccumulator = 0;
+    registers = APURegisters{};
 }
 
 void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {

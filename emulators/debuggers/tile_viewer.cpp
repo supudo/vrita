@@ -32,9 +32,8 @@ void TileViewer::release() {
     settings.Save();
 }
 
-void TileViewer::setMemory(const char* emulatorType, uint8_t* data, int paletteChoicesSelected) {
+void TileViewer::setMemory(const char* emulatorType, uint8_t* data) {
     memoryData = data;
-    this->paletteChoicesSelected = paletteChoicesSelected;
     uint8_t et = -1;
     if (strcmp(emulatorType, "dmg") == 0)
         et = 1;
@@ -77,9 +76,7 @@ void TileViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
                 uint8_t bit = 7 - x;
                 uint8_t lo = (low >> bit) & 1;
                 uint8_t hi = (high >> bit) & 1;
-                uint8_t colorId = (hi << 1) | lo; // from 0 to 3
-                PaletteColor color = paletteViewer.getColorPalette(colorId);
-                tile.pixels[x][y] = { color.r, color.g, color.b, 1.0f };
+                tile.pixels[x][y] = (hi << 1) | lo; // from 0 to 3
             }
         }
     }
@@ -111,6 +108,15 @@ void TileViewer::render(bool* windowOpened) {
     ImGui::Text("Tiles size:");
     ImGui::SameLine();
     ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 64.0f);
+
+    ImGui::Text("Choose palette transformer:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(100);
+    static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
+    if (ImGui::Combo("##paletteChoicesCombo", &paletteViewer.paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
+        settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
+        settings.Save();
+    }
 
     ImGui::Separator();
 
@@ -267,8 +273,8 @@ void TileViewer::renderTilePreview() {
 void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize) {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
-            const TileColor& c = tile.pixels[x][y];
-            ImU32 col = IM_COL32((int)(c.r * 255.0f), (int)(c.g * 255.0f), (int)(c.b * 255.0f), (int)(c.a * 255.0f));
+            PaletteColor color = paletteViewer.getColorPalette(tile.pixels[x][y]);
+            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
             draw_list->AddRectFilled(p0, p1, col);

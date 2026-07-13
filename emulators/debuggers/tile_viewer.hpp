@@ -17,7 +17,7 @@ public:
     TileViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
-    void setMemory(const char* emulatorType, uint8_t* data, int paletteChoicesSelected);
+    void setMemory(const char* emulatorType, uint8_t* data);
     void release();
     void render(bool* windowOpened);
 
@@ -35,8 +35,6 @@ private:
 
     uint8_t* memoryData = nullptr;
     uint8_t emulatorType = -1;
-
-    int paletteChoicesSelected = 0;
 
     ImVector<TileItem> tiles;
     ImGuiID nextTileID;

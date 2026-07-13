@@ -7,13 +7,9 @@
 #include <vector>
 #include <imgui.h>
 
-struct TileColor {
-    float r, g, b, a;
-};
-
 struct TileItem {
     ImGuiID TileItemID;
-    TileColor pixels[8][8];
+    uint8_t pixels[8][8];
     uint8_t TileNumberHex;
     uint8_t TileNumberInt;
     char TileAddress[8];
@@ -21,7 +17,7 @@ struct TileItem {
         TileAddress[0] = '\0';
         for (auto& row : pixels)
             for (auto& c : row)
-                c = { 0.0f, 0.0f, 0.0f, 1.0f };
+                c = 0;
     }
     TileItem(ImGuiID id, uint8_t tileNumberHex, uint8_t tileNumberInt, const char* tileAddress) {
         TileItemID = id;

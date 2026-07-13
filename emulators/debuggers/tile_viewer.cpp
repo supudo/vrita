@@ -17,7 +17,19 @@ bool TileViewer::init() {
     windowWidth = settings.GetInt("Debuggers - Tile Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Tile Viewer", "height", 300);
     zoomPerPixel = settings.GetFloat("Debuggers - Tile Viewer", "zoom_per_pixel", 2.0f);
+    previewSize = settings.GetFloat("Debuggers - Tile Viewer", "preview_size", 40.0f);
     return true;
+}
+
+void TileViewer::release() {
+    tiles.clear();
+    settings.Set("Debuggers - Tile Viewer", "position_x", (int)lastWindowPosition.x);
+    settings.Set("Debuggers - Tile Viewer", "position_y", (int)lastWindowPosition.y);
+    settings.Set("Debuggers - Tile Viewer", "width", (int)lastWindowSize.x);
+    settings.Set("Debuggers - Tile Viewer", "height", (int)lastWindowSize.y);
+    settings.Set("Debuggers - Tile Viewer", "zoom_per_pixel", zoomPerPixel);
+    settings.Set("Debuggers - Tile Viewer", "preview_size", previewSize);
+    settings.Save();
 }
 
 void TileViewer::setMemory(const char* emulatorType, uint8_t* data) {
@@ -56,28 +68,20 @@ void TileViewer::initializeData(uint8_t emulatorType) {
 }
 
 void TileViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
-    for (uint8_t y = 0; y < 8; y++) {
-        uint8_t low = tileData[y * 2];
-        uint8_t high = tileData[y * 2 + 1];
-        for (uint8_t x = 0; x < 8; x++) {
-            uint8_t bit = 7 - x;
-            uint8_t lo = (low >> bit) & 1;
-            uint8_t hi = (high >> bit) & 1;
-            uint8_t colorId = (hi << 1) | lo; // from 0 to 3
-            PaletteColor color = paletteViewer.getColorPalette(colorId);
-            tile.pixels[x][y] = { color.r, color.g, color.b, 1.0f };
+    if (emulatorType == 1) {
+        for (uint8_t y = 0; y < 8; y++) {
+            uint8_t low = tileData[y * 2];
+            uint8_t high = tileData[y * 2 + 1];
+            for (uint8_t x = 0; x < 8; x++) {
+                uint8_t bit = 7 - x;
+                uint8_t lo = (low >> bit) & 1;
+                uint8_t hi = (high >> bit) & 1;
+                uint8_t colorId = (hi << 1) | lo; // from 0 to 3
+                PaletteColor color = paletteViewer.getColorPalette(colorId);
+                tile.pixels[x][y] = { color.r, color.g, color.b, 1.0f };
+            }
         }
     }
-}
-
-void TileViewer::release() {
-    tiles.clear();
-    settings.Set("Debuggers - Tile Viewer", "position_x", (int)lastWindowPosition.x);
-    settings.Set("Debuggers - Tile Viewer", "position_y", (int)lastWindowPosition.y);
-    settings.Set("Debuggers - Tile Viewer", "width", (int)lastWindowSize.x);
-    settings.Set("Debuggers - Tile Viewer", "height", (int)lastWindowSize.y);
-    settings.Set("Debuggers - Tile Viewer", "zoom_per_pixel", zoomPerPixel);
-    settings.Save();
 }
 
 void TileViewer::render(bool* windowOpened) {

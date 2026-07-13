@@ -74,6 +74,12 @@ struct AudioOutput {
     uint32_t sampleAccumulator = 0;
     static constexpr uint32_t cpuClock = 4194304;
     static constexpr uint32_t sampleRate = 44100;
+
+    static constexpr uint32_t oversample = 4;
+    int32_t oversampleSumLeft = 0;
+    int32_t oversampleSumRight = 0;
+    uint32_t oversampleCount = 0;
+
     std::vector<int16_t> buffer;
 };
 

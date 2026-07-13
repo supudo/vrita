@@ -17,6 +17,9 @@ void DMG_APU::clearResources() {
     frame = FrameSequencer{};
     output.buffer.clear();
     output.sampleAccumulator = 0;
+    output.oversampleSumLeft = 0;
+    output.oversampleSumRight = 0;
+    output.oversampleCount = 0;
     registers = APURegisters{};
 }
 
@@ -50,14 +53,20 @@ void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {
             frame.step = (frame.step + 1) & 7;
         }
 
-        // sample generation
-        output.sampleAccumulator += AudioOutput::sampleRate;
+        output.sampleAccumulator += AudioOutput::sampleRate * AudioOutput::oversample;
         if (output.sampleAccumulator >= AudioOutput::cpuClock) {
             output.sampleAccumulator -= AudioOutput::cpuClock;
             int16_t left, right;
             mixSample(left, right);
-            output.buffer.push_back(left);
-            output.buffer.push_back(right);
+            output.oversampleSumLeft += left;
+            output.oversampleSumRight += right;
+            if (++output.oversampleCount >= AudioOutput::oversample) {
+                output.buffer.push_back(static_cast<int16_t>(output.oversampleSumLeft / (int32_t)AudioOutput::oversample));
+                output.buffer.push_back(static_cast<int16_t>(output.oversampleSumRight / (int32_t)AudioOutput::oversample));
+                output.oversampleSumLeft = 0;
+                output.oversampleSumRight = 0;
+                output.oversampleCount = 0;
+            }
         }
     }
 

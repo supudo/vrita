@@ -1,6 +1,7 @@
 #ifndef VRITA_DEBUGGERS_DEFINES_INCLUDES
 #define VRITA_DEBUGGERS_DEFINES_INCLUDES
 
+#include <cstdio>
 #include <functional>
 #include <map>
 #include <vector>
@@ -13,7 +14,21 @@ struct TileColor {
 struct TileItem {
     ImGuiID TileItemID;
     TileColor pixels[8][8];
-    TileItem(ImGuiID id) { TileItemID = id; }
+    uint8_t TileNumberHex;
+    uint8_t TileNumberInt;
+    char TileAddress[8];
+    TileItem() : TileItemID(0), TileNumberHex(0), TileNumberInt(0) {
+        TileAddress[0] = '\0';
+        for (auto& row : pixels)
+            for (auto& c : row)
+                c = { 0.0f, 0.0f, 0.0f, 1.0f };
+    }
+    TileItem(ImGuiID id, uint8_t tileNumberHex, uint8_t tileNumberInt, const char* tileAddress) {
+        TileItemID = id;
+        TileNumberHex = tileNumberHex;
+        TileNumberInt = tileNumberInt;
+        snprintf(TileAddress, sizeof(TileAddress), "%s", tileAddress);
+    }
 };
 
 struct PaletteColor {

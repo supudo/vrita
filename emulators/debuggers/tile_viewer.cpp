@@ -32,8 +32,9 @@ void TileViewer::release() {
     settings.Save();
 }
 
-void TileViewer::setMemory(const char* emulatorType, uint8_t* data) {
+void TileViewer::setMemory(const char* emulatorType, uint8_t* data, int paletteChoicesSelected) {
     memoryData = data;
+    this->paletteChoicesSelected = paletteChoicesSelected;
     uint8_t et = -1;
     if (strcmp(emulatorType, "dmg") == 0)
         et = 1;

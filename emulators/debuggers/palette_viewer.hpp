@@ -24,6 +24,8 @@ public:
 
     PaletteColor getColorPalette(uint8_t colorValue);
 
+    int paletteChoicesSelected = 0;
+
 private:
     Logger& logger;
     Settings& settings;
@@ -41,8 +43,6 @@ private:
     uint8_t paletteBGP = 0;
     uint8_t paletteOBP0 = 0;
     uint8_t paletteOBP1 = 0;
-
-    int paletteChoicesSelected = 0;
 
     void renderCenteredCellContent(const char* lbl);
     void renderColorButtons(const char* label, uint8_t paletteValue);

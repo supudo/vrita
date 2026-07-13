@@ -153,6 +153,7 @@ void TileViewer::renderTiles() {
 
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
         if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
+            ImGui::BeginChild("TilesScroll1", ImVec2(0, 0), ImGuiChildFlags_None);
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 start = ImGui::GetCursorScreenPos();
             for (int i = 0; i < tiles.Size; i++) {
@@ -171,10 +172,12 @@ void TileViewer::renderTiles() {
                         selectedTileItem = tiles[slot];
                 }
             }
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Tiles 2 (0x8800 signed)", nullptr, ImGuiTabItemFlags_None)) {
+            ImGui::BeginChild("TilesScroll2", ImVec2(0, 0), ImGuiChildFlags_None);
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 start = ImGui::GetCursorScreenPos();
             for (int i = 0; i < 256; i++) {
@@ -195,10 +198,12 @@ void TileViewer::renderTiles() {
                         selectedTileItem = tiles[idx];
                 }
             }
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("OBJ Tiles", nullptr, ImGuiTabItemFlags_None)) {
+            ImGui::BeginChild("TilesScroll3", ImVec2(0, 0), ImGuiChildFlags_None);
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 start = ImGui::GetCursorScreenPos();
             int count = 0;
@@ -223,6 +228,7 @@ void TileViewer::renderTiles() {
                         selectedTileItem = tiles[idx];
                 }
             }
+            ImGui::EndChild();
             ImGui::EndTabItem();
         }
 

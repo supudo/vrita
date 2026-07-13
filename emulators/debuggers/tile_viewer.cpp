@@ -18,6 +18,7 @@ bool TileViewer::init() {
     windowHeight = settings.GetInt("Debuggers - Tile Viewer", "height", 300);
     zoomPerPixel = settings.GetFloat("Debuggers - Tile Viewer", "zoom_per_pixel", 2.0f);
     previewSize = settings.GetFloat("Debuggers - Tile Viewer", "preview_size", 40.0f);
+    autoRefresh = settings.GetFloat("Debuggers - Tile Viewer", "auto_refresh", true);
     return true;
 }
 
@@ -29,6 +30,7 @@ void TileViewer::release() {
     settings.Set("Debuggers - Tile Viewer", "height", (int)lastWindowSize.y);
     settings.Set("Debuggers - Tile Viewer", "zoom_per_pixel", zoomPerPixel);
     settings.Set("Debuggers - Tile Viewer", "preview_size", previewSize);
+    settings.Set("Debuggers - Tile Viewer", "auto_refresh", autoRefresh);
     settings.Save();
 }
 
@@ -41,9 +43,10 @@ void TileViewer::setMemory(const char* emulatorType, uint8_t* data) {
         et = 2;
     else
         et = 0;
-    if (et != this->emulatorType)
-        initializeData(et);
+    bool changed = et != this->emulatorType;
     this->emulatorType = et;
+    if (changed)
+        initializeData(et);
 }
 
 void TileViewer::initializeData(uint8_t emulatorType) {
@@ -103,7 +106,8 @@ void TileViewer::render(bool* windowOpened) {
         return;
     }
 
-    initializeData(emulatorType);
+    if (autoRefresh)
+        initializeData(emulatorType);
 
     ImGui::Text("Tiles size:");
     ImGui::SameLine();
@@ -117,6 +121,10 @@ void TileViewer::render(bool* windowOpened) {
         settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
         settings.Save();
     }
+
+    ImGui::Text("Auto refresh:");
+    ImGui::SameLine();
+    ImGui::Checkbox("##autorefresh", &autoRefresh);
 
     ImGui::Separator();
 

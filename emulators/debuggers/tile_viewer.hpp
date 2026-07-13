@@ -43,6 +43,7 @@ private:
     bool previewSelected = false;
     TileItem hoveredTileItem;
     TileItem selectedTileItem;
+    bool autoRefresh = true;
 
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);

@@ -24,6 +24,9 @@ struct TileItem {
         TileNumberHex = tileNumberHex;
         TileNumberInt = tileNumberInt;
         snprintf(TileAddress, sizeof(TileAddress), "%s", tileAddress);
+        for (auto& row : pixels)
+            for (auto& c : row)
+                c = 0;
     }
 };
 

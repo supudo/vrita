@@ -39,10 +39,15 @@ private:
     ImVector<TileItem> tiles;
     ImGuiID nextTileID;
     float zoomPerPixel = 2.0f;
-    int tilesPerRow = 16;
+    float previewSize = 40.0f;
+    int tileHovered = 0;
+    int tileSelected = 0;
+    bool previewSelected = false;
 
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);
+    void renderTiles();
+    void renderTilePreview();
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize);
 };
 

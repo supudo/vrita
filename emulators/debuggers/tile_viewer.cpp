@@ -17,7 +17,6 @@ bool TileViewer::init() {
     windowWidth = settings.GetInt("Debuggers - Tile Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Tile Viewer", "height", 300);
     zoomPerPixel = settings.GetFloat("Debuggers - Tile Viewer", "zoom_per_pixel", 2.0f);
-    tilesPerRow = settings.GetInt("Debuggers - Tile Viewer", "tiles_per_row", 16);
     return true;
 }
 
@@ -70,11 +69,13 @@ void TileViewer::release() {
     settings.Set("Debuggers - Tile Viewer", "width", (int)lastWindowSize.x);
     settings.Set("Debuggers - Tile Viewer", "height", (int)lastWindowSize.y);
     settings.Set("Debuggers - Tile Viewer", "zoom_per_pixel", zoomPerPixel);
-    settings.Set("Debuggers - Tile Viewer", "tiles_per_row", tilesPerRow);
     settings.Save();
 }
 
 void TileViewer::render(bool* windowOpened) {
+    const float widthVerticalSeparator = 2.0f;
+    const float widthRightPanel = 240.0f;
+
     ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);
 
@@ -92,9 +93,7 @@ void TileViewer::render(bool* windowOpened) {
         return;
     }
 
-    ImGui::Text("Tiles per row:");
-    ImGui::SameLine();
-    ImGui::SliderInt("##tilesPerRow", &tilesPerRow, 8, 64);
+    initializeData(emulatorType);
 
     ImGui::Text("Tiles size:");
     ImGui::SameLine();
@@ -102,47 +101,107 @@ void TileViewer::render(bool* windowOpened) {
 
     ImGui::Separator();
 
+    float totalH = ImGui::GetContentRegionAvail().y;
+    float totalW = ImGui::GetContentRegionAvail().x;
+    float leftW = totalW - widthRightPanel - widthVerticalSeparator;
+
+    ImGui::BeginChild("childLeft", ImVec2(leftW, totalH), ImGuiChildFlags_ResizeX);
+    renderTiles();
+    ImGui::EndChild();
+
+    // separator
+    {
+        ImVec2 rMin = ImGui::GetItemRectMin();
+        ImVec2 rMax = ImGui::GetItemRectMax();
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(rMax.x, rMin.y), ImVec2(rMax.x, rMax.y), ImGui::GetColorU32(ImGuiCol_Separator), widthVerticalSeparator);
+        ImGui::SameLine(0, widthVerticalSeparator);
+    }
+
+    ImGui::BeginChild("childRight", ImVec2(0, totalH), ImGuiChildFlags_None);
+    renderTilePreview();
+    ImGui::EndChild();
+
+    ImGui::End();
+}
+
+void TileViewer::renderTiles() {
     float tileSize = 8.0f * zoomPerPixel;
+    float tileStep = tileSize + 2.0f;
+    int tilesPerRow = std::max(1, (int)(ImGui::GetContentRegionAvail().x / tileStep));
 
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 start = ImGui::GetCursorScreenPos();
         if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 start = ImGui::GetCursorScreenPos();
             for (int i = 0; i < tiles.Size; i++) {
                 int tx = i % tilesPerRow;
                 int ty = i / tilesPerRow;
-                ImVec2 tilePos(start.x + tx * tileSize, start.y  + ty * tileSize);
-                drawTile(draw_list, tiles[i], tilePos, zoomPerPixel);
+                drawTile(draw_list, tiles[i], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
+            }
+            int numRows1 = (tiles.Size + tilesPerRow - 1) / tilesPerRow;
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows1 * tileStep));
+            if (ImGui::IsItemHovered()) {
+                ImVec2 mouse = ImGui::GetIO().MousePos;
+                int tileX = int((mouse.x - start.x) / tileStep);
+                int tileY = int((mouse.y - start.y) / tileStep);
+                tileHovered = tileY * tilesPerRow + tileX;
+            }
+            if (ImGui::IsItemClicked()) {
+                previewSelected = !previewSelected;
+                if (previewSelected)
+                    tileSelected = tileHovered;
             }
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Tiles 2 (0x8800 signed)", nullptr, ImGuiTabItemFlags_None)) {
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 start = ImGui::GetCursorScreenPos();
             for (int i = 0; i < 256; i++) {
                 int tileIndex = 256 + (int8_t)i;
-                int x = i % tilesPerRow;
-                int y = i / tilesPerRow;
-                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + x * tileSize, start.y + y * tileSize), zoomPerPixel);
+                int tx = i % tilesPerRow;
+                int ty = i / tilesPerRow;
+                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
             }
+            int numRows2 = (256 + tilesPerRow - 1) / tilesPerRow;
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows2 * tileStep));
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("OBJ Tiles", nullptr, ImGuiTabItemFlags_None)) {
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            ImVec2 start = ImGui::GetCursorScreenPos();
             int count = 0;
             for (int oam = 0; oam < 160; oam += 4) {
                 uint8_t tileIndex = memoryData[DMG_TileAddressOBJ + oam + 2];
-                int x = count % tilesPerRow;
-                int y = count / tilesPerRow;
-                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + x * tileSize, start.y + y * tileSize), zoomPerPixel);
+                int tx = count % tilesPerRow;
+                int ty = count / tilesPerRow;
+                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
                 count++;
             }
+            int numRows3 = (40 + tilesPerRow - 1) / tilesPerRow;
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows3 * tileStep));
             ImGui::EndTabItem();
         }
 
         ImGui::EndTabBar();
     }
+}
 
-    ImGui::End();
+void TileViewer::renderTilePreview() {
+    ImGui::Text("Size:");
+    ImGui::SameLine();
+    ImGui::SliderFloat("##previewSize", &previewSize, 2.0f, 64.0f);
+
+    ImGui::Separator();
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 start = ImGui::GetCursorScreenPos();
+
+    int tileIndex = tileHovered;
+    if (previewSelected)
+        tileIndex = tileSelected;
+    drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + 2.0f, start.y + 2.0f), previewSize);
 }
 
 void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize) {
@@ -155,4 +214,6 @@ void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 po
             draw_list->AddRectFilled(p0, p1, col);
         }
     }
+    float s = pixelSize * 8.0f;
+    draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
 }

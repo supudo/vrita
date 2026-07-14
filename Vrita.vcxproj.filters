@@ -47,30 +47,6 @@
     <ClCompile Include="emulators\dmg\cpu_extended.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\debuggers\memory_editor.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\palette_viewer.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\sprite_viewer.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\tile_viewer.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\tilemap_viewer.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\debugger.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\debugger_registers.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
-    <ClCompile Include="emulators\debuggers\debugger_assembly.cpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClCompile>
     <ClCompile Include="emulators\dmg\joypad.cpp">
       <Filter>emulators\dmg</Filter>
     </ClCompile>
@@ -88,6 +64,30 @@
     </ClCompile>
     <ClCompile Include="emulators\dmg\apu_wave.cpp">
       <Filter>emulators\dmg</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\debugger.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\debugger_assembly.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\debugger_registers.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\memory_editor.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\palette_viewer.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\sprite_viewer.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\tile_viewer.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
+    <ClCompile Include="debuggers\tilemap_viewer.cpp">
+      <Filter>debuggers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -151,36 +151,6 @@
     <ClInclude Include="utilities\strings.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\debuggers\memory_editor.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\palette_viewer.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\sprite_viewer.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\tile_viewer.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\debuggers_defines.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\debugger.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\debuggers_defines_dmg.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\debuggers_defines_agb.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
-    <ClInclude Include="emulators\debuggers\debuggers_defines_cgb.hpp">
-      <Filter>emulators\debuggers</Filter>
-    </ClInclude>
     <ClInclude Include="utilities\iconfonts\IconsFontAwesome7.h">
       <Filter>utilities\iconfonts</Filter>
     </ClInclude>
@@ -189,6 +159,36 @@
     </ClInclude>
     <ClInclude Include="emulators\dmg\apu_structs.hpp">
       <Filter>emulators\dmg</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\debugger.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\debuggers_defines.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\debuggers_defines_agb.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\debuggers_defines_cgb.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\debuggers_defines_dmg.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\memory_editor.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\palette_viewer.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\sprite_viewer.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\tile_viewer.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="debuggers\tilemap_viewer.hpp">
+      <Filter>debuggers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -210,9 +210,6 @@
     <Filter Include="eyecandy">
       <UniqueIdentifier>{65eb6884-3c42-42da-84be-f77ab17950e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="emulators\debuggers">
-      <UniqueIdentifier>{3b55912f-8868-482e-b45b-7f696fc7da7e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="resources">
       <UniqueIdentifier>{3921aa0d-d845-4074-adca-e6814d6506f0}</UniqueIdentifier>
     </Filter>
@@ -222,17 +219,9 @@
     <Filter Include="utilities\iconfonts">
       <UniqueIdentifier>{9e4189b8-a7eb-472a-b219-727fd674f98f}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="emulators\debuggers\debuggers_defines_dmg.inl">
-      <Filter>emulators\debuggers</Filter>
-    </None>
-    <None Include="emulators\debuggers\debuggers_defines_agb.inl">
-      <Filter>emulators\debuggers</Filter>
-    </None>
-    <None Include="emulators\debuggers\debuggers_defines_cgb.inl">
-      <Filter>emulators\debuggers</Filter>
-    </None>
+    <Filter Include="debuggers">
+      <UniqueIdentifier>{0f1425d6-4284-4aea-b12d-32e038d55fb6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\fonts\fa-regular-400.ttf">
@@ -241,5 +230,16 @@
     <Font Include="resources\fonts\fa-solid-900.ttf">
       <Filter>resources\fonts</Filter>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debuggers\debuggers_defines_agb.inl">
+      <Filter>debuggers</Filter>
+    </None>
+    <None Include="debuggers\debuggers_defines_cgb.inl">
+      <Filter>debuggers</Filter>
+    </None>
+    <None Include="debuggers\debuggers_defines_dmg.inl">
+      <Filter>debuggers</Filter>
+    </None>
   </ItemGroup>
 </Project>

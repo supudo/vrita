@@ -146,15 +146,15 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="debuggers\debugger.cpp" />
+    <ClCompile Include="debuggers\debugger_assembly.cpp" />
+    <ClCompile Include="debuggers\debugger_registers.cpp" />
+    <ClCompile Include="debuggers\memory_editor.cpp" />
+    <ClCompile Include="debuggers\palette_viewer.cpp" />
+    <ClCompile Include="debuggers\sprite_viewer.cpp" />
+    <ClCompile Include="debuggers\tilemap_viewer.cpp" />
+    <ClCompile Include="debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\agb\agb.cpp" />
-    <ClCompile Include="emulators\debuggers\debugger.cpp" />
-    <ClCompile Include="emulators\debuggers\debugger_assembly.cpp" />
-    <ClCompile Include="emulators\debuggers\debugger_registers.cpp" />
-    <ClCompile Include="emulators\debuggers\memory_editor.cpp" />
-    <ClCompile Include="emulators\debuggers\palette_viewer.cpp" />
-    <ClCompile Include="emulators\debuggers\sprite_viewer.cpp" />
-    <ClCompile Include="emulators\debuggers\tilemap_viewer.cpp" />
-    <ClCompile Include="emulators\debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
     <ClCompile Include="emulators\dmg\apu_mixer.cpp" />
     <ClCompile Include="emulators\dmg\apu_noise.cpp" />
@@ -178,17 +178,17 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="debuggers\debugger.hpp" />
+    <ClInclude Include="debuggers\debuggers_defines.hpp" />
+    <ClInclude Include="debuggers\debuggers_defines_agb.hpp" />
+    <ClInclude Include="debuggers\debuggers_defines_cgb.hpp" />
+    <ClInclude Include="debuggers\debuggers_defines_dmg.hpp" />
+    <ClInclude Include="debuggers\memory_editor.hpp" />
+    <ClInclude Include="debuggers\palette_viewer.hpp" />
+    <ClInclude Include="debuggers\sprite_viewer.hpp" />
+    <ClInclude Include="debuggers\tilemap_viewer.hpp" />
+    <ClInclude Include="debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\agb\agb.hpp" />
-    <ClInclude Include="emulators\debuggers\debugger.hpp" />
-    <ClInclude Include="emulators\debuggers\debuggers_defines.hpp" />
-    <ClInclude Include="emulators\debuggers\debuggers_defines_agb.hpp" />
-    <ClInclude Include="emulators\debuggers\debuggers_defines_cgb.hpp" />
-    <ClInclude Include="emulators\debuggers\debuggers_defines_dmg.hpp" />
-    <ClInclude Include="emulators\debuggers\memory_editor.hpp" />
-    <ClInclude Include="emulators\debuggers\palette_viewer.hpp" />
-    <ClInclude Include="emulators\debuggers\sprite_viewer.hpp" />
-    <ClInclude Include="emulators\debuggers\tilemap_viewer.hpp" />
-    <ClInclude Include="emulators\debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\apu_structs.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
@@ -213,17 +213,17 @@
     <ClInclude Include="utilities\strings.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="emulators\debuggers\debuggers_defines_agb.inl" />
-    <None Include="emulators\debuggers\debuggers_defines_cgb.inl" />
-    <None Include="emulators\debuggers\debuggers_defines_dmg.inl" />
-  </ItemGroup>
-  <ItemGroup>
     <Font Include="resources\fonts\fa-regular-400.ttf">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </Font>
     <Font Include="resources\fonts\fa-solid-900.ttf">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
     </Font>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="debuggers\debuggers_defines_agb.inl" />
+    <None Include="debuggers\debuggers_defines_cgb.inl" />
+    <None Include="debuggers\debuggers_defines_dmg.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

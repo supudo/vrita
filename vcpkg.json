@@ -1,0 +1,11 @@
+{
+  "name": "vrita",
+  "version": "0.1.0",
+  "dependencies": [
+    "sdl3",
+    {
+      "name": "imgui",
+      "features": ["sdl3-binding", "sdlgpu3-binding"]
+    }
+  ]
+}

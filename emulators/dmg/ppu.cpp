@@ -58,35 +58,29 @@ void DMG_PPU::setPalette(int palleteId) {
 
 uint32_t DMG_PPU::applyPalette(uint8_t paletteReg, uint8_t colorId) const {
     uint8_t shade = (paletteReg >> (colorId * 2)) & 0x03;
+    uint32_t argb;
     switch (paletteChoicesSelected) {
         case 1:
-            return COLORS_DMG[shade];
+            argb = DMG_PALETTE_DMG[shade];
+            break;
         case 2:
-            return COLORS_CGB[shade];
+            argb = DMG_PALETTE_CGB[shade];
+            break;
         case 3:
-            return COLORS_MGB[shade];
+            argb = DMG_PALETTE_MGB[shade];
+            break;
         case 4:
-            return COLORS_MGL[shade];
+            argb = DMG_PALETTE_MGL[shade];
+            break;
         default:
-            return COLORS_DEFAULT[shade];
+            argb = DMG_PALETTE_DEFAULT[shade];
+            break;
     }
+    return DMG_PackForFramebuffer(argb);
 }
 
 uint32_t DMG_PPU::getBackground() const {
-    switch (paletteChoicesSelected) {
-        case 1:
-            return COLORS_DEFAULT[0];
-        case 2:
-            return COLORS_DMG[0];
-        case 3:
-            return COLORS_CGB[0];
-        case 4:
-            return COLORS_MGB[0];
-        case 5:
-            return COLORS_MGL[0];
-        default:
-            return COLORS_DEFAULT[0];
-    }
+    return applyPalette(0x00, 0);
 }
 
 uint8_t DMG_PPU::tileColorId(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const {

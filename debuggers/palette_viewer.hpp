@@ -44,6 +44,8 @@ private:
     uint8_t paletteOBP0 = 0;
     uint8_t paletteOBP1 = 0;
 
+    PaletteColor unpackPaletteColor(uint32_t packed);
+
     void renderCenteredCellContent(const char* lbl);
     void renderColorButtons(const char* label, uint8_t paletteValue);
     bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f);

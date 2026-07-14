@@ -43,6 +43,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerAPU->setMuted(settings.GetBool("Emulators - DMG", "muted", false));
 
     paletteChoicesSelected = settings.GetInt("Emulators - DMG", "dmg_palette", 0);
+    managerPPU->setPalette(paletteChoicesSelected);
 
     initAudio();
 
@@ -99,7 +100,7 @@ std::string DMG::loadROM(const char* path) {
     clear();
     initAudio();
     for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
-        gFramebuffer[i] = 0xFF9BBC0F;
+        gFramebuffer[i] = DMG_PackForFramebuffer(DMG_PALETTE_DEFAULT[0]);
     std::streamsize size = file.tellg();
     std::streamsize memNeeded = std::max(size, (std::streamsize)0x10000);
     logger.log("[DMG] Loading ROM: %s", path);
@@ -387,7 +388,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (!ROMFileLoaded)
         ImGui::BeginDisabled();
     ImGui::SetNextItemWidth(240);
-    static const char* paletteChoices[] = { "-- Choose palette --", "Default", "DMG", "CGB", "MGB", "MGL" };
+    static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
     if (ImGui::Combo("##palettedmg", &paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
         settings.Set("Emulators - DMG", "dmg_palette", paletteChoicesSelected);
         settings.Save();
@@ -426,7 +427,9 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         }
     }
 
+    ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest, nullptr);
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
+    ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear, nullptr);
 
     float cursorYAfterImage = ImGui::GetCursorPosY();
 

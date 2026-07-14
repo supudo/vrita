@@ -199,6 +199,7 @@
     <ClInclude Include="emulators\dmg\joypad.hpp" />
     <ClInclude Include="emulators\dmg\mbc.hpp" />
     <ClInclude Include="emulators\dmg\mmu.hpp" />
+    <ClInclude Include="emulators\dmg\palette_presets.hpp" />
     <ClInclude Include="emulators\dmg\ppu.hpp" />
     <ClInclude Include="emulators\dmg\timer.hpp" />
     <ClInclude Include="emulators\emulators.hpp" />

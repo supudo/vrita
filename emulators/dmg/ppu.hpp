@@ -9,6 +9,7 @@ GameBoy (DMG)
 
 #include "mmu.hpp"
 #include "cpu_registers.hpp"
+#include "palette_presets.hpp"
 
 class Logger;
 class DMG_MMU;
@@ -40,11 +41,6 @@ private:
     uint8_t tileColorId(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const;
 
     int paletteChoicesSelected = 0;
-    static constexpr uint32_t COLORS_DEFAULT[4] = { 0xFF9BBC0F, 0xFF8BAC0F, 0xFF306230, 0xFF0F380F };
-    static constexpr uint32_t COLORS_DMG[4] = { 0xFFE0F7D1, 0xFF8CBF6B, 0xFF386B2E, 0xFF0F260F };
-    static constexpr uint32_t COLORS_CGB[4] = { 0xFF9CBD0F, 0xFF8CAB0F, 0xFF306130, 0xFF0F380F };
-    static constexpr uint32_t COLORS_MGB[4] = { 0xFFC4CFA1, 0xFF8C946E, 0xFF4D543D, 0xFF1F1F1F };
-    static constexpr uint32_t COLORS_MGL[4] = { 0xFF1CDECF, 0xFF1AC7B3, 0xFF17A696, 0xFF0A7A6E };
 
     uint32_t getBackground() const;
 

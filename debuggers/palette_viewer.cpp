@@ -11,6 +11,7 @@
 #include "debuggers_defines_dmg.hpp"
 #include "debuggers_defines_cgb.hpp"
 #include "debuggers_defines_agb.hpp"
+#include "emulators/dmg/palette_presets.hpp"
 
 bool PaletteViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Palette Viewer", "position_x", 44);
@@ -113,15 +114,25 @@ void PaletteViewer::renderCenteredCellContent(const char* lbl) {
 
 PaletteColor PaletteViewer::getColorPalette(uint8_t colorValue) {
     switch (paletteChoicesSelected) {
+        case 0:
+            return unpackPaletteColor(DMG_PALETTE_DEFAULT[colorValue]);
         case 2:
-            return DMG_Palette_CGB[colorValue];
+            return unpackPaletteColor(DMG_PALETTE_CGB[colorValue]);
         case 3:
-            return DMG_Palette_MGB[colorValue];
+            return unpackPaletteColor(DMG_PALETTE_MGB[colorValue]);
         case 4:
-            return DMG_Palette_MGL[colorValue];
+            return unpackPaletteColor(DMG_PALETTE_MGL[colorValue]);
         default:
-            return DMG_Palette_DMG[colorValue];
+            return unpackPaletteColor(DMG_PALETTE_DMG[colorValue]);
     }
+}
+
+PaletteColor PaletteViewer::unpackPaletteColor(uint32_t packed) {
+    return {
+        ((packed >> 16) & 0xFF) / 255.0f,
+        ((packed >> 8) & 0xFF) / 255.0f,
+        (packed & 0xFF) / 255.0f
+    };
 }
 
 void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) {
@@ -131,21 +142,10 @@ void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) 
     uint8_t colorValue2 = (paletteValue >> 4) & 0x03;
     uint8_t colorValue3 = (paletteValue >> 6) & 0x03;
 
-    PaletteColor bgp_color0, bgp_color1, bgp_color2, bgp_color3;
-    if (paletteChoicesSelected > 0) {
-        bgp_color0 = getColorPalette(colorValue0);
-        bgp_color1 = getColorPalette(colorValue1);
-        bgp_color2 = getColorPalette(colorValue2);
-        bgp_color3 = getColorPalette(colorValue3);
-    }
-    else {
-        float v0 = colorValue0 / 3.0f, v1 = colorValue1 / 3.0f;
-        float v2 = colorValue2 / 3.0f, v3 = colorValue3 / 3.0f;
-        bgp_color0 = { v0, v0, v0 };
-        bgp_color1 = { v1, v1, v1 };
-        bgp_color2 = { v2, v2, v2 };
-        bgp_color3 = { v3, v3, v3 };
-    }
+    PaletteColor bgp_color0 = getColorPalette(colorValue0);
+    PaletteColor bgp_color1 = getColorPalette(colorValue1);
+    PaletteColor bgp_color2 = getColorPalette(colorValue2);
+    PaletteColor bgp_color3 = getColorPalette(colorValue3);
 
     renderButtonWithBorder("##0", ImVec2(80, 80), bgp_color0);
     ImGui::SameLine(0.0f, 10.0f);

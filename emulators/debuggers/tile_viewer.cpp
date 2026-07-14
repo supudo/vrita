@@ -19,6 +19,7 @@ bool TileViewer::init() {
     zoomPerPixel = settings.GetFloat("Debuggers - Tile Viewer", "zoom_per_pixel", 2.0f);
     previewSize = settings.GetFloat("Debuggers - Tile Viewer", "preview_size", 40.0f);
     autoRefresh = settings.GetFloat("Debuggers - Tile Viewer", "auto_refresh", true);
+    showGrid = settings.GetFloat("Debuggers - Tile Viewer", "show_grid", true);
     return true;
 }
 
@@ -31,6 +32,7 @@ void TileViewer::release() {
     settings.Set("Debuggers - Tile Viewer", "zoom_per_pixel", zoomPerPixel);
     settings.Set("Debuggers - Tile Viewer", "preview_size", previewSize);
     settings.Set("Debuggers - Tile Viewer", "auto_refresh", autoRefresh);
+    settings.Set("Debuggers - Tile Viewer", "show_grid", showGrid);
     settings.Save();
 }
 
@@ -109,22 +111,22 @@ void TileViewer::render(bool* windowOpened) {
     if (autoRefresh)
         initializeData(emulatorType);
 
-    ImGui::Text("Tiles size:");
+    ImGui::Text("Tiles size");
     ImGui::SameLine();
     ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 64.0f);
 
-    ImGui::Text("Choose palette transformer:");
-    ImGui::SameLine();
     ImGui::SetNextItemWidth(100);
     static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
     if (ImGui::Combo("##paletteChoicesCombo", &paletteViewer.paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
         settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
         settings.Save();
     }
-
-    ImGui::Text("Auto refresh:");
     ImGui::SameLine();
-    ImGui::Checkbox("##autorefresh", &autoRefresh);
+    ImGui::Text("Choose palette transformer");
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto refresh", &autoRefresh);
+    ImGui::SameLine();
+    ImGui::Checkbox("Show grid", &showGrid);
 
     ImGui::Separator();
 
@@ -167,7 +169,7 @@ int TileViewer::pickHoveredSlot(ImVec2 start, float tileStep, int tilesPerRow, i
 
 void TileViewer::renderTiles() {
     float tileSize = 8.0f * zoomPerPixel;
-    float tileStep = tileSize + 2.0f;
+    float tileStep = tileSize + (showGrid ? 1.0f : 0.0f);
     int tilesPerRow = std::max(1, (int)(ImGui::GetContentRegionAvail().x / tileStep));
 
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
@@ -255,6 +257,22 @@ void TileViewer::renderTiles() {
     }
 }
 
+void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize) {
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            PaletteColor color = paletteViewer.getColorPalette(tile.pixels[x][y]);
+            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+            ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
+            ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
+            draw_list->AddRectFilled(p0, p1, col);
+        }
+    }
+    if (showGrid) {
+        float s = pixelSize * 8.0f;
+        draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
+    }
+}
+
 void TileViewer::renderTilePreview() {
     if (tiles.Size == 0)
         return;
@@ -276,18 +294,4 @@ void TileViewer::renderTilePreview() {
     ImVec2 start = ImGui::GetCursorScreenPos();
 
     drawTile(draw_list, item, ImVec2(start.x + 2.0f, start.y + 2.0f), previewSize);
-}
-
-void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize) {
-    for (int y = 0; y < 8; y++) {
-        for (int x = 0; x < 8; x++) {
-            PaletteColor color = paletteViewer.getColorPalette(tile.pixels[x][y]);
-            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
-            ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
-            ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
-            draw_list->AddRectFilled(p0, p1, col);
-        }
-    }
-    float s = pixelSize * 8.0f;
-    draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
 }

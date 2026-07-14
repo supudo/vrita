@@ -24,6 +24,26 @@ void TilemapViewer::release() {
     settings.Save();
 }
 
+void TilemapViewer::setMemory(const char* emulatorType, uint8_t* data) {
+    memoryData = data;
+    uint8_t et = -1;
+    if (strcmp(emulatorType, "dmg") == 0)
+        et = 1;
+    else if (strcmp(emulatorType, "agb") == 0)
+        et = 2;
+    else
+        et = 0;
+    bool changed = et != this->emulatorType;
+    this->emulatorType = et;
+    if (changed)
+        initializeData(et);
+}
+
+void TilemapViewer::initializeData(uint8_t emulatorType) {
+    if (emulatorType == 1) {
+    }
+}
+
 void TilemapViewer::render(bool* windowOpened) {
     ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);

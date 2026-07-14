@@ -44,6 +44,7 @@ private:
     TileItem hoveredTileItem;
     TileItem selectedTileItem;
     bool autoRefresh = true;
+    bool showGrid = true;
 
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);

@@ -67,6 +67,8 @@ public:
 
     void handleKey(uint32_t type, uint32_t key);
 
+    int paletteChoicesSelected = 0;
+
 private:
     Logger& logger;
     Settings& settings;

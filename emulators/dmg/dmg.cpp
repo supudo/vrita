@@ -42,6 +42,8 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerAPU->setUserVolume((uint8_t)settings.GetInt("Emulators - DMG", "volume", 100));
     managerAPU->setMuted(settings.GetBool("Emulators - DMG", "muted", false));
 
+    paletteChoicesSelected = settings.GetInt("Emulators - DMG", "dmg_palette", 0);
+
     initAudio();
 
     return true;
@@ -380,6 +382,20 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (!localRomFileLoaded)
         ImGui::EndDisabled();
     
+    ImGui::Separator();
+
+    if (!ROMFileLoaded)
+        ImGui::BeginDisabled();
+    ImGui::SetNextItemWidth(240);
+    static const char* paletteChoices[] = { "-- Choose palette --", "Default", "DMG", "CGB", "MGB", "MGL" };
+    if (ImGui::Combo("##palettedmg", &paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
+        settings.Set("Emulators - DMG", "dmg_palette", paletteChoicesSelected);
+        settings.Save();
+        managerPPU->setPalette(paletteChoicesSelected);
+    }
+    if (!ROMFileLoaded)
+        ImGui::EndDisabled();
+
     ImGui::Separator();
 
     ImVec2 avail = ImGui::GetContentRegionAvail();

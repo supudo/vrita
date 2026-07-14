@@ -35,6 +35,8 @@ private:
     int romBanksCount = 0;
     int ramBanksCount = 0;
 
+    uint16_t addressCartridgeType = 0x147;
+
     int getRamBanksCount(uint8_t type);
     void printCartridgeInfo();
 };

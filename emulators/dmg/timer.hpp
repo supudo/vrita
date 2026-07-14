@@ -18,7 +18,7 @@ public:
     explicit DMG_TIMER(Logger& logger, DMG_INTERRUPT& managerInterrupts);
 
     static constexpr uint32_t CPU_HZ = 4194304;
-    static constexpr uint32_t CYCLES_PER_FRAME = 70224; // 154 scanlines * 456 T-cycles
+    static constexpr uint32_t CYCLES_PER_FRAME = 70224; // 154 lines * 456 dots @ 4.194304 MHz / 59.7275 fps
 
     void reset();
     void tick(uint32_t cycles);

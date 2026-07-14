@@ -396,9 +396,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     static auto lastTime = std::chrono::steady_clock::now();
     if (ROMFileLoaded && !gameIsPaused) {
-        static const uint64_t CYCLES_PER_FRAME = 70224; // 154 lines * 456 dots @ 4.194304 MHz / 59.7275 fps
         uint64_t frameStart = managerMMU->totalCycles;
-        while ((managerMMU->totalCycles - frameStart) < CYCLES_PER_FRAME)
+        while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
             stepAll();
         renderingFrames++;
         auto now = std::chrono::steady_clock::now();

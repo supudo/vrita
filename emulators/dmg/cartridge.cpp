@@ -2,7 +2,7 @@
 
 void DMG_CARTRIDGE::loadROM(std::streamsize size) {
     ram.assign(0x8000, 0);
-    uint8_t type = mmu.memory[0x147]; // cartridge number
+    uint8_t type = mmu.memory[addressCartridgeType]; // cartridge number
     logger.log("[DMG-CARTRIDGE] Cartridge type byte: 0x%02X", type);
     switch (type) {
         case 0x00:

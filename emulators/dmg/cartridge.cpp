@@ -88,7 +88,6 @@ int DMG_CARTRIDGE::getRamBanksCount(uint8_t type) {
 void DMG_CARTRIDGE::printCartridgeInfo() {
     logger.log("[DMG-CARTRIDGE] Rom Title: %s", romTitle.c_str());
     logger.log("[DMG-CARTRIDGE] Manufacturer Code: %s", romManufacturerCode.c_str());
-    logger.log("[DMG-CARTRIDGE] CGB Game: %s", (cgbGame ? "Yes" : "No"));
     logger.log("[DMG-CARTRIDGE] MBC: %i", +mbcType);
     logger.log("[DMG-CARTRIDGE] ROM Banks: %i", romBanksCount);
     logger.log("[DMG-CARTRIDGE] RAM Banks: %i", ramBanksCount);

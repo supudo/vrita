@@ -30,7 +30,6 @@ private:
 
     std::string romTitle;
     std::string romManufacturerCode;
-    bool cgbGame = false;
     uint8_t mbcType = 0x0;
     int romBanksCount = 0;
     int ramBanksCount = 0;

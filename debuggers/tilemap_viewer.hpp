@@ -34,6 +34,9 @@ private:
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
+    bool autoRefresh = true;
+    bool showGrid = true;
+
     uint8_t* memoryData = nullptr;
     uint8_t emulatorType = -1;
 

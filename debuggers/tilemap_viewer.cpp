@@ -56,5 +56,18 @@ void TilemapViewer::render(bool* windowOpened) {
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
 
+    ImGui::Checkbox("Show grid", &showGrid);
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto refresh", &autoRefresh);
+    ImGui::SameLine();
+    if (autoRefresh)
+        ImGui::BeginDisabled();
+    if (ImGui::Button("Refresh"))
+        initializeData(emulatorType);
+    if (autoRefresh)
+        ImGui::EndDisabled();
+
+    ImGui::Separator();
+
     ImGui::End();
 }

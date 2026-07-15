@@ -16,8 +16,8 @@
 bool PaletteViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Palette Viewer", "position_x", 44);
     windowPositionY = settings.GetInt("Debuggers - Palette Viewer", "position_y", 44);
-    //windowWidth = settings.GetInt("Debuggers - Palette Viewer", "width", 488);
-    //windowHeight = settings.GetInt("Debuggers - Palette Viewer", "height", 357);
+    windowWidth = settings.GetInt("Debuggers - Palette Viewer", "width", 488);
+    windowHeight = settings.GetInt("Debuggers - Palette Viewer", "height", 357);
     paletteChoicesSelected = settings.GetInt("Debuggers - Palette Viewer", "dmg_chosen_palette", 0);
     return true;
 }
@@ -44,8 +44,8 @@ void PaletteViewer::setMemory(const char* emulatorType, uint8_t bgp, uint8_t obp
 }
 
 void PaletteViewer::render(bool* windowOpened) {
-    ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight));
-    if (!ImGui::Begin("Debuggers - Palette Viewer", windowOpened, ImGuiWindowFlags_NoResize)) {
+    ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);
+    if (!ImGui::Begin("Debuggers - Palette Viewer", windowOpened, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::End();
         return;
     }
@@ -53,7 +53,11 @@ void PaletteViewer::render(bool* windowOpened) {
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
 
-    ImGui::BeginChild("##palettes");
+    if (paletteBGP == 0) {
+        ImGui::Text("No file loaded. Memory is empty.");
+        ImGui::End();
+        return;
+    }
 
     ImGui::Text("Choose palette transformer:");
     ImGui::SameLine();
@@ -96,8 +100,6 @@ void PaletteViewer::render(bool* windowOpened) {
 
         ImGui::EndTable();
     }
-
-    ImGui::EndChild();
 
     ImGui::End();
 }

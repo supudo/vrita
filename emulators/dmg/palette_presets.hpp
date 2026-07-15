@@ -19,6 +19,7 @@ inline constexpr std::array<uint32_t, 4> DMG_PALETTE_CGB = { 0xFF9CBD0F, 0xFF8CA
 inline constexpr std::array<uint32_t, 4> DMG_PALETTE_MGB = { 0xFFC4CFA1, 0xFF8C946E, 0xFF4D543D, 0xFF1F1F1F };
 inline constexpr std::array<uint32_t, 4> DMG_PALETTE_MGL = { 0xFF1CDECF, 0xFF1AC7B3, 0xFF17A696, 0xFF0A7A6E };
 
+// AA+GG, RR, BB = AA:RR:GG:BB
 inline constexpr uint32_t DMG_PackForFramebuffer(uint32_t argb) {
     return (argb & 0xFF00FF00u) | ((argb & 0x00FF0000u) >> 16) | ((argb & 0x000000FFu) << 16);
 }

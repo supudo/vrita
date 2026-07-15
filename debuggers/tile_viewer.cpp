@@ -34,6 +34,7 @@ void TileViewer::release() {
     settings.Set("Debuggers - Tile Viewer", "preview_size", previewSize);
     settings.Set("Debuggers - Tile Viewer", "auto_refresh", autoRefresh);
     settings.Set("Debuggers - Tile Viewer", "show_grid", showGrid);
+    settings.Set("Debuggers - Tile Viewer", "tile_size", tileSize);
     settings.Save();
 }
 
@@ -173,12 +174,12 @@ void TileViewer::render(bool* windowOpened) {
     ImGui::End();
 }
 
-int TileViewer::pickHoveredSlot(ImVec2 start, float tileStep, int tilesPerRow, int count) {
+int TileViewer::pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count) {
     if (!ImGui::IsItemHovered())
         return -1;
     ImVec2 mouse = ImGui::GetIO().MousePos;
-    int tileX = (int)((mouse.x - start.x) / tileStep);
-    int tileY = (int)((mouse.y - start.y) / tileStep);
+    int tileX = (int)((mouse.x - start.x) / tileStepX);
+    int tileY = (int)((mouse.y - start.y) / tileStepY);
     if (tileX < 0 || tileX >= tilesPerRow || tileY < 0)
         return -1;
     int slot = tileY * tilesPerRow + tileX;
@@ -188,29 +189,49 @@ int TileViewer::pickHoveredSlot(ImVec2 start, float tileStep, int tilesPerRow, i
 }
 
 void TileViewer::renderTiles() {
-    float tileSize = 8.0f * zoomPerPixel;
-    float tileStep = tileSize + (showGrid ? 1.0f : 0.0f);
-    int tilesPerRow = std::max(1, (int)(ImGui::GetContentRegionAvail().x / tileStep));
+    float tileSizeZoom = 8.0f * zoomPerPixel;
+    float gridGap = showGrid ? 1.0f : 0.0f;
+    bool stacked = tileSize == 1;
+    int unitHeightTiles = stacked ? 2 : 1;
+    float tileStepX = tileSizeZoom + gridGap;
+    float tileStepY = tileSizeZoom * unitHeightTiles + gridGap;
+    int tilesPerRow = std::max(1, (int)(ImGui::GetContentRegionAvail().x / tileStepX));
 
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
         if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
             ImGui::BeginChild("TilesScroll1", ImVec2(0, 0), ImGuiChildFlags_None);
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 start = ImGui::GetCursorScreenPos();
-            for (int i = 0; i < tiles.Size; i++) {
-                int tx = i % tilesPerRow;
-                int ty = i / tilesPerRow;
-                drawTile(draw_list, tiles[i], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
+            int totalTiles = tiles.Size; // 384
+            int unitCount1 = stacked ? (totalTiles + 1) / 2 : totalTiles; // 192 stacked
+            for (int u = 0; u < unitCount1; u++) {
+                int topIndex = stacked ? u * 2 : u;
+                int bottomIndex = topIndex + 1;
+                bool hasBottom = stacked && (bottomIndex < totalTiles);
+                int tx = u % tilesPerRow;
+                int ty = u / tilesPerRow;
+                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+                drawTileUnit(draw_list, tiles[topIndex], hasBottom ? tiles[bottomIndex] : tiles[topIndex], hasBottom, pos, zoomPerPixel);
             }
-            int numRows1 = (tiles.Size + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows1 * tileStep));
-            int slot = pickHoveredSlot(start, tileStep, tilesPerRow, tiles.Size);
+            int numRows1 = (unitCount1 + tilesPerRow - 1) / tilesPerRow;
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows1 * tileStepY));
+            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount1);
             if (slot >= 0) {
-                hoveredTileItem = tiles[slot];
+                int topIndex = stacked ? slot * 2 : slot;
+                int bottomIndex = topIndex + 1;
+                bool hasBottom = stacked && (bottomIndex < totalTiles);
+                hoveredTileItem = tiles[topIndex];
+                hoveredHasBottom = hasBottom;
+                if (hasBottom)
+                    hoveredTileItemBottom = tiles[bottomIndex];
                 if (ImGui::IsItemClicked()) {
                     previewSelected = !previewSelected;
-                    if (previewSelected)
-                        selectedTileItem = tiles[slot];
+                    if (previewSelected) {
+                        selectedTileItem = tiles[topIndex];
+                        selectedHasBottom = hasBottom;
+                        if (hasBottom)
+                            selectedTileItemBottom = tiles[bottomIndex];
+                    }
                 }
             }
             ImGui::EndChild();
@@ -221,22 +242,36 @@ void TileViewer::renderTiles() {
             ImGui::BeginChild("TilesScroll2", ImVec2(0, 0), ImGuiChildFlags_None);
             ImDrawList* draw_list = ImGui::GetWindowDrawList();
             ImVec2 start = ImGui::GetCursorScreenPos();
-            for (int i = 0; i < 256; i++) {
-                int tileIndex = 256 + (int8_t)i;
-                int tx = i % tilesPerRow;
-                int ty = i / tilesPerRow;
-                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
+            int unitCount2 = stacked ? 128 : 256;
+            for (int u = 0; u < unitCount2; u++) {
+                int i0 = stacked ? u * 2 : u;
+                int topIndex = 256 + (int8_t)i0;
+                int bottomIndex = 256 + (int8_t)(i0 + 1);
+                bool hasBottom = stacked;
+                int tx = u % tilesPerRow;
+                int ty = u / tilesPerRow;
+                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+                drawTileUnit(draw_list, tiles[topIndex], hasBottom ? tiles[bottomIndex] : tiles[topIndex], hasBottom, pos, zoomPerPixel);
             }
-            int numRows2 = (256 + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows2 * tileStep));
-            int slot = pickHoveredSlot(start, tileStep, tilesPerRow, 256);
+            int numRows2 = (unitCount2 + tilesPerRow - 1) / tilesPerRow;
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows2 * tileStepY));
+            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount2);
             if (slot >= 0) {
-                int idx = 256 + (int8_t)slot;
-                hoveredTileItem = tiles[idx];
+                int i0 = stacked ? slot * 2 : slot;
+                int topIndex = 256 + (int8_t)i0;
+                int bottomIndex = 256 + (int8_t)(i0 + 1);
+                hoveredTileItem = tiles[topIndex];
+                hoveredHasBottom = stacked;
+                if (stacked)
+                    hoveredTileItemBottom = tiles[bottomIndex];
                 if (ImGui::IsItemClicked()) {
                     previewSelected = !previewSelected;
-                    if (previewSelected)
-                        selectedTileItem = tiles[idx];
+                    if (previewSelected) {
+                        selectedTileItem = tiles[topIndex];
+                        selectedHasBottom = stacked;
+                        if (stacked)
+                            selectedTileItemBottom = tiles[bottomIndex];
+                    }
                 }
             }
             ImGui::EndChild();
@@ -252,21 +287,33 @@ void TileViewer::renderTiles() {
             for (int oam = 0; oam < 160; oam += 4) {
                 uint8_t tileIndex = memoryData[DMG_TileAddressOBJ + oam + 2];
                 objTileIndices[count] = tileIndex;
+                int topIndex = stacked ? (tileIndex & 0xFE) : tileIndex;
+                int bottomIndex = tileIndex | 0x01;
                 int tx = count % tilesPerRow;
                 int ty = count / tilesPerRow;
-                drawTile(draw_list, tiles[tileIndex], ImVec2(start.x + tx * tileStep, start.y + ty * tileStep), zoomPerPixel);
+                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+                drawTileUnit(draw_list, tiles[topIndex], stacked ? tiles[bottomIndex] : tiles[topIndex], stacked, pos, zoomPerPixel);
                 count++;
             }
             int numRows3 = (40 + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStep, numRows3 * tileStep));
-            int slot = pickHoveredSlot(start, tileStep, tilesPerRow, 40);
+            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows3 * tileStepY));
+            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, 40);
             if (slot >= 0) {
-                int idx = objTileIndices[slot];
-                hoveredTileItem = tiles[idx];
+                uint8_t raw = objTileIndices[slot];
+                int topIndex = stacked ? (raw & 0xFE) : raw;
+                int bottomIndex = raw | 0x01;
+                hoveredTileItem = tiles[topIndex];
+                hoveredHasBottom = stacked;
+                if (stacked)
+                    hoveredTileItemBottom = tiles[bottomIndex];
                 if (ImGui::IsItemClicked()) {
                     previewSelected = !previewSelected;
-                    if (previewSelected)
-                        selectedTileItem = tiles[idx];
+                    if (previewSelected) {
+                        selectedTileItem = tiles[topIndex];
+                        selectedHasBottom = stacked;
+                        if (stacked)
+                            selectedTileItemBottom = tiles[bottomIndex];
+                    }
                 }
             }
             ImGui::EndChild();
@@ -277,7 +324,7 @@ void TileViewer::renderTiles() {
     }
 }
 
-void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize) {
+void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
             PaletteColor color = paletteViewer.getColorPalette(tile.pixels[x][y]);
@@ -287,7 +334,7 @@ void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 po
             draw_list->AddRectFilled(p0, p1, col);
         }
     }
-    if (showGrid) {
+    if (showGrid && drawBorder) {
         float s = pixelSize * 8.0f;
         draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
     }
@@ -298,9 +345,15 @@ void TileViewer::renderTilePreview() {
         return;
 
     const TileItem& item = previewSelected ? selectedTileItem : hoveredTileItem;
+    bool hasBottom = previewSelected ? selectedHasBottom : hoveredHasBottom;
+    const TileItem& bottomItem = previewSelected ? selectedTileItemBottom : hoveredTileItemBottom;
 
-    ImGui::Text("Number: %02X : %i", item.TileNumberHex, item.TileNumberInt);
-    ImGui::Text("Address: %s", item.TileAddress);
+    if (hasBottom) {
+        ImGui::Text("   Top tile: %02X : %i (Address %s)", item.TileNumberHex, item.TileNumberInt, item.TileAddress);
+        ImGui::Text("Bottom tile: %02X : %i (Address %s)", bottomItem.TileNumberHex, bottomItem.TileNumberInt, bottomItem.TileAddress);
+    }
+    else
+        ImGui::Text("Tile: %02X : %i (Address %s)", item.TileNumberHex, item.TileNumberInt, item.TileAddress);
 
     ImGui::Separator();
 
@@ -312,6 +365,17 @@ void TileViewer::renderTilePreview() {
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 start = ImGui::GetCursorScreenPos();
+    drawTileUnit(draw_list, item, bottomItem, hasBottom, ImVec2(start.x + 2.0f, start.y + 2.0f), previewSize);
+    ImGui::Dummy(ImVec2(previewSize * 8.0f + 4.0f, previewSize * 8.0f * (hasBottom ? 2.0f : 1.0f) + 4.0f));
+}
 
-    drawTile(draw_list, item, ImVec2(start.x + 2.0f, start.y + 2.0f), previewSize);
+void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) {
+    drawTile(draw_list, top, pos, pixelSize, false);
+    if (hasBottom)
+        drawTile(draw_list, bottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
+    if (showGrid) {
+        float w = pixelSize * 8.0f;
+        float h = pixelSize * 8.0f * (hasBottom ? 2.0f : 1.0f);
+        draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
+    }
 }

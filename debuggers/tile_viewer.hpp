@@ -41,18 +41,24 @@ private:
     float zoomPerPixel = 2.0f;
     float previewSize = 40.0f;
     bool previewSelected = false;
-    TileItem hoveredTileItem;
-    TileItem selectedTileItem;
     bool autoRefresh = true;
     bool showGrid = true;
     int tileSize = 0;
+
+    TileItem hoveredTileItem;
+    TileItem hoveredTileItemBottom;
+    TileItem selectedTileItem;
+    TileItem selectedTileItemBottom;
+    bool hoveredHasBottom = false;
+    bool selectedHasBottom = false;
 
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);
     void renderTiles();
     void renderTilePreview();
-    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize);
-    int pickHoveredSlot(ImVec2 start, float tileStep, int tilesPerRow, int count);
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
+    int pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count);
+    void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
 };
 
 #endif

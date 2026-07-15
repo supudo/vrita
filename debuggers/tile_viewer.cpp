@@ -124,9 +124,16 @@ void TileViewer::render(bool* windowOpened) {
     ImGui::SameLine();
     ImGui::Text("Choose palette transformer");
     ImGui::SameLine();
+    ImGui::Checkbox("Show grid", &showGrid);
+    ImGui::SameLine();
     ImGui::Checkbox("Auto refresh", &autoRefresh);
     ImGui::SameLine();
-    ImGui::Checkbox("Show grid", &showGrid);
+    if (autoRefresh)
+        ImGui::BeginDisabled();
+    if (ImGui::Button("Refresh"))
+        initializeData(emulatorType);
+    if (autoRefresh)
+        ImGui::EndDisabled();
 
     ImGui::Separator();
 

@@ -20,6 +20,7 @@ bool TileViewer::init() {
     previewSize = settings.GetFloat("Debuggers - Tile Viewer", "preview_size", 40.0f);
     autoRefresh = settings.GetFloat("Debuggers - Tile Viewer", "auto_refresh", true);
     showGrid = settings.GetFloat("Debuggers - Tile Viewer", "show_grid", true);
+    tileSize = settings.GetInt("Debuggers - Tile Viewer", "tile_size", 0);
     return true;
 }
 
@@ -111,21 +112,26 @@ void TileViewer::render(bool* windowOpened) {
     if (autoRefresh)
         initializeData(emulatorType);
 
-    ImGui::Text("Tiles size");
-    ImGui::SameLine();
-    ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 64.0f);
-
-    ImGui::SetNextItemWidth(100);
+    ImGui::SetNextItemWidth(120);
     static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
     if (ImGui::Combo("##paletteChoicesCombo", &paletteViewer.paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
         settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
         settings.Save();
     }
     ImGui::SameLine();
-    ImGui::Text("Choose palette transformer");
+    ImGui::Text("Palette transformer");
+
+    ImGui::SetNextItemWidth(120);
+    static const char* tileSizeChoices[] = { "8 x 8", "8 x 16" };
+    if (ImGui::Combo("##tileSizeCombo", &tileSize, tileSizeChoices, IM_ARRAYSIZE(tileSizeChoices))) {
+        settings.Set("Debuggers - Tile Viewer", "tile_size", tileSize);
+        settings.Save();
+    }
     ImGui::SameLine();
+    ImGui::Text("Tile size");
+
     ImGui::Checkbox("Show grid", &showGrid);
-    ImGui::SameLine();
+
     ImGui::Checkbox("Auto refresh", &autoRefresh);
     ImGui::SameLine();
     if (autoRefresh)
@@ -134,6 +140,13 @@ void TileViewer::render(bool* windowOpened) {
         initializeData(emulatorType);
     if (autoRefresh)
         ImGui::EndDisabled();
+
+    ImGui::Separator();
+
+    ImGui::Text("Tiles size");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(200);
+    ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 16.0f);
 
     ImGui::Separator();
 

@@ -13,6 +13,7 @@ bool TilemapViewer::init() {
     windowPositionY = settings.GetInt("Debuggers - Tilemap Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Tilemap Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Tilemap Viewer", "height", 300);
+    tileMapAddress = settings.GetInt("Debuggers - Tilemap Viewer", "tile_map_address", 0);
     return true;
 }
 
@@ -21,6 +22,7 @@ void TilemapViewer::release() {
     settings.Set("Debuggers - Tilemap Viewer", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Tilemap Viewer", "width", (int)lastWindowSize.x);
     settings.Set("Debuggers - Tilemap Viewer", "height", (int)lastWindowSize.y);
+    settings.Set("Debuggers - Tile Viewer", "tile_map_address", tileMapAddress);
     settings.Save();
 }
 
@@ -48,16 +50,28 @@ void TilemapViewer::render(bool* windowOpened) {
     ImGui::SetNextWindowSize(ImVec2((float)windowWidth, (float)windowHeight), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowPos(ImVec2((float)windowPositionX, (float)windowPositionY), ImGuiCond_FirstUseEver);
 
+    lastWindowPosition = ImGui::GetWindowPos();
+    lastWindowSize = ImGui::GetWindowSize();
+
     if (!ImGui::Begin("Debuggers - Tilemap Viewer", windowOpened)) {
         ImGui::End();
         return;
     }
 
-    lastWindowPosition = ImGui::GetWindowPos();
-    lastWindowSize = ImGui::GetWindowSize();
+    if (autoRefresh)
+        initializeData(emulatorType);
+
+    ImGui::SetNextItemWidth(120);
+    static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
+    if (ImGui::Combo("##paletteChoicesCombo", &paletteViewer.paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
+        settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
+        settings.Save();
+    }
+    ImGui::SameLine();
+    ImGui::Text("Palette transformer");
 
     ImGui::Checkbox("Show grid", &showGrid);
-    ImGui::SameLine();
+
     ImGui::Checkbox("Auto refresh", &autoRefresh);
     ImGui::SameLine();
     if (autoRefresh)
@@ -69,5 +83,29 @@ void TilemapViewer::render(bool* windowOpened) {
 
     ImGui::Separator();
 
+    ImGui::Text("Tiles size");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(200);
+    ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 16.0f);
+
+    ImGui::Separator();
+
+    renderTileMap();
+
     ImGui::End();
+}
+
+void TilemapViewer::renderTileMap() {
+    ImGui::BeginChild("TileMap", ImVec2(0, 0), ImGuiChildFlags_None);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 start = ImGui::GetCursorScreenPos();
+
+    ImGui::Text("Tile map comes here ...");
+
+    ImGui::EndChild();
+}
+
+void TilemapViewer::renderTileMapInfo() {
+    ImGui::Separator();
+    ImGui::Text("Tile info comes here ...");
 }

@@ -34,18 +34,23 @@ private:
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
-    bool autoRefresh = true;
-    bool showGrid = true;
-
     uint8_t* memoryData = nullptr;
     uint8_t emulatorType = -1;
+
+    float zoomPerPixel = 2.0f;
+    bool autoRefresh = true;
+    bool showGrid = true;
 
     uint16_t TileMap1Start = 0x9800;
     uint16_t TileMap1End = 0x98FF;
     uint16_t TileMap2Start = 0x9C00;
     uint16_t TileMap2End = 0x9FFF;
 
+    int tileMapAddress = 0;
+
     void initializeData(uint8_t emulatorType);
+    void renderTileMap();
+    void renderTileMapInfo();
 };
 
 #endif

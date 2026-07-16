@@ -47,10 +47,21 @@ private:
     uint16_t TileMap2End = 0x9FFF;
 
     int tileMapAddress = 0;
+    int tileDataAddress = 0;
+
+    float lastInfoHeight = 0.0f;
+
+    TileItem hoveredTileItem;
+    TileItem hoveredTileItemBottom;
+    TileItem selectedTileItem;
+    TileItem selectedTileItemBottom;
+    bool hoveredHasBottom = false;
+    bool selectedHasBottom = false;
 
     void initializeData(uint8_t emulatorType);
-    void renderTileMap();
+    void renderTileMap(float height);
     void renderTileMapInfo();
+    void textRightAligned(const char* text);
 };
 
 #endif

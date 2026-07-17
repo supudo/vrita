@@ -280,7 +280,7 @@ void TilemapViewer::renderTileMapInfo() {
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
         if (hoveredTilemapItem.Tile)
-            ImGui::Text("%i", hoveredTilemapItem.TileIndex);
+            ImGui::Text("%i (%02X) @ VRAM 00:%04X", hoveredTilemapItem.TileIndex, hoveredTilemapItem.TileIndex, hoveredTilemapItem.TileAddress);
         else
             ImGui::Text("");
 
@@ -290,7 +290,10 @@ void TilemapViewer::renderTileMapInfo() {
         textRightAligned("Tile index");
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
-        ImGui::Text("...");
+        if (hoveredTilemapItem.Tile)
+            ImGui::Text("%i (%02X) @ VRAM 00:%04X", hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileAddress);
+        else
+            ImGui::Text("");
 
         ImGui::EndTable();
     }

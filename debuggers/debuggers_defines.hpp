@@ -27,13 +27,11 @@ struct TileItem {
 
 struct TilemapItem {
     ImGuiID TilemapItemID;
-    uint16_t TileIndex;
     uint16_t TileAddress;
     const TileItem* Tile;
-    TilemapItem() : TilemapItemID(0), TileIndex(0), TileAddress(0x0000), Tile(nullptr) {}
-    TilemapItem(ImGuiID tilemapItemID, uint16_t tileIndex, uint16_t tileAddress, const TileItem* tile) {
+    TilemapItem() : TilemapItemID(0), TileAddress(0x0000), Tile(nullptr) {}
+    TilemapItem(ImGuiID tilemapItemID, uint16_t tileAddress, const TileItem* tile) {
         TilemapItemID = tilemapItemID;
-        TileIndex = tileIndex;
         TileAddress = tileAddress;
         Tile = tile;
     }

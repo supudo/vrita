@@ -66,7 +66,7 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
             const uint8_t* vramAddress = vramTilemap1 + i;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
             uint8_t tileIndex = *vramAddress;
-            TilemapItem mapTile(i, tileIndex, address, &tiles[tileIndex]);
+            TilemapItem mapTile(i, address, &tiles[tileIndex]);
             mapTiles1.push_back(mapTile);
         }
 
@@ -77,7 +77,7 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
             const uint8_t* vramAddress = vramTilemap2 + i;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
             uint8_t tileIndex = *vramAddress;
-            TilemapItem mapTile(i, tileIndex, address, &tiles[tileIndex]);
+            TilemapItem mapTile(i, address, &tiles[tileIndex]);
             mapTiles2.push_back(mapTile);
         }
     }
@@ -279,8 +279,11 @@ void TilemapViewer::renderTileMapInfo() {
         textRightAligned("Tile map index");
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
-        if (hoveredTilemapItem.Tile)
-            ImGui::Text("%i (%02X) @ VRAM 00:%04X", hoveredTilemapItem.TileIndex, hoveredTilemapItem.TileIndex, hoveredTilemapItem.TileAddress);
+        if (hoveredTilemapItem.Tile) {
+            int r = hoveredTilemapItem.TilemapItemID / 32;
+            int c = hoveredTilemapItem.TilemapItemID % 32;
+            ImGui::Text("%i ($%02X) @ VRAM 00:%04X | row: %i | column: %i", hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.TileAddress, r, c);
+        }
         else
             ImGui::Text("");
 
@@ -291,7 +294,7 @@ void TilemapViewer::renderTileMapInfo() {
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
         if (hoveredTilemapItem.Tile)
-            ImGui::Text("%i (%02X) @ VRAM 00:%04X", hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileAddress);
+            ImGui::Text("%i ($%02X) @ VRAM 00:%04X", hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileAddress);
         else
             ImGui::Text("");
 

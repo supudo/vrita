@@ -177,6 +177,11 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
                 }
             }
         }
+
+        ImVec2 tileEnd(pos.x + tileSizeZoom, pos.y + tileSizeZoom);
+        if (ImGui::IsMouseHoveringRect(pos, tileEnd))
+            hoveredTilemapItem = mapTiles[t];
+
         if (showGrid)
             draw_list->AddRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
     }
@@ -274,7 +279,10 @@ void TilemapViewer::renderTileMapInfo() {
         textRightAligned("Tile map index");
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
-        ImGui::Text("...");
+        if (hoveredTilemapItem.Tile)
+            ImGui::Text("%i", hoveredTilemapItem.TileIndex);
+        else
+            ImGui::Text("");
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

@@ -41,27 +41,23 @@ private:
     bool autoRefresh = true;
     bool showGrid = true;
 
-    uint16_t TileMap1Start = 0x9800;
-    uint16_t TileMap1End = 0x98FF;
-    uint16_t TileMap2Start = 0x9C00;
-    uint16_t TileMap2End = 0x9FFF;
-
     int tileMapAddress = 0;
     int tileDataAddress = 0;
 
     float lastInfoHeight = 0.0f;
 
-    TileItem hoveredTileItem;
-    TileItem hoveredTileItemBottom;
-    TileItem selectedTileItem;
-    TileItem selectedTileItemBottom;
-    bool hoveredHasBottom = false;
-    bool selectedHasBottom = false;
+    ImVector<TileItem> tiles;
+    ImVector<TilemapItem> mapTiles1;
+    ImVector<TilemapItem> mapTiles2;
+    TilemapItem hoveredTilemapItem;
+    TilemapItem selectedTilemapItem;
 
     void initializeData(uint8_t emulatorType);
-    void renderTileMap(float height);
+    void decodeTile(const uint8_t* tileData, TileItem& tile);
+    void renderTileMap(float height, ImVector<TilemapItem> mapTiles);
     void renderTileMapInfo();
     void textRightAligned(const char* text);
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
 };
 
 #endif

@@ -58,18 +58,12 @@ void TileViewer::initializeData(uint8_t emulatorType) {
         tiles.clear();
         tiles.reserve(DMG_TilesCount);
         const uint8_t* vram = memoryData + DMG_TileAddressStart;
-        uint8_t tileCounterHex = 0x00;
-        for (uint32_t i = 0; i < DMG_TilesCount; i++, nextTileID++) {
+        for (uint32_t i = 0; i < DMG_TilesCount; i++) {
             const uint8_t* vramAddress = vram + i * 16;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
-
-            char tileAddress[8];
-            snprintf(tileAddress, sizeof(tileAddress), "00:%04X", address);
-
-            TileItem tile(i, tileCounterHex, i, tileAddress);
+            TileItem tile(i, address);
             decodeTile(vramAddress, tile);
             tiles.push_back(tile);
-            ++tileCounterHex;
         }
     }
 }
@@ -83,7 +77,7 @@ void TileViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
                 uint8_t bit = 7 - x;
                 uint8_t lo = (low >> bit) & 1;
                 uint8_t hi = (high >> bit) & 1;
-                tile.pixels[x][y] = (hi << 1) | lo; // from 0 to 3
+                tile.Pixels[x][y] = (hi << 1) | lo; // from 0 to 3
             }
         }
     }
@@ -327,7 +321,7 @@ void TileViewer::renderTiles() {
 void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
-            PaletteColor color = paletteViewer.getColorPalette(tile.pixels[x][y]);
+            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[x][y]);
             ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
@@ -349,11 +343,11 @@ void TileViewer::renderTilePreview() {
     const TileItem& bottomItem = previewSelected ? selectedTileItemBottom : hoveredTileItemBottom;
 
     if (hasBottom) {
-        ImGui::Text("   Top tile: %02X : %i (Address %s)", item.TileNumberHex, item.TileNumberInt, item.TileAddress);
-        ImGui::Text("Bottom tile: %02X : %i (Address %s)", bottomItem.TileNumberHex, bottomItem.TileNumberInt, bottomItem.TileAddress);
+        ImGui::Text("   Top tile: %02X : %i (Address 00:%04X)", item.TileItemID, item.TileItemID, item.TileAddress);
+        ImGui::Text("Bottom tile: %02X : %i (Address 00:%04X)", bottomItem.TileItemID, bottomItem.TileItemID, bottomItem.TileAddress);
     }
     else
-        ImGui::Text("Tile: %02X : %i (Address %s)", item.TileNumberHex, item.TileNumberInt, item.TileAddress);
+        ImGui::Text("Tile: %02X : %i (Address 00:%04X)", item.TileItemID, item.TileItemID, item.TileAddress);
 
     ImGui::Separator();
 

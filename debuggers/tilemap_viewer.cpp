@@ -7,6 +7,9 @@
 #include <imgui_impl_sdlgpu3.h>
 
 #include "utilities/settings.hpp"
+#include "debuggers_defines_dmg.hpp"
+#include "debuggers_defines_cgb.hpp"
+#include "debuggers_defines_agb.hpp"
 
 bool TilemapViewer::init() {
     windowPositionX = settings.GetInt("Debuggers - Tilemap Viewer", "position_x", 44);
@@ -45,6 +48,53 @@ void TilemapViewer::setMemory(const char* emulatorType, uint8_t* data) {
 
 void TilemapViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
+        tiles.clear();
+        tiles.reserve(DMG_TilesCount);
+        const uint8_t* vramTiles = memoryData + DMG_TileAddressStart;
+        for (uint32_t i = 0; i < DMG_TilesCount; i++) {
+            const uint8_t* vramAddress = vramTiles + i * 16;
+            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+            TileItem tile(i, address);
+            decodeTile(vramAddress, tile);
+            tiles.push_back(tile);
+        }
+
+        mapTiles1.clear();
+        mapTiles1.reserve(DMG_TilemapCount);
+        const uint8_t* vramTilemap1 = memoryData + DMG_TileMap1Start;
+        for (uint32_t i = 0; i < DMG_TilemapCount; i++) {
+            const uint8_t* vramAddress = vramTilemap1 + i;
+            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+            uint8_t tileIndex = *vramAddress;
+            TilemapItem mapTile(i, tileIndex, address, &tiles[tileIndex]);
+            mapTiles1.push_back(mapTile);
+        }
+
+        mapTiles2.clear();
+        mapTiles2.reserve(DMG_TilemapCount);
+        const uint8_t* vramTilemap2 = memoryData + DMG_TileMap2Start;
+        for (uint32_t i = 0; i < DMG_TilemapCount; i++) {
+            const uint8_t* vramAddress = vramTilemap2 + i;
+            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+            uint8_t tileIndex = *vramAddress;
+            TilemapItem mapTile(i, tileIndex, address, &tiles[tileIndex]);
+            mapTiles2.push_back(mapTile);
+        }
+    }
+}
+
+void TilemapViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
+    if (emulatorType == 1) {
+        for (uint8_t y = 0; y < 8; y++) {
+            uint8_t low = tileData[y * 2];
+            uint8_t high = tileData[y * 2 + 1];
+            for (uint8_t x = 0; x < 8; x++) {
+                uint8_t bit = 7 - x;
+                uint8_t lo = (low >> bit) & 1;
+                uint8_t hi = (high >> bit) & 1;
+                tile.Pixels[x][y] = (hi << 1) | lo; // from 0 to 3
+            }
+        }
     }
 }
 
@@ -94,20 +144,66 @@ void TilemapViewer::render(bool* windowOpened) {
     if (tileMapHeight < 50.0f)
         tileMapHeight = 50.0f;
 
-    renderTileMap(tileMapHeight);
+    renderTileMap(tileMapHeight, tileMapAddress == 2 ? mapTiles2 : mapTiles1);
     renderTileMapInfo();
 
     ImGui::End();
 }
 
-void TilemapViewer::renderTileMap(float height) {
+void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) {
     ImGui::BeginChild("TileMap", ImVec2(0, height), ImGuiChildFlags_Borders, ImGuiWindowFlags_HorizontalScrollbar);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 start = ImGui::GetCursorScreenPos();
 
-    ImGui::Text("Tile map comes here ...");
+    float tileSizeZoom = 8.0f * zoomPerPixel;
+    float gridGap = showGrid ? 1.0f : 0.0f;
+    float tileStep = tileSizeZoom + gridGap;
+    int tilesPerRow = 32;
+
+    for (uint32_t t = 0; t < DMG_TilemapX * DMG_TilemapY; t++) {
+        int tx = t % tilesPerRow;
+        int ty = t / tilesPerRow;
+        ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
+
+        const TileItem* tile = mapTiles[t].Tile;
+        if (tile) {
+            for (int y = 0; y < 8; y++) {
+                for (int x = 0; x < 8; x++) {
+                    PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
+                    ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+                    ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
+                    ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
+                    draw_list->AddRectFilled(p0, p1, col);
+                }
+            }
+        }
+        if (showGrid)
+            draw_list->AddRect(pos, ImVec2(pos.x + (tileSizeZoom * 8.0f), pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
+    }
+
+    int totalRows = (DMG_TilemapX * DMG_TilemapY + tilesPerRow - 1) / tilesPerRow;
+    ImGui::Dummy(ImVec2(tilesPerRow * tileStep, totalRows * tileStep));
 
     ImGui::EndChild();
+}
+
+void renderTilemapTiles(ImVector<TilemapItem> mapTiles) {
+}
+
+void TilemapViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[x][y]);
+            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+            ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
+            ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
+            draw_list->AddRectFilled(p0, p1, col);
+        }
+    }
+    if (showGrid && drawBorder) {
+        float s = pixelSize * 8.0f;
+        draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
+    }
 }
 
 void TilemapViewer::renderTileMapInfo() {

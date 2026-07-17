@@ -37,7 +37,6 @@ private:
     uint8_t emulatorType = -1;
 
     ImVector<TileItem> tiles;
-    ImGuiID nextTileID;
     float zoomPerPixel = 2.0f;
     float previewSize = 40.0f;
     bool previewSelected = false;

@@ -2,31 +2,40 @@
 #define VRITA_DEBUGGERS_DEFINES_INCLUDES
 
 #include <cstdio>
-#include <functional>
 #include <map>
 #include <vector>
 #include <imgui.h>
 
 struct TileItem {
+    uint8_t Pixels[8][8];
     ImGuiID TileItemID;
-    uint8_t pixels[8][8];
-    uint8_t TileNumberHex;
-    uint8_t TileNumberInt;
-    char TileAddress[8];
-    TileItem() : TileItemID(0), TileNumberHex(0), TileNumberInt(0) {
-        TileAddress[0] = '\0';
-        for (auto& row : pixels)
+    uint16_t TileAddress;
+    TileItem() : TileItemID(0) {
+        TileAddress = 0x0000;
+        for (auto& row : Pixels)
             for (auto& c : row)
                 c = 0;
     }
-    TileItem(ImGuiID id, uint8_t tileNumberHex, uint8_t tileNumberInt, const char* tileAddress) {
+    TileItem(ImGuiID id, uint16_t tileAddress) {
         TileItemID = id;
-        TileNumberHex = tileNumberHex;
-        TileNumberInt = tileNumberInt;
-        snprintf(TileAddress, sizeof(TileAddress), "%s", tileAddress);
-        for (auto& row : pixels)
+        TileAddress = tileAddress;
+        for (auto& row : Pixels)
             for (auto& c : row)
                 c = 0;
+    }
+};
+
+struct TilemapItem {
+    ImGuiID TilemapItemID;
+    uint16_t TileIndex;
+    uint16_t TileAddress;
+    const TileItem* Tile;
+    TilemapItem() : TilemapItemID(0), TileIndex(0), TileAddress(0x0000), Tile(nullptr) {}
+    TilemapItem(ImGuiID tilemapItemID, uint16_t tileIndex, uint16_t tileAddress, const TileItem* tile) {
+        TilemapItemID = tilemapItemID;
+        TileIndex = tileIndex;
+        TileAddress = tileAddress;
+        Tile = tile;
     }
 };
 

@@ -24,6 +24,8 @@ const uint16_t DMG_TileMap2End = 0x9FFF;
 
 const uint16_t DMG_TilemapX = 32;
 const uint16_t DMG_TilemapY = 32;
+const uint16_t DMG_ViewportX = 20;
+const uint16_t DMG_ViewportY = 18;
 
 #include "debuggers_defines_dmg.inl"
 

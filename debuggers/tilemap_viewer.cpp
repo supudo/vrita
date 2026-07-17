@@ -178,8 +178,11 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
             }
         }
         if (showGrid)
-            draw_list->AddRect(pos, ImVec2(pos.x + (tileSizeZoom * 8.0f), pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
+            draw_list->AddRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
     }
+
+    ImVec2 viewportEnd(start.x + DMG_ViewportX * tileStep, start.y + DMG_ViewportY * tileStep);
+    draw_list->AddRect(start, viewportEnd, IM_COL32(255, 0, 0, 255), 0.0f, 0, 2.0f);
 
     int totalRows = (DMG_TilemapX * DMG_TilemapY + tilesPerRow - 1) / tilesPerRow;
     ImGui::Dummy(ImVec2(tilesPerRow * tileStep, totalRows * tileStep));

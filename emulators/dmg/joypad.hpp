@@ -23,6 +23,16 @@ public:
     void write(uint8_t value);
 
     void handleKey(uint32_t type, uint32_t key);
+    void setButton(uint8_t button, bool keyDown);
+
+    static constexpr uint8_t JOYPAD_RIGHT = 0;
+    static constexpr uint8_t JOYPAD_LEFT = 1;
+    static constexpr uint8_t JOYPAD_UP = 2;
+    static constexpr uint8_t JOYPAD_DOWN = 3;
+    static constexpr uint8_t JOYPAD_A = 4;
+    static constexpr uint8_t JOYPAD_B = 5;
+    static constexpr uint8_t JOYPAD_SELECT = 6;
+    static constexpr uint8_t JOYPAD_START = 7;
 
 private:
     Logger& logger;
@@ -34,16 +44,6 @@ private:
     uint8_t stateDPad = 0x0F; // bits 0-3: Right, Left, Up, Down
     uint8_t stateButtons = 0x0F; // bits 0-3: A, B, Select, Start
 
-    static constexpr uint8_t JOYPAD_RIGHT = 0;
-    static constexpr uint8_t JOYPAD_LEFT = 1;
-    static constexpr uint8_t JOYPAD_UP = 2;
-    static constexpr uint8_t JOYPAD_DOWN = 3;
-    static constexpr uint8_t JOYPAD_A = 4;
-    static constexpr uint8_t JOYPAD_B = 5;
-    static constexpr uint8_t JOYPAD_SELECT = 6;
-    static constexpr uint8_t JOYPAD_START = 7;
-
-    void setButton(uint8_t button, bool keyDown);
     uint8_t computeLowNibble(uint8_t sel) const;
 };
 

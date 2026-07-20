@@ -479,20 +479,22 @@ void DMG::renderJoypadUI() {
 
     ImVec2 dCenter = origin + ImVec2(90, 95);
 
-    auto DrawPadPiece = [&](const char* id, ImVec2 pos, ImVec2 sz, const char* icon) {
+    auto DrawPadPiece = [&](const char* id, ImVec2 pos, ImVec2 sz, const char* icon, uint8_t joypadButton) {
         ImGui::SetCursorScreenPos(pos);
         ImGui::InvisibleButton(id, sz);
         bool down = ImGui::IsItemActive();
+        if (ROMFileLoaded)
+            managerJoypad->setButton(joypadButton, down);
         draw->AddRectFilled(pos, pos + sz, down ? buttonPressed : buttonColor, 5);
         ImVec2 iconSize = ImGui::CalcTextSize(icon);
         draw->AddText(pos + (sz - iconSize) * 0.5f, IM_COL32_WHITE, icon);
     };
 
     constexpr float PAD_GAP = 2.0f;
-    DrawPadPiece("UP", dCenter + ImVec2(-15, -60), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_UP);
-    DrawPadPiece("DOWN", dCenter + ImVec2(-15, 15 + PAD_GAP), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_DOWN);
-    DrawPadPiece("LEFT", dCenter + ImVec2(-60, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_LEFT);
-    DrawPadPiece("RIGHT", dCenter + ImVec2(15 + PAD_GAP, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_RIGHT);
+    DrawPadPiece("UP", dCenter + ImVec2(-15, -60), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_UP, DMG_JOYPAD::JOYPAD_UP);
+    DrawPadPiece("DOWN", dCenter + ImVec2(-15, 15 + PAD_GAP), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_DOWN, DMG_JOYPAD::JOYPAD_DOWN);
+    DrawPadPiece("LEFT", dCenter + ImVec2(-60, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_LEFT, DMG_JOYPAD::JOYPAD_LEFT);
+    DrawPadPiece("RIGHT", dCenter + ImVec2(15 + PAD_GAP, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_RIGHT, DMG_JOYPAD::JOYPAD_RIGHT);
     draw->AddRectFilled(dCenter + ImVec2(-15, -15), dCenter + ImVec2(15, 15), buttonColor, 4);
 
     // button B
@@ -501,6 +503,8 @@ void DMG::renderJoypadUI() {
     ImGui::SetCursorScreenPos(bPos - ImVec2(28, 28));
     ImGui::InvisibleButton("B", ImVec2(56, 56));
     bool bHeld = ImGui::IsItemActive();
+    if (ROMFileLoaded)
+        managerJoypad->setButton(DMG_JOYPAD::JOYPAD_B, bHeld);
     draw->AddCircleFilled(bPos, 28, bHeld ? purplePressed : purple, 40);
 
     float letterFontSize = ImGui::GetFontSize() * 1.8f;
@@ -513,26 +517,28 @@ void DMG::renderJoypadUI() {
 
     ImGui::SetCursorScreenPos(aPos - ImVec2(28, 28));
     ImGui::InvisibleButton("A", ImVec2(56, 56));
-
     bool aHeld = ImGui::IsItemActive();
-
+    if (ROMFileLoaded)
+        managerJoypad->setButton(DMG_JOYPAD::JOYPAD_A, bHeld);
     draw->AddCircleFilled(aPos, 28, aHeld ? purplePressed : purple, 40);
     ImVec2 aLetterSize = ImGui::GetFont()->CalcTextSizeA(letterFontSize, FLT_MAX, 0.0f, ICON_FA_A);
     draw->AddText(ImGui::GetFont(), letterFontSize, aPos - aLetterSize * 0.5f, IM_COL32_WHITE, ICON_FA_A);
 
     // buttons SELECT and START
 
-    auto DrawPill = [&](const char* id, ImVec2 center, const char* label) {
+    auto DrawPill = [&](const char* id, ImVec2 center, const char* label, uint8_t joypadButton) {
         ImVec2 p = center - ImVec2(28, 16);
         ImGui::SetCursorScreenPos(p);
         ImGui::InvisibleButton(id, ImVec2(56, 32));
         bool held = ImGui::IsItemActive();
+        if (ROMFileLoaded)
+            managerJoypad->setButton(joypadButton, held);
         draw->AddRectFilled(p, p + ImVec2(56, 32), held ? buttonPressed : buttonColor, 8);
         float labelX = (56.0f - ImGui::CalcTextSize(label).x) * 0.5f;
         draw->AddText(p + ImVec2(labelX, 38), textColor, label);
     };
-    DrawPill("SELECT", origin + ImVec2(170, 190), "SELECT");
-    DrawPill("START", origin + ImVec2(260, 190), "START");
+    DrawPill("SELECT", origin + ImVec2(170, 190), "SELECT", DMG_JOYPAD::JOYPAD_SELECT);
+    DrawPill("START", origin + ImVec2(260, 190), "START", DMG_JOYPAD::JOYPAD_START);
 
     // speaker lines
 

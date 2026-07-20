@@ -9,20 +9,23 @@
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
+#include "palette_viewer.hpp"
 
 class Settings;
 
 class SpriteViewer {
 public:
-    SpriteViewer(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
+    SpriteViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
+    void setMemory(const char* emulatorType, uint8_t* data);
     void release();
     void render(bool* windowOpened);
 
 private:
     Logger& logger;
     Settings& settings;
+    PaletteViewer& paletteViewer;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -30,6 +33,11 @@ private:
     int windowHeight = 300;
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
+
+    uint8_t* memoryData = nullptr;
+    uint8_t emulatorType = -1;
+
+    void initializeData(uint8_t emulatorType);
 };
 
 #endif

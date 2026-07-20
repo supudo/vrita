@@ -45,7 +45,7 @@ void Emulators::init(Settings& settings) {
     debuggerTilemapViewer->init();
     debuggerTilemapViewerVisible = settings.GetBool("Debuggers - Tilemap Viewer", "visible", false);
 
-    debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger, settings);
+    debuggerSpriteViewer = std::make_shared<SpriteViewer>(logger, settings, *debuggerPaletteViewer);
     debuggerSpriteViewer->init();
     debuggerSpriteViewerVisible = settings.GetBool("Debuggers - Sprite Viewer", "visible", false);
 
@@ -116,6 +116,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));

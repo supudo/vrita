@@ -47,9 +47,21 @@ set(SOURCES
 if(WIN32)
     enable_language(RC)
     list(APPEND SOURCES resources/Vrita.rc)
+elseif(APPLE)
+    list(APPEND SOURCES resources/Vrita.icns)
+    set_source_files_properties(resources/Vrita.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
 add_executable(Vrita ${SOURCES})
+
+if(APPLE)
+    set_target_properties(Vrita PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_ICON_FILE Vrita.icns
+        MACOSX_BUNDLE_BUNDLE_NAME Vrita
+        MACOSX_BUNDLE_GUI_IDENTIFIER com.vrita.app
+    )
+endif()
 
 target_include_directories(Vrita PRIVATE ${CMAKE_SOURCE_DIR})
 

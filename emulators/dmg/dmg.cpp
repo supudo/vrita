@@ -431,6 +431,21 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
     ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear, nullptr);
 
+    if (!ROMFileLoaded) {
+        ImVec2 imgMin = ImGui::GetItemRectMin();
+        ImVec2 imgMax = ImGui::GetItemRectMax();
+        const char* overlayText = "Please, load or drag a ROM file";
+        ImVec2 textSize = ImGui::CalcTextSize(overlayText);
+        ImVec2 textPos(
+            imgMin.x + (imgMax.x - imgMin.x - textSize.x) * 0.5f,
+            imgMin.y + (imgMax.y - imgMin.y - textSize.y) * 0.5f
+        );
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddRectFilled(imgMin, imgMax, IM_COL32(0, 0, 0, 120));
+        drawList->AddText(ImVec2(textPos.x + 1, textPos.y + 1), IM_COL32(0, 0, 0, 255), overlayText);
+        drawList->AddText(textPos, IM_COL32(255, 255, 255, 255), overlayText);
+    }
+
     float cursorYAfterImage = ImGui::GetCursorPosY();
 
     if (renderJoypad) {

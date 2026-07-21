@@ -37,6 +37,10 @@ private:
     uint8_t* memoryData = nullptr;
     uint8_t emulatorType = -1;
 
+    float zoomPerPixel = 2.0f;
+    bool autoRefresh = true;
+    bool showGrid = true;
+
     void initializeData(uint8_t emulatorType);
 };
 

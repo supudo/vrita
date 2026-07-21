@@ -60,5 +60,28 @@ void SpriteViewer::render(bool* windowOpened) {
         return;
     }
 
+    if (autoRefresh)
+        initializeData(emulatorType);
+
+    ImGui::Checkbox("Show grid", &showGrid);
+
+    ImGui::Checkbox("Auto refresh", &autoRefresh);
+    ImGui::SameLine();
+    if (autoRefresh)
+        ImGui::BeginDisabled();
+    if (ImGui::Button("Refresh"))
+        initializeData(emulatorType);
+    if (autoRefresh)
+        ImGui::EndDisabled();
+
+    ImGui::Separator();
+
+    ImGui::Text("Tiles size");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(200);
+    ImGui::SliderFloat("##tileSize", &zoomPerPixel, 1.0f, 16.0f);
+
+    ImGui::Separator();
+
     ImGui::End();
 }

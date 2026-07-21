@@ -190,6 +190,7 @@
     <ClInclude Include="debuggers\tilemap_viewer.hpp">
       <Filter>debuggers</Filter>
     </ClInclude>
+    <ClInclude Include="emulators\dmg\palette_presets.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">
@@ -241,5 +242,15 @@
     <None Include="debuggers\debuggers_defines_dmg.inl">
       <Filter>debuggers</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\Vrita.ico">
+      <Filter>resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\Vrita.rc">
+      <Filter>resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

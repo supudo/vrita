@@ -226,6 +226,12 @@
     <None Include="debuggers\debuggers_defines_cgb.inl" />
     <None Include="debuggers\debuggers_defines_dmg.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\Vrita.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\Vrita.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

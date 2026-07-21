@@ -225,6 +225,7 @@
     <None Include="debuggers\debuggers_defines_agb.inl" />
     <None Include="debuggers\debuggers_defines_cgb.inl" />
     <None Include="debuggers\debuggers_defines_dmg.inl" />
+    <None Include="resources\Vrita.icns" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\Vrita.ico" />

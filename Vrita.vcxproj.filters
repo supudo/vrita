@@ -242,6 +242,9 @@
     <None Include="debuggers\debuggers_defines_dmg.inl">
       <Filter>debuggers</Filter>
     </None>
+    <None Include="resources\Vrita.icns">
+      <Filter>resources</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\Vrita.ico">

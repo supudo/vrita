@@ -44,6 +44,11 @@ set(SOURCES
     gui/log.cpp
 )
 
+if(WIN32)
+    enable_language(RC)
+    list(APPEND SOURCES resources/Vrita.rc)
+endif()
+
 add_executable(Vrita ${SOURCES})
 
 target_include_directories(Vrita PRIVATE ${CMAKE_SOURCE_DIR})

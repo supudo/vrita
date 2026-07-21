@@ -41,7 +41,12 @@ private:
     bool autoRefresh = true;
     bool showGrid = true;
 
+    float lastInfoHeight = 0.0f;
+
     void initializeData(uint8_t emulatorType);
+    void renderSprites(float height);
+    void renderInfo();
+    void textRightAligned(const char* text);
 };
 
 #endif

@@ -190,7 +190,9 @@
     <ClInclude Include="debuggers\tilemap_viewer.hpp">
       <Filter>debuggers</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\dmg\palette_presets.hpp" />
+    <ClInclude Include="emulators\dmg\palette_presets.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

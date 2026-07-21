@@ -29,11 +29,11 @@ public:
     uint64_t totalCycles = 0;
     bool firstRAMWrite = true;
 
-    uint8_t read8(uint16_t address) const;
-    void write8(uint16_t address, uint8_t value);
-    inline uint16_t read16(uint16_t address) const { return read8(address) | (read8(address + 1) << 8); }
-    inline void write16(uint16_t address, uint16_t value) { write8(address, value & 0xFF); write8(address + 1, value >> 8); }
-    inline void writeStack(uint16_t* sp, uint16_t value) { (*sp)--; write8(*sp, (uint8_t)((value & 0xFF00) >> 8)); (*sp)--; write8(*sp, (uint8_t)(value & 0x00FF)); }
+    uint8_t read8(uint16_t address, bool no_tick = false);
+    void write8(uint16_t address, uint8_t value, bool no_tick = false);
+    inline uint16_t read16(uint16_t address, bool no_tick = false) { return read8(address, no_tick) | (read8(address + 1, no_tick) << 8); }
+    inline void write16(uint16_t address, uint16_t value, bool no_tick = false) { write8(address, value & 0xFF, no_tick); write8(address + 1, value >> 8, no_tick); }
+    inline void writeStack(uint16_t* sp, uint16_t value) { (*sp)--; write8(*sp, (uint8_t)((value & 0xFF00) >> 8), false); (*sp)--; write8(*sp, (uint8_t)(value & 0x00FF), false); }
     inline uint16_t readStack(uint16_t* sp) { uint16_t value = read16(*sp); *sp += 2; return value; }
 
 private:

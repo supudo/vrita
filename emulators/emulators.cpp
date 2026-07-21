@@ -96,10 +96,10 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->memorySize);
         debuggerMemoryEditor->setCallbacks(
             [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
+                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
             },
             [&] (uint32_t addr, uint8_t value) {
-                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
+                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true);
             }
         );
         debuggerMemoryEditor->setRegsiterCallback(
@@ -119,10 +119,10 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr));
+                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
             },
             [&] (uint32_t addr, uint8_t value) {
-                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value);
+                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true);
             },
             [&] (uint8_t flag) {
                 return emulatorDMG->managerCPU->isFlagSet(flag);

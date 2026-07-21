@@ -861,7 +861,7 @@ void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
             break;
         case 0xE8: // ADD SP, n
             Registers.SP = addSignedToSP("0xE8 - ADD SP, n", (int8_t)mmu.read8(Registers.PC++));
-            mmu.tick(4);
+            mmu.tick(8);
             break;
         case 0xE9: // JP HL
             logCall(true, "0xE9 JP HL");

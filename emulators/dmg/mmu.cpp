@@ -86,7 +86,9 @@ void DMG_MMU::clearResources() {
     clearMemory();
 }
 
-uint8_t DMG_MMU::read8(uint16_t address) const {
+uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
+    if (!no_tick)
+        tick(4);
     if (address < 0x8000 || (address > 0xA000 && address < 0xC000))
         return managerCartridge->read(address);
     if (address == 0xFF00)
@@ -98,7 +100,9 @@ uint8_t DMG_MMU::read8(uint16_t address) const {
     return memory[address];
 }
 
-void DMG_MMU::write8(uint16_t address, uint8_t value) {
+void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
+    if (!no_tick)
+        tick(4);
     if (address < 0x8000) { // MBC write, no memory store
         managerCartridge->write(address, value);
         return;
@@ -127,7 +131,7 @@ void DMG_MMU::write8(uint16_t address, uint8_t value) {
         memory[address] = value;
         uint16_t source = (uint16_t)value << 8;
         for (uint16_t i = 0; i < 0xA0; i++)
-            memory[0xFE00 + i] = read8(source + i);
+            memory[0xFE00 + i] = read8(source + i, false);
         return;
     }
     memory[address] = value;

@@ -260,6 +260,8 @@ int main(int argc, char** argv) {
 
     ImVec4 clear_color = ImVec4(188.0f / 255.0f, 190.0f / 255.0f, 194.0f / 255.0f, 1.00f);
 
+    std::vector<std::string> droppedFiles;
+    bool showDropCountError = false;
     while (!vritaRunning) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -270,6 +272,17 @@ int main(int argc, char** argv) {
                 vritaRunning = true;
             if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
                 managerEmulators->handleKey(event.type, event.key.key);
+            if (event.type == SDL_EVENT_DROP_FILE) {
+                logger->log("[VRITA] File dropped: %s", event.drop.data);
+                droppedFiles.emplace_back(event.drop.data);
+            }
+            if (event.type == SDL_EVENT_DROP_COMPLETE) {
+                if (droppedFiles.size() == 1)
+                    loadROM(droppedFiles[0].c_str());
+                else if (droppedFiles.size() > 1)
+                    showDropCountError = true;
+                droppedFiles.clear();
+            }
         }
 
         if (SDL_GetWindowFlags(appWindow) & SDL_WINDOW_MINIMIZED) {
@@ -284,6 +297,22 @@ int main(int argc, char** argv) {
         ImGui_ImplSDLGPU3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
+
+        if (showDropCountError) {
+            ImGui::OpenPopup("Error");
+            showDropCountError = false;
+        }
+        ImVec2 dropErrorCenter = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(dropErrorCenter, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+            ImGui::Text("Please, drop only one file at a time.");
+            ImGui::Dummy(ImVec2(0.0f, 10.0f));
+            float okButtonWidth = 120.0f;
+            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - okButtonWidth) * 0.5f);
+            if (ImGui::Button("OK", ImVec2(okButtonWidth, 0)))
+                ImGui::CloseCurrentPopup();
+            ImGui::EndPopup();
+        }
 
         ShowMainMenu();
 

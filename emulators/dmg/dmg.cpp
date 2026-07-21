@@ -441,8 +441,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::Separator();
 
     ImGui::Text("START = <Enter>, SELECT = <space>");
-    ImGui::Text("D-Pad = <arrow keys>");
-    ImGui::Text("A = <A>, B = <B>");
+    ImGui::Text("D-Pad = <arrow keys>, A = <A>, B = <B>");
 
     ImGui::Separator();
 

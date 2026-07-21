@@ -6,6 +6,14 @@
 #include <vector>
 #include <imgui.h>
 
+struct SpriteItem {
+    uint8_t X;
+    uint8_t Y;
+    uint8_t Tile;
+    uint8_t Flags;
+    ImGuiID SpriteID;
+};
+
 struct TileItem {
     uint8_t Pixels[8][8];
     ImGuiID TileItemID;

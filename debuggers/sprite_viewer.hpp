@@ -19,6 +19,7 @@ public:
 
     bool init();
     void setMemory(const char* emulatorType, uint8_t* data);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
     void release();
     void render(bool* windowOpened);
 
@@ -26,6 +27,9 @@ private:
     Logger& logger;
     Settings& settings;
     PaletteViewer& paletteViewer;
+
+    std::function<uint8_t(uint16_t)> funcMemoryRead;
+    std::function<void(uint16_t, uint8_t)> funcMemoryWrite;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -41,12 +45,15 @@ private:
     bool autoRefresh = true;
     bool showGrid = true;
 
-    float lastInfoHeight = 0.0f;
+    bool isSprite8x16 = false;
+    ImVector<SpriteItem> spriteItems;
 
     void initializeData(uint8_t emulatorType);
     void renderSprites(float height);
     void renderInfo();
     void textRightAligned(const char* text);
+
+    float lastInfoHeight = 0.0f;
 };
 
 #endif

@@ -42,7 +42,23 @@ void SpriteViewer::setMemory(const char* emulatorType, uint8_t* data) {
         initializeData(et);
 }
 
+void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+    funcMemoryRead = read8;
+    funcMemoryWrite = write8;
+}
+
 void SpriteViewer::initializeData(uint8_t emulatorType) {
+    if (emulatorType == 1) {
+        //isSprite8x16 = funcMemoryRead(DMG_Address_LCDC) & 0x04;
+        //const uint8_t* oam = memoryData + DMG_Address_SpritesStart;
+        //spriteItems.clear();
+        //spriteItems.reserve(DMG_SpriteCount);
+        //for (uint32_t i = 0; i < DMG_SpriteCount; ++i) {
+        //    const uint8_t* entry = oam + i * 4;
+        //    SpriteItem spriteTile(i, entry[0], entry[1], entry[2], entry[3], static_cast<uint8_t>(i), static_cast<uint16_t>(entry - memoryData));
+        //    spriteItems.push_back(spriteTile);
+        //}
+    }
 }
 
 void SpriteViewer::render(bool* windowOpened) {

@@ -117,6 +117,14 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerSpriteViewer->setCallbacks(
+            [&] (uint32_t addr) {
+                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
+            },
+            [&] (uint32_t addr, uint8_t value) {
+                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true);
+            }
+        );
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);

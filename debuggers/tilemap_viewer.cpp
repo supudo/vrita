@@ -50,7 +50,7 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
         tiles.clear();
         tiles.reserve(DMG_TilesCount);
-        const uint8_t* vramTiles = memoryData + DMG_TileAddressStart;
+        const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
         for (uint32_t i = 0; i < DMG_TilesCount; i++) {
             const uint8_t* vramAddress = vramTiles + i * 16;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);

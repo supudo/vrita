@@ -57,7 +57,7 @@ void TileViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
         tiles.clear();
         tiles.reserve(DMG_TilesCount);
-        const uint8_t* vram = memoryData + DMG_TileAddressStart;
+        const uint8_t* vram = memoryData + DMG_Address_TileStart;
         for (uint32_t i = 0; i < DMG_TilesCount; i++) {
             const uint8_t* vramAddress = vram + i * 16;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
@@ -279,7 +279,7 @@ void TileViewer::renderTiles() {
             int count = 0;
             uint8_t objTileIndices[40];
             for (int oam = 0; oam < 160; oam += 4) {
-                uint8_t tileIndex = memoryData[DMG_TileAddressOBJ + oam + 2];
+                uint8_t tileIndex = memoryData[DMG_Address_TileOBJ + oam + 2];
                 objTileIndices[count] = tileIndex;
                 int topIndex = stacked ? (tileIndex & 0xFE) : tileIndex;
                 int bottomIndex = tileIndex | 0x01;

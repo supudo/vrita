@@ -55,9 +55,9 @@ private:
     void decodeTile(const uint8_t* tileData, TileItem& tile);
     void renderTiles();
     void renderTilePreview();
+    void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
     int pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count);
-    void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
 };
 
 #endif

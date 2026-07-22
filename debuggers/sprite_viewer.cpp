@@ -55,8 +55,8 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
         spriteItems.reserve(DMG_SpriteCount);
         for (uint32_t i = 0; i < DMG_SpriteCount; ++i) {
             const uint8_t* entry = oam + i * 4;
-            SpriteItem spriteTile(i, entry[0], entry[1], entry[2], entry[3], static_cast<uint8_t>(i), static_cast<uint16_t>(entry - memoryData));
-            spriteItems.push_back(spriteTile);
+            //SpriteItem spriteTile(i, entry[0], entry[1], entry[2], entry[3], static_cast<uint8_t>(i), static_cast<uint16_t>(entry - memoryData));
+            //spriteItems.push_back(spriteTile);
         }
     }
 }
@@ -130,6 +130,11 @@ void SpriteViewer::renderSprites(float height) {
         int ty = t / tilesPerRow;
         ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
 
+        //const SpriteItem sprite = spriteItems[t];
+        //if () {
+
+        //}
+
         if (showGrid)
             draw_list->AddRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
     }
@@ -155,6 +160,18 @@ void SpriteViewer::renderInfo() {
         ImGui::TableSetupColumn("Control", ImGuiTableColumnFlags_WidthStretch);
 
         float rowHeight = ImGui::GetFrameHeight();
+
+        ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+        ImGui::TableSetColumnIndex(0);
+        ImGui::AlignTextToFramePadding();
+        textRightAligned("Palette transformer");
+        ImGui::TableSetColumnIndex(1);
+        ImGui::SetNextItemWidth(120);
+        static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
+        if (ImGui::Combo("##paletteChoicesCombo", &paletteViewer.paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
+            settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteViewer.paletteChoicesSelected);
+            settings.Save();
+        }
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

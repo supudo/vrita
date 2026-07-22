@@ -318,6 +318,17 @@ void TileViewer::renderTiles() {
     }
 }
 
+void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) {
+    drawTile(draw_list, top, pos, pixelSize, false);
+    if (hasBottom)
+        drawTile(draw_list, bottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
+    if (showGrid) {
+        float w = pixelSize * 8.0f;
+        float h = pixelSize * 8.0f * (hasBottom ? 2.0f : 1.0f);
+        draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
+    }
+}
+
 void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
@@ -361,15 +372,4 @@ void TileViewer::renderTilePreview() {
     ImVec2 start = ImGui::GetCursorScreenPos();
     drawTileUnit(draw_list, item, bottomItem, hasBottom, ImVec2(start.x + 2.0f, start.y + 2.0f), previewSize);
     ImGui::Dummy(ImVec2(previewSize * 8.0f + 4.0f, previewSize * 8.0f * (hasBottom ? 2.0f : 1.0f) + 4.0f));
-}
-
-void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) {
-    drawTile(draw_list, top, pos, pixelSize, false);
-    if (hasBottom)
-        drawTile(draw_list, bottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
-    if (showGrid) {
-        float w = pixelSize * 8.0f;
-        float h = pixelSize * 8.0f * (hasBottom ? 2.0f : 1.0f);
-        draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
-    }
 }

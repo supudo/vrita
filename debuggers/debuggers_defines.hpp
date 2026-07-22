@@ -6,26 +6,6 @@
 #include <vector>
 #include <imgui.h>
 
-struct SpriteItem {
-    ImGuiID SpriteID;
-    uint8_t X;
-    uint8_t Y;
-    uint8_t Tile;
-    uint8_t Flags;
-    uint8_t Index;
-    uint16_t OAMAddress;
-    SpriteItem() : SpriteID(0) {}
-    SpriteItem(ImGuiID spriteID, uint8_t x, uint8_t y, uint8_t tile, uint8_t flags, uint8_t index, uint16_t oamAddress) {
-        SpriteID = spriteID;
-        X = x;
-        Y = y;
-        Tile = tile;
-        Flags = flags;
-        Index = index;
-        OAMAddress = oamAddress;
-    }
-};
-
 struct TileItem {
     uint8_t Pixels[8][8];
     ImGuiID TileItemID;
@@ -54,6 +34,28 @@ struct TilemapItem {
         TilemapItemID = tilemapItemID;
         TileAddress = tileAddress;
         Tile = tile;
+    }
+};
+
+struct SpriteItem {
+    ImGuiID SpriteID;
+    uint8_t X;
+    uint8_t Y;
+    uint8_t Tile;
+    uint8_t Flags;
+    uint8_t Index;
+    uint16_t OAMAddress;
+    const TileItem* TileData;
+    SpriteItem() : SpriteID(0), TileData(nullptr) {}
+    SpriteItem(ImGuiID spriteID, uint8_t x, uint8_t y, uint8_t tile, uint8_t flags, uint8_t index, uint16_t oamAddress, TileItem* tileData) {
+        SpriteID = spriteID;
+        X = x;
+        Y = y;
+        Tile = tile;
+        Flags = flags;
+        Index = index;
+        OAMAddress = oamAddress;
+        TileData = tileData;
     }
 };
 

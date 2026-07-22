@@ -12,6 +12,17 @@ C/C++ Emulator - GameBoy (DMG), etc.
 - [NoobBoy](https://github.com/Mika412/NoobBoy)
 - all the others GameBoy/Advance emulators!
 
+## Tests
+
+ - [ ] [gb-test-roms:](https://github.com/retrio/gb-test-roms)
+	 - [x] cpu_instrs;
+	 - [ ] dmg_sound;
+	 - [ ] instr_timing;
+	 - [ ] interrupt_time;
+	 - [ ] mem_timing-2;
+	 - [ ] mem_timing;
+	 - [ ] oam_bug;
+
 #### License
 
 Each library uses comes with its own license. See LICENSE.md.

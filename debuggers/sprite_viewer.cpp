@@ -50,13 +50,43 @@ void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::fun
 void SpriteViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
         isSprite8x16 = funcMemoryRead(DMG_Address_LCDC) & 0x04;
+
+        tiles.clear();
+        tiles.reserve(DMG_TilesCount);
+        const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
+        for (uint32_t i = 0; i < DMG_TilesCount; i++) {
+            const uint8_t* vramAddress = vramTiles + i * 16;
+            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+            TileItem tile(i, address);
+            decodeTile(vramAddress, tile);
+            tiles.push_back(tile);
+        }
+
         const uint8_t* oam = memoryData + DMG_Address_SpritesStart;
         spriteItems.clear();
         spriteItems.reserve(DMG_SpriteCount);
         for (uint32_t i = 0; i < DMG_SpriteCount; ++i) {
             const uint8_t* entry = oam + i * 4;
-            //SpriteItem spriteTile(i, entry[0], entry[1], entry[2], entry[3], static_cast<uint8_t>(i), static_cast<uint16_t>(entry - memoryData));
-            //spriteItems.push_back(spriteTile);
+            uint16_t address = static_cast<uint16_t>(entry - memoryData);
+            const uint8_t tileIndex = entry[2];
+            const uint8_t firstTile = isSprite8x16 ? (tileIndex & 0xFE) : tileIndex;
+            SpriteItem spriteTile(i, entry[0], entry[1], tileIndex, entry[3], static_cast<uint8_t>(i), address, &tiles[firstTile], isSprite8x16 ? &tiles[firstTile + 1] : nullptr);
+            spriteItems.push_back(spriteTile);
+        }
+    }
+}
+
+void SpriteViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
+    if (emulatorType == 1) {
+        for (uint8_t y = 0; y < 8; y++) {
+            uint8_t low = tileData[y * 2];
+            uint8_t high = tileData[y * 2 + 1];
+            for (uint8_t x = 0; x < 8; x++) {
+                uint8_t bit = 7 - x;
+                uint8_t lo = (low >> bit) & 1;
+                uint8_t hi = (high >> bit) & 1;
+                tile.Pixels[x][y] = (hi << 1) | lo; // from 0 to 3
+            }
         }
     }
 }
@@ -130,10 +160,18 @@ void SpriteViewer::renderSprites(float height) {
         int ty = t / tilesPerRow;
         ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
 
-        //const SpriteItem sprite = spriteItems[t];
-        //if () {
-
-        //}
+        const TileItem* tile = spriteItems[t].TileTop;
+        if (tile) {
+            for (int y = 0; y < 8; y++) {
+                for (int x = 0; x < 8; x++) {
+                    PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
+                    ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+                    ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
+                    ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
+                    draw_list->AddRectFilled(p0, p1, col);
+                }
+            }
+        }
 
         if (showGrid)
             draw_list->AddRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));

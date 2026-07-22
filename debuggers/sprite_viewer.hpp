@@ -46,9 +46,11 @@ private:
     bool showGrid = true;
 
     bool isSprite8x16 = false;
+    ImVector<TileItem> tiles;
     ImVector<SpriteItem> spriteItems;
 
     void initializeData(uint8_t emulatorType);
+    void decodeTile(const uint8_t* tileData, TileItem& tile);
     void renderSprites(float height);
     void renderInfo();
     void textRightAligned(const char* text);

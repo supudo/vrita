@@ -45,9 +45,10 @@ struct SpriteItem {
     uint8_t Flags;
     uint8_t Index;
     uint16_t OAMAddress;
-    const TileItem* TileData;
-    SpriteItem() : SpriteID(0), TileData(nullptr) {}
-    SpriteItem(ImGuiID spriteID, uint8_t x, uint8_t y, uint8_t tile, uint8_t flags, uint8_t index, uint16_t oamAddress, TileItem* tileData) {
+    const TileItem* TileTop;
+    const TileItem* TileBottom;
+    SpriteItem() : SpriteID(0), TileTop(nullptr), TileBottom(nullptr) {}
+    SpriteItem(ImGuiID spriteID, const uint8_t x, const uint8_t y, const uint8_t tile, const uint8_t flags, const uint8_t index, uint16_t oamAddress, const TileItem* tileTop, const TileItem* tileBottom) {
         SpriteID = spriteID;
         X = x;
         Y = y;
@@ -55,7 +56,8 @@ struct SpriteItem {
         Flags = flags;
         Index = index;
         OAMAddress = oamAddress;
-        TileData = tileData;
+        TileTop = tileTop;
+        TileBottom = tileBottom;
     }
 };
 

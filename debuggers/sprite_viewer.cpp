@@ -16,6 +16,7 @@ bool SpriteViewer::init() {
     windowPositionY = settings.GetInt("Debuggers - Sprite Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Sprite Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Sprite Viewer", "height", 300);
+    zoomPerPixel = settings.GetInt("Debuggers - Sprite Viewer", "zoom_per_pixel", 3.0);
     return true;
 }
 
@@ -24,6 +25,7 @@ void SpriteViewer::release() {
     settings.Set("Debuggers - Sprite Viewer", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Sprite Viewer", "width", (int)lastWindowSize.x);
     settings.Set("Debuggers - Sprite Viewer", "height", (int)lastWindowSize.y);
+    settings.Set("Debuggers - Sprite Viewer", "zoom_per_pixel", zoomPerPixel);
     settings.Save();
 }
 
@@ -146,19 +148,18 @@ void SpriteViewer::render(bool* windowOpened) {
 }
 
 void SpriteViewer::renderSprites(float height) {
-    ImGui::BeginChild("TileMap", ImVec2(0, height), ImGuiChildFlags_Borders, ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("Sprites", ImVec2(0, height), ImGuiChildFlags_Borders, ImGuiWindowFlags_HorizontalScrollbar);
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 start = ImGui::GetCursorScreenPos();
 
-    float tileSizeZoom = 8.0f * zoomPerPixel;
+    float spriteSizeZoom = 8.0f * zoomPerPixel;
     float gridGap = showGrid ? 1.0f : 0.0f;
-    float tileStep = tileSizeZoom + gridGap;
-    int tilesPerRow = DMG_SpritesX;
+    float spriteStep = spriteSizeZoom + gridGap;
 
     for (uint32_t t = 0; t < DMG_SpritesX * DMG_SpritesY; t++) {
-        int tx = t % tilesPerRow;
-        int ty = t / tilesPerRow;
-        ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
+        int tx = t % DMG_SpritesX;
+        int ty = t / DMG_SpritesX;
+        ImVec2 pos(start.x + tx * spriteStep, start.y + ty * spriteStep);
 
         //const TileItem* tile = spriteItems[t].TileTop;
         //if (tile) {
@@ -176,20 +177,17 @@ void SpriteViewer::renderSprites(float height) {
         const TileItem* tile = spriteItems[t].TileTop;
         if (tile) {
             for (uint16_t i = 0; i < spriteItems.size(); i++) {
-                ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
+                ImVec2 pos(start.x + tx * spriteStep, start.y + ty * spriteStep);
                 drawTileUnit(draw_list, spriteItems[t], pos, zoomPerPixel);
             }
         }
 
         if (showGrid)
-            draw_list->AddRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom), IM_COL32(60, 60, 60, 255));
+            draw_list->AddRect(pos, ImVec2(pos.x + spriteSizeZoom, pos.y + spriteSizeZoom), IM_COL32(60, 60, 60, 255));
     }
 
-    ImVec2 viewportEnd(start.x + DMG_SpritesX * tileStep, start.y + DMG_SpritesY * tileStep);
-    draw_list->AddRect(start, viewportEnd, IM_COL32(255, 0, 0, 255), 0.0f, 0, 2.0f);
-
-    int totalRows = (DMG_SpritesX * DMG_SpritesY + tilesPerRow - 1) / tilesPerRow;
-    ImGui::Dummy(ImVec2(tilesPerRow * tileStep, totalRows * tileStep));
+    int totalRows = (DMG_SpritesX * DMG_SpritesY + DMG_SpritesX - 1) / DMG_SpritesX;
+    ImGui::Dummy(ImVec2(DMG_SpritesX * spriteStep, totalRows * spriteStep));
 
     ImGui::EndChild();
 }

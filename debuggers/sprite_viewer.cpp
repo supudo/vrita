@@ -157,37 +157,14 @@ void SpriteViewer::renderSprites(float height) {
     float spriteStep = spriteSizeZoom + gridGap;
 
     for (uint32_t t = 0; t < DMG_SpritesX * DMG_SpritesY; t++) {
-        int tx = t % DMG_SpritesX;
-        int ty = t / DMG_SpritesX;
-        ImVec2 pos(start.x + tx * spriteStep, start.y + ty * spriteStep);
-
-        //const TileItem* tile = spriteItems[t].TileTop;
-        //if (tile) {
-        //    for (int y = 0; y < 8; y++) {
-        //        for (int x = 0; x < 8; x++) {
-        //            PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
-        //            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
-        //            ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
-        //            ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
-        //            draw_list->AddRectFilled(p0, p1, col);
-        //        }
-        //    }
-        //}
-
-        const TileItem* tile = spriteItems[t].TileTop;
-        if (tile) {
-            for (uint16_t i = 0; i < spriteItems.size(); i++) {
-                ImVec2 pos(start.x + tx * spriteStep, start.y + ty * spriteStep);
-                drawTileUnit(draw_list, spriteItems[t], pos, zoomPerPixel);
-            }
-        }
-
-        if (showGrid)
-            draw_list->AddRect(pos, ImVec2(pos.x + spriteSizeZoom, pos.y + spriteSizeZoom), IM_COL32(60, 60, 60, 255));
+        int line = t % DMG_SpritesX;
+        int column = (t / DMG_SpritesX) * 2;
+        const SpriteItem sprite = spriteItems[t];
+        drawTileUnit(draw_list, spriteItems[t], ImVec2(start.x + line * spriteStep, start.y + column * spriteStep), zoomPerPixel);
     }
 
     int totalRows = (DMG_SpritesX * DMG_SpritesY + DMG_SpritesX - 1) / DMG_SpritesX;
-    ImGui::Dummy(ImVec2(DMG_SpritesX * spriteStep, totalRows * spriteStep));
+    ImGui::Dummy(ImVec2(DMG_SpritesX * spriteStep, totalRows * 2 * spriteStep));
 
     ImGui::EndChild();
 }
@@ -195,11 +172,18 @@ void SpriteViewer::renderSprites(float height) {
 void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) {
     if (sprite.TileTop)
         drawTile(draw_list, *sprite.TileTop, pos, pixelSize, false);
-    if (isSprite8x16)
+    
+    if (sprite.TileBottom)
         drawTile(draw_list, *sprite.TileBottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
+    else {
+        ImVec2 posTop(pos.x, pos.y + pixelSize * 8.0f);
+        ImVec2 posBottom(pos.x + pixelSize * 8.0f, pos.y + (pixelSize * 8.0f * 2));
+        draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 0, 0, 255));
+    }
+
     if (showGrid) {
         float w = pixelSize * 8.0f;
-        float h = pixelSize * 8.0f * (isSprite8x16 ? 2.0f : 1.0f);
+        float h = pixelSize * 8.0f * 2.0f;
         draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
     }
 }

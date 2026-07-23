@@ -160,16 +160,24 @@ void SpriteViewer::renderSprites(float height) {
         int ty = t / tilesPerRow;
         ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
 
+        //const TileItem* tile = spriteItems[t].TileTop;
+        //if (tile) {
+        //    for (int y = 0; y < 8; y++) {
+        //        for (int x = 0; x < 8; x++) {
+        //            PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
+        //            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+        //            ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
+        //            ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
+        //            draw_list->AddRectFilled(p0, p1, col);
+        //        }
+        //    }
+        //}
+
         const TileItem* tile = spriteItems[t].TileTop;
         if (tile) {
-            for (int y = 0; y < 8; y++) {
-                for (int x = 0; x < 8; x++) {
-                    PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
-                    ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
-                    ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
-                    ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
-                    draw_list->AddRectFilled(p0, p1, col);
-                }
+            for (uint16_t i = 0; i < spriteItems.size(); i++) {
+                ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
+                drawTileUnit(draw_list, spriteItems[t], pos, zoomPerPixel);
             }
         }
 
@@ -184,6 +192,34 @@ void SpriteViewer::renderSprites(float height) {
     ImGui::Dummy(ImVec2(tilesPerRow * tileStep, totalRows * tileStep));
 
     ImGui::EndChild();
+}
+
+void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) {
+    if (sprite.TileTop)
+        drawTile(draw_list, *sprite.TileTop, pos, pixelSize, false);
+    if (isSprite8x16)
+        drawTile(draw_list, *sprite.TileBottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
+    if (showGrid) {
+        float w = pixelSize * 8.0f;
+        float h = pixelSize * 8.0f * (isSprite8x16 ? 2.0f : 1.0f);
+        draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
+    }
+}
+
+void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[x][y]);
+            ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
+            ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
+            ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
+            draw_list->AddRectFilled(p0, p1, col);
+        }
+    }
+    if (showGrid && drawBorder) {
+        float s = pixelSize * 8.0f;
+        draw_list->AddRect(pos, ImVec2(pos.x + s, pos.y + s), IM_COL32(60, 60, 60, 255));
+    }
 }
 
 void SpriteViewer::renderInfo() {

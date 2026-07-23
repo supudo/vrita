@@ -195,9 +195,6 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
     ImGui::EndChild();
 }
 
-void renderTilemapTiles(ImVector<TilemapItem> mapTiles) {
-}
-
 void TilemapViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {

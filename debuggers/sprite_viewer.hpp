@@ -52,6 +52,8 @@ private:
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);
     void renderSprites(float height);
+    void drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize);
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
     void renderInfo();
     void textRightAligned(const char* text);
 

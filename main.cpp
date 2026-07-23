@@ -64,13 +64,13 @@ void ShowMainMenu() {
         if (ImGui::BeginMenu("Debuggers")) {
             if (ImGui::MenuItem("Memory Editor", NULL, managerEmulators->debuggersMemoryEditorVisible))
                 managerEmulators->debuggersMemoryEditorVisible = !managerEmulators->debuggersMemoryEditorVisible;
-            if (ImGui::MenuItem("Tile Viewer", NULL, managerEmulators->debuggerTileViewerVisible))
+            if (ImGui::MenuItem("Tile Viewer (Tiles)", NULL, managerEmulators->debuggerTileViewerVisible))
                 managerEmulators->debuggerTileViewerVisible = !managerEmulators->debuggerTileViewerVisible;
-            if (ImGui::MenuItem("Tilemap Viewer", NULL, managerEmulators->debuggerTilemapViewerVisible))
+            if (ImGui::MenuItem("Tilemap Viewer (BG)", NULL, managerEmulators->debuggerTilemapViewerVisible))
                 managerEmulators->debuggerTilemapViewerVisible = !managerEmulators->debuggerTilemapViewerVisible;
-            if (ImGui::MenuItem("Sprite Viewer", NULL, managerEmulators->debuggerSpriteViewerVisible))
+            if (ImGui::MenuItem("Sprite Viewer (OAM)", NULL, managerEmulators->debuggerSpriteViewerVisible))
                 managerEmulators->debuggerSpriteViewerVisible = !managerEmulators->debuggerSpriteViewerVisible;
-            if (ImGui::MenuItem("Palette Viewer", NULL, managerEmulators->debuggerPaletteViewerVisible))
+            if (ImGui::MenuItem("Palette Viewer (Palettes)", NULL, managerEmulators->debuggerPaletteViewerVisible))
                 managerEmulators->debuggerPaletteViewerVisible = !managerEmulators->debuggerPaletteViewerVisible;
             if (ImGui::MenuItem("Debugger", NULL, managerEmulators->debuggerDebuggerVisible))
                 managerEmulators->debuggerDebuggerVisible = !managerEmulators->debuggerDebuggerVisible;

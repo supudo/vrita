@@ -16,7 +16,7 @@ bool SpriteViewer::init() {
     windowPositionY = settings.GetInt("Debuggers - Sprite Viewer", "position_y", 44);
     windowWidth = settings.GetInt("Debuggers - Sprite Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Sprite Viewer", "height", 300);
-    zoomPerPixel = settings.GetInt("Debuggers - Sprite Viewer", "zoom_per_pixel", 3.0);
+    zoomPerPixel = settings.GetFloat("Debuggers - Sprite Viewer", "zoom_per_pixel", 3.0);
     return true;
 }
 
@@ -165,16 +165,33 @@ void SpriteViewer::renderSprites(float height) {
 
     int totalRows = (DMG_SpritesX * DMG_SpritesY + DMG_SpritesX - 1) / DMG_SpritesX;
     ImGui::Dummy(ImVec2(DMG_SpritesX * spriteStep, totalRows * 2 * spriteStep));
+    int slot = pickHoveredSlot(start, spriteStep);
+    if (slot >= 0)
+        hoveredSprite = spriteItems[slot];
 
     ImGui::EndChild();
 }
 
+int SpriteViewer::pickHoveredSlot(ImVec2 start, float tileStep) {
+    if (!ImGui::IsItemHovered())
+        return -1;
+    ImVec2 mouse = ImGui::GetIO().MousePos;
+    int tileX = (int)((mouse.x - start.x) / tileStep);
+    int tileY = (int)((mouse.y - start.y) / (tileStep * 2.0f));
+    if (tileX < 0 || tileX >= DMG_SpritesX || tileY < 0)
+        return -1;
+    int slot = tileY * DMG_SpritesX + tileX;
+    if (slot < 0 || slot >= DMG_SpritesX * DMG_SpritesY)
+        return -1;
+    return slot;
+}
+
 void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) {
     if (sprite.TileTop)
-        drawTile(draw_list, *sprite.TileTop, pos, pixelSize, false);
+        drawTile(draw_list, *sprite.TileTop, pos, pixelSize, sprite.Flags, false);
     
     if (sprite.TileBottom)
-        drawTile(draw_list, *sprite.TileBottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);
+        drawTile(draw_list, *sprite.TileBottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, sprite.Flags, false);
     else {
         ImVec2 posTop(pos.x, pos.y + pixelSize * 8.0f);
         ImVec2 posBottom(pos.x + pixelSize * 8.0f, pos.y + (pixelSize * 8.0f * 2));
@@ -188,10 +205,15 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
     }
 }
 
-void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
+void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder) {
+    bool flipX = Flags & 0x20;
+    bool flipY = Flags & 0x40;
+    bool useOBP1 = Flags & 0x01;
     for (int y = 0; y < 8; y++) {
+        int srcY = flipY ? (7 - y) : y;
         for (int x = 0; x < 8; x++) {
-            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[x][y]);
+            int srcX = flipX ? (7 - x) : x;
+            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[srcX][srcY]);
             ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
@@ -241,7 +263,8 @@ void SpriteViewer::renderInfo() {
         ImGui::AlignTextToFramePadding();
         textRightAligned("Index");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        if (hoveredSprite.TileTop)
+            ImGui::Text("%i (%02X) @ OAM %04X", hoveredSprite.Index, hoveredSprite.Index, hoveredSprite.OAMAddress);
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

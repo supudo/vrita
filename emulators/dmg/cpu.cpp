@@ -22,8 +22,6 @@ void DMG_CPU::step(bool ROMFileLoaded) {
         Registers.PC++;
     mmu.triggerHaltBug = false;
 
-    mmu.tick(4);
-
     if (opcode == 0xCB)
         executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
     else

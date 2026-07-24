@@ -17,7 +17,7 @@ C/C++ Emulator - GameBoy (DMG), etc.
  - [ ] [gb-test-roms:](https://github.com/retrio/gb-test-roms)
 	 - [x] cpu_instrs;
 	 - [ ] dmg_sound;
-	 - [ ] instr_timing;
+	 - [x] instr_timing;
 	 - [ ] interrupt_time;
 	 - [ ] mem_timing-2;
 	 - [ ] mem_timing;

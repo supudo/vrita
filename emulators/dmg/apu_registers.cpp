@@ -51,6 +51,10 @@ uint8_t DMG_APU::readRegister(uint16_t address) {
 }
 
 void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
+    bool isWaveRAM = address >= 0xFF30 && address <= 0xFF3F;
+    if (!(registers.NR52 & 0x80) && address != 0xFF26 && !isWaveRAM)
+        return;
+
     switch (address) {
         // CH1
         case 0xFF10:
@@ -126,6 +130,8 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
             }
             break;
         case 0xFF26:
+            if (!(value & 0x80))
+                powerOff();
             registers.NR52 = value & 0x80;
             break;
         // Wave

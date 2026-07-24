@@ -45,6 +45,7 @@ private:
     uint16_t FrameCounterStep = 8192;
 
     void pushAudio();
+    void powerOff();
 
     // pulse
     void stepPulseChannel(PulseChannel&);

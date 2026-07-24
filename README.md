@@ -21,6 +21,7 @@ C/C++ Emulator - GameBoy (DMG), etc.
 	 - [x] mem_timing-2;
 	 - [x] mem_timing;
 	 - [ ] oam_bug;
+	 - [ ] halt_bug;
 
 #### License
 

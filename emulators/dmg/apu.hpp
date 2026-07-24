@@ -62,10 +62,6 @@ private:
     template<typename T>
     void clockEnvelope(T& channel);
 
-    // extra length-counter clock (Pan Docs "Obscure Behavior"): applied when
-    // length becomes active - via the NRx4 enable bit's rising edge, or here
-    // via a trigger reloading a zeroed counter - while the frame sequencer's
-    // pending step won't itself clock length (odd step).
     template<typename T>
     void extraClockLengthIfNeeded(T& channel, const char* name) {
         if ((frame.step & 1) == 0)

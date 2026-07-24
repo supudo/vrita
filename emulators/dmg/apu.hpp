@@ -52,7 +52,7 @@ private:
     void stepPulseChannel(PulseChannel&);
 
     template<typename T>
-    void clockLength(T& channel, const char* name);
+    void clockLength(T& channel);
 
     void clockLengthCounters();
     void clockSweep();
@@ -62,31 +62,14 @@ private:
     void clockEnvelope(T& channel);
 
     template<typename T>
-    void extraClockLengthIfNeeded(T& channel, const char* name) {
-        if ((frame.step & 1) == 0)
-            return;
-        if (!channel.length.enabled || channel.length.counter == 0)
-            return;
-        channel.length.counter--;
-        logger.log("[APU-DEBUG] %s extraClock -> counter=%d (frame.step=%d)", name, channel.length.counter, frame.step);
-        if (channel.length.counter == 0) {
-            channel.state.enabled = false;
-            logger.log("[APU-DEBUG] %s extraClock disabled channel", name);
-        }
-    }
-
-    template<typename T>
-    bool triggerCommon(T& channel, uint16_t lengthMax, const char* name) {
+    bool triggerCommon(T& channel, uint16_t lengthMax) {
         if (!channel.state.dacEnabled) {
             channel.state.enabled = false;
             return false;
         }
         channel.state.enabled = true;
-        if (channel.length.counter == 0) {
+        if (channel.length.counter == 0)
             channel.length.counter = lengthMax;
-            logger.log("[APU-DEBUG] %s trigger reload -> counter=%d (frame.step=%d)", name, channel.length.counter, frame.step);
-            extraClockLengthIfNeeded(channel, name);
-        }
         return true;
     }
 

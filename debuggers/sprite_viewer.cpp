@@ -285,7 +285,13 @@ void SpriteViewer::renderInfo() {
         ImGui::AlignTextToFramePadding();
         textRightAligned("Attributes");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        if (hoveredSprite.TileTop) {
+            bool flipX = hoveredSprite.Flags & 0x20;
+            bool flipY = hoveredSprite.Flags & 0x40;
+            bool isOBP1 = hoveredSprite.Flags & 0x01;
+            bool isPriority = hoveredSprite.Flags & 0x80;
+            ImGui::Text("Flip X: %s | Flip Y: %s | Palette: %s | Priority: %s", flipX ? "true" : "false", flipY ? "true" : "false", isOBP1 ? "OBP1" : "OBP0", isPriority ? "true" : "false");
+        }
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

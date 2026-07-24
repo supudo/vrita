@@ -10,10 +10,11 @@ GameBoy (DMG)
 #include <SDL3/SDL.h>
 #include "apu_structs.hpp"
 #include "mmu.hpp"
+#include "utilities/logger.hpp"
 
 class DMG_APU {
 public:
-    DMG_APU(DMG_MMU& mmu) : mmu(mmu) {}
+    DMG_APU(Logger& logger, DMG_MMU& mmu) : logger(logger), mmu(mmu) {}
 
     void initAudioStream(SDL_AudioStream* audioStream);
     void step(bool ROMFileLoaded, uint32_t cycles);
@@ -28,6 +29,7 @@ public:
     bool isMuted() const;
 
 private:
+    Logger& logger;
     DMG_MMU& mmu;
     SDL_AudioStream* audioStream = nullptr;
 
@@ -51,7 +53,7 @@ private:
     void stepPulseChannel(PulseChannel&);
 
     template<typename T>
-    void clockLength(T& channel);
+    void clockLength(T& channel, const char* name);
 
     void clockLengthCounters();
     void clockSweep();
@@ -60,17 +62,36 @@ private:
     template<typename T>
     void clockEnvelope(T& channel);
 
-    // shared trigger boilerplate (DAC-off disables channel, length reload-on-zero);
-    // returns false if the channel was disabled by the DAC-off check
+    // extra length-counter clock (Pan Docs "Obscure Behavior"): applied when
+    // length becomes active - via the NRx4 enable bit's rising edge, or here
+    // via a trigger reloading a zeroed counter - while the frame sequencer's
+    // pending step won't itself clock length (odd step).
     template<typename T>
-    bool triggerCommon(T& channel, uint16_t lengthMax) {
+    void extraClockLengthIfNeeded(T& channel, const char* name) {
+        if ((frame.step & 1) == 0)
+            return;
+        if (!channel.length.enabled || channel.length.counter == 0)
+            return;
+        channel.length.counter--;
+        logger.log("[APU-DEBUG] %s extraClock -> counter=%d (frame.step=%d)", name, channel.length.counter, frame.step);
+        if (channel.length.counter == 0) {
+            channel.state.enabled = false;
+            logger.log("[APU-DEBUG] %s extraClock disabled channel", name);
+        }
+    }
+
+    template<typename T>
+    bool triggerCommon(T& channel, uint16_t lengthMax, const char* name) {
         if (!channel.state.dacEnabled) {
             channel.state.enabled = false;
             return false;
         }
         channel.state.enabled = true;
-        if (channel.length.counter == 0)
+        if (channel.length.counter == 0) {
             channel.length.counter = lengthMax;
+            logger.log("[APU-DEBUG] %s trigger reload -> counter=%d (frame.step=%d)", name, channel.length.counter, frame.step);
+            extraClockLengthIfNeeded(channel, name);
+        }
         return true;
     }
 

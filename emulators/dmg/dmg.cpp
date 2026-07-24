@@ -30,7 +30,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU = std::make_shared<DMG_PPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU->setFramebuffer(gFramebuffer);
-    managerAPU = std::make_shared<DMG_APU>(*managerMMU);
+    managerAPU = std::make_shared<DMG_APU>(logger, *managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
     managerJoypad = std::make_shared<DMG_JOYPAD>(logger, *managerMMU, *managerInterrupts);
     

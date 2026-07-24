@@ -18,9 +18,8 @@ C/C++ Emulator - GameBoy (DMG), etc.
 	 - [x] cpu_instrs;
 	 - [ ] dmg_sound;
 	 - [x] instr_timing;
-	 - [ ] interrupt_time;
-	 - [ ] mem_timing-2;
-	 - [ ] mem_timing;
+	 - [x] mem_timing-2;
+	 - [x] mem_timing;
 	 - [ ] oam_bug;
 
 #### License

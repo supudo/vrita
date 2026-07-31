@@ -77,8 +77,8 @@ void DMG_APU::clockSweep() {
         ch1.sweep.remaining--;
     if (ch1.sweep.remaining != 0)
         return;
-    ch1.sweep.remaining = ch1.sweep.period;
-    if (!ch1.sweepEnabled)
+    ch1.sweep.remaining = ch1.sweep.period != 0 ? ch1.sweep.period : 8;
+    if (!ch1.sweepEnabled || ch1.sweep.period == 0)
         return;
     uint16_t newFrequency = calculateSweepFrequency();
     if (newFrequency > 2047) {
@@ -88,6 +88,8 @@ void DMG_APU::clockSweep() {
     if (ch1.sweepShift != 0) {
         ch1.shadowFrequency = newFrequency;
         ch1.frequency.frequency = newFrequency;
+        if (calculateSweepFrequency() > 2047)
+            ch1.state.enabled = false;
     }
 }
 
@@ -105,7 +107,9 @@ void DMG_APU::triggerPulse(PulseChannel& channel) {
     resetEnvelope(channel);
     if (channel.hasSweep) {
         channel.shadowFrequency = channel.frequency.frequency;
-        channel.sweep.remaining = channel.sweep.period;
+        channel.sweep.remaining = channel.sweep.period != 0 ? channel.sweep.period : 8;
         channel.sweepEnabled = (channel.sweep.period != 0 || channel.sweepShift != 0);
+        if (channel.sweepShift != 0 && calculateSweepFrequency() > 2047)
+            channel.state.enabled = false;
     }
 }

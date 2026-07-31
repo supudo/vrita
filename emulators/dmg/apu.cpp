@@ -23,6 +23,22 @@ void DMG_APU::clearResources() {
     registers = APURegisters{};
 }
 
+void DMG_APU::powerOff() {
+    ch1 = PulseChannel{ .hasSweep = true };
+    ch2 = PulseChannel{ .hasSweep = false };
+    auto waveRAM = wave.waveRAM;
+    wave = WaveChannel{};
+    wave.waveRAM = waveRAM;
+    noise = NoiseChannel{};
+    uint8_t userVolume = mixer.userVolume;
+    bool userMuted = mixer.userMuted;
+    mixer = Mixer{};
+    mixer.userVolume = userVolume;
+    mixer.userMuted = userMuted;
+    registers.NR50 = 0;
+    registers.NR51 = 0;
+}
+
 void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {
     if (!ROMFileLoaded)
         return;

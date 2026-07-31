@@ -36,8 +36,7 @@ uint8_t DMG_APU::waveOutput() {
 
 // Trigger CH3
 void DMG_APU::triggerWave() {
-    if (!triggerCommon(wave, 256))
-        return;
+    triggerCommon(wave, 256);
     wave.frequency.timer = frequencyTimerReload(wave.frequency.frequency, 2);
     wave.wavePosition = 0;
     wave.sampleBuffer = wave.waveRAM[0] >> 4;

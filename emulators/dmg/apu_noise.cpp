@@ -48,8 +48,7 @@ uint8_t DMG_APU::noiseOutput() {
 
 // Trigger CH4
 void DMG_APU::triggerNoise() {
-    if (!triggerCommon(noise, 64))
-        return;
+    triggerCommon(noise, 64);
     noise.lfsr = 0x7FFF;
     noise.timer = noiseTimerReload(noise.divisorCode, noise.clockShift);
     resetEnvelope(noise);

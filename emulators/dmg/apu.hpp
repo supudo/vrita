@@ -63,15 +63,23 @@ private:
     void clockEnvelope(T& channel);
 
     template<typename T>
-    bool triggerCommon(T& channel, uint16_t lengthMax) {
-        if (!channel.state.dacEnabled) {
-            channel.state.enabled = false;
-            return false;
-        }
-        channel.state.enabled = true;
+    void extraClockLengthIfNeeded(T& channel) {
+        if ((frame.step & 1) == 0)
+            return;
+        if (!channel.length.enabled || channel.length.counter == 0)
+            return;
+        channel.length.counter--;
         if (channel.length.counter == 0)
+            channel.state.enabled = false;
+    }
+
+    template<typename T>
+    void triggerCommon(T& channel, uint16_t lengthMax) {
+        if (channel.length.counter == 0) {
             channel.length.counter = lengthMax;
-        return true;
+            extraClockLengthIfNeeded(channel);
+        }
+        channel.state.enabled = channel.state.dacEnabled;
     }
 
     template<typename T>

@@ -38,7 +38,7 @@ void DMG_APU::clockLengthCounters() {
 
 template<typename T>
 void DMG_APU::clockLength(T& channel) {
-    if (!channel.state.enabled || !channel.length.enabled)
+    if (!channel.length.enabled)
         return;
     if (channel.length.counter > 0) {
         channel.length.counter--;
@@ -99,8 +99,7 @@ uint16_t DMG_APU::calculateSweepFrequency() {
 }
 
 void DMG_APU::triggerPulse(PulseChannel& channel) {
-    if (!triggerCommon(channel, 64))
-        return;
+    triggerCommon(channel, 64);
     channel.frequency.timer = frequencyTimerReload(channel.frequency.frequency, 4);
     channel.dutyPosition = 0;
     resetEnvelope(channel);

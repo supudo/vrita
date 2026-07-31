@@ -81,13 +81,17 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
             ch1.NRx3 = value;
             ch1.frequency.frequency = (ch1.frequency.frequency & 0x700) | value;
             break;
-        case 0xFF14:
+        case 0xFF14: {
             ch1.NRx4 = value;
             ch1.frequency.frequency = (ch1.frequency.frequency & 0xFF) | ((value & 0x07) << 8);
+            bool wasEnabledFF14 = ch1.length.enabled;
             ch1.length.enabled = value & 0x40;
+            if (!wasEnabledFF14 && ch1.length.enabled)
+                extraClockLengthIfNeeded(ch1);
             if (value & 0x80)
                 triggerPulse(ch1);
             break;
+        }
         // CH2
         case 0xFF16:
             ch2.NRx1 = value;
@@ -107,13 +111,17 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
             ch2.NRx3 = value;
             ch2.frequency.frequency = (ch2.frequency.frequency & 0x700) | value;
             break;
-        case 0xFF19:
+        case 0xFF19: {
             ch2.NRx4 = value;
             ch2.frequency.frequency = (ch2.frequency.frequency & 0xFF) | ((value & 0x07) << 8);
+            bool wasEnabledFF19 = ch2.length.enabled;
             ch2.length.enabled = value & 0x40;
+            if (!wasEnabledFF19 && ch2.length.enabled)
+                extraClockLengthIfNeeded(ch2);
             if (value & 0x80)
                 triggerPulse(ch2);
             break;
+        }
         // Mixer
         case 0xFF24:
             registers.NR50 = value;
@@ -153,13 +161,17 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
             wave.NR33 = value;
             wave.frequency.frequency = (wave.frequency.frequency & 0x700) | value;
             break;
-        case 0xFF1E:
+        case 0xFF1E: {
             wave.NR34 = value;
             wave.frequency.frequency = (wave.frequency.frequency & 0xFF) | ((value & 0x07) << 8);
+            bool wasEnabledFF1E = wave.length.enabled;
             wave.length.enabled = value & 0x40;
+            if (!wasEnabledFF1E && wave.length.enabled)
+                extraClockLengthIfNeeded(wave);
             if (value & 0x80)
                 triggerWave();
             break;
+        }
         // Noise
         case 0xFF20:
             noise.NR41 = value;
@@ -180,12 +192,16 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
             noise.widthMode = value & 0x08;
             noise.divisorCode = value & 0x07;
             break;
-        case 0xFF23:
+        case 0xFF23: {
             noise.NR44 = value;
+            bool wasEnabledFF23 = noise.length.enabled;
             noise.length.enabled = value & 0x40;
+            if (!wasEnabledFF23 && noise.length.enabled)
+                extraClockLengthIfNeeded(noise);
             if (value & 0x80)
                 triggerNoise();
             break;
+        }
         default:
             if (address >= 0xFF30 && address <= 0xFF3F)
                 wave.waveRAM[address - 0xFF30] = value;

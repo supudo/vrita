@@ -99,6 +99,7 @@ struct PulseChannel {
     ClockTimer sweep;
 
     bool sweepNegate = false;
+    bool didNegateCalculation = false;
     uint8_t sweepShift = 0;
 
     uint16_t shadowFrequency = 0;

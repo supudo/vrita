@@ -57,12 +57,16 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
 
     switch (address) {
         // CH1
-        case 0xFF10:
+        case 0xFF10: {
             ch1.NRx0 = value;
             ch1.sweep.period = (value >> 4) & 0x7;
+            bool oldNegate = ch1.sweepNegate;
             ch1.sweepNegate = value & 0x08;
+            if (oldNegate && !ch1.sweepNegate && ch1.didNegateCalculation)
+                ch1.state.enabled = false;
             ch1.sweepShift = value & 0x07;
             break;
+        }
         case 0xFF11:
             ch1.NRx1 = value;
             ch1.duty = value >> 6;

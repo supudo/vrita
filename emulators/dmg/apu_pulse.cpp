@@ -95,8 +95,10 @@ void DMG_APU::clockSweep() {
 
 uint16_t DMG_APU::calculateSweepFrequency() {
     uint16_t offset = ch1.shadowFrequency >> ch1.sweepShift;
-    if (ch1.sweepNegate)
+    if (ch1.sweepNegate) {
+        ch1.didNegateCalculation = true;
         return ch1.shadowFrequency - offset;
+    }
     return ch1.shadowFrequency + offset;
 }
 

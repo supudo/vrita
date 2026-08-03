@@ -144,6 +144,8 @@ void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
         case 0xFF26:
             if ((registers.NR52 & 0x80) && !(value & 0x80))
                 powerOff();
+            else if (!(registers.NR52 & 0x80) && (value & 0x80))
+                frame = FrameSequencer{};
             registers.NR52 = value & 0x80;
             break;
         // Wave

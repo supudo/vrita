@@ -32,7 +32,7 @@ void DMG_APU::powerOff() {
     wave.waveRAM = waveRAM;
 
     uint8_t nr41 = noise.NR41;
-    uint8_t lengthCounter = noise.length.counter;
+    uint16_t lengthCounter = noise.length.counter;
     noise = NoiseChannel{};
     noise.NR41 = nr41;
     noise.length.counter = lengthCounter;

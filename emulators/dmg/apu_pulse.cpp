@@ -109,6 +109,7 @@ void DMG_APU::triggerPulse(PulseChannel& channel) {
     resetEnvelope(channel);
     if (channel.hasSweep) {
         channel.shadowFrequency = channel.frequency.frequency;
+        channel.didNegateCalculation = false;
         channel.sweep.remaining = channel.sweep.period != 0 ? channel.sweep.period : 8;
         channel.sweepEnabled = (channel.sweep.period != 0 || channel.sweepShift != 0);
         if (channel.sweepShift != 0 && calculateSweepFrequency() > 2047)

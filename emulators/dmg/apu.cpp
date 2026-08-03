@@ -26,15 +26,23 @@ void DMG_APU::clearResources() {
 void DMG_APU::powerOff() {
     ch1 = PulseChannel{ .hasSweep = true };
     ch2 = PulseChannel{ .hasSweep = false };
+    
     auto waveRAM = wave.waveRAM;
     wave = WaveChannel{};
     wave.waveRAM = waveRAM;
+
+    uint8_t nr41 = noise.NR41;
+    uint8_t lengthCounter = noise.length.counter;
     noise = NoiseChannel{};
+    noise.NR41 = nr41;
+    noise.length.counter = lengthCounter;
+
     uint8_t userVolume = mixer.userVolume;
     bool userMuted = mixer.userMuted;
     mixer = Mixer{};
     mixer.userVolume = userVolume;
     mixer.userMuted = userMuted;
+    
     registers.NR50 = 0;
     registers.NR51 = 0;
 }

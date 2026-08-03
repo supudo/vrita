@@ -52,7 +52,8 @@ uint8_t DMG_APU::readRegister(uint16_t address) {
 
 void DMG_APU::writeRegister(uint16_t address, uint8_t value) {
     bool isWaveRAM = address >= 0xFF30 && address <= 0xFF3F;
-    if (!(registers.NR52 & 0x80) && address != 0xFF26 && !isWaveRAM)
+    bool isLengthTimer = address == 0xFF11 || address == 0xFF16 || address == 0xFF1B || address == 0xFF20;
+    if (!(registers.NR52 & 0x80) && address != 0xFF26 && !isWaveRAM && !isLengthTimer)
         return;
 
     switch (address) {

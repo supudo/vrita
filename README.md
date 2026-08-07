@@ -24,7 +24,7 @@ C/C++ Emulator - GameBoy (DMG), etc.
 	 - [ ] halt_bug;
 
 
-![Vrita](https://raw.githubusercontent.com/supudo/Vrita/main/screenshot-2026-08-07.png "Vrita")
+![Vrita](https://github.com/supudo/vrita/blob/sdl2_opengl/screenshot-2026-08-07.png "Vrita")
 
 #### License
 

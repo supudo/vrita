@@ -23,6 +23,9 @@ C/C++ Emulator - GameBoy (DMG), etc.
 	 - [ ] oam_bug;
 	 - [ ] halt_bug;
 
+
+![Vrita](https://raw.githubusercontent.com/supudo/Vrita/main/screenshot-2026-08-07.png "Vrita")
+
 #### License
 
 Each library uses comes with its own license. See LICENSE.md.

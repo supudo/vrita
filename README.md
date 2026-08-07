@@ -15,13 +15,13 @@ C/C++ Emulator - GameBoy (DMG), etc.
 ## Tests
 
  - [ ] [gb-test-roms:](https://github.com/retrio/gb-test-roms)
-	 - [x] cpu_instrs;
-	 - [ ] dmg_sound;
-	 - [x] instr_timing;
-	 - [x] mem_timing-2;
-	 - [x] mem_timing;
-	 - [ ] oam_bug;
-	 - [ ] halt_bug;
+	 - [x] cpu_instrs
+	 - [ ] dmg_sound (9/12)
+	 - [x] instr_timing
+	 - [x] mem_timing-2
+	 - [x] mem_timing
+	 - [ ] oam_bug
+	 - [ ] halt_bug
 
 
 ![Vrita](https://github.com/supudo/vrita/blob/main/screenshot-2026-08-07.png "Vrita")

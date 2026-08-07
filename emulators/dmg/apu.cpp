@@ -1,7 +1,7 @@
 #include "apu.hpp"
 
-void DMG_APU::initAudioStream(SDL_AudioStream* audioStream) {
-    this->audioStream = audioStream;
+void DMG_APU::initAudioDevice(SDL_AudioDeviceID device) {
+    this->audioDevice = device;
 }
 
 void DMG_APU::clearResources() {
@@ -50,6 +50,9 @@ void DMG_APU::powerOff() {
 void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {
     if (!ROMFileLoaded)
         return;
+#ifdef TRACY_ENABLE
+    ZoneScopedN("APU::step");
+#endif
 
     if (!registers.NR52)
         return;
@@ -98,8 +101,11 @@ void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {
 }
 
 void DMG_APU::pushAudio() {
-    if (!audioStream || output.buffer.empty())
+    if (!audioDevice || output.buffer.empty())
         return;
-    SDL_PutAudioStreamData(audioStream, output.buffer.data(), output.buffer.size() * sizeof(int16_t));
+#ifdef TRACY_ENABLE
+    TracyPlot("APU buffer size", (int64_t)output.buffer.size());
+#endif
+    SDL_QueueAudio(audioDevice, output.buffer.data(), (Uint32)(output.buffer.size() * sizeof(int16_t)));
     output.buffer.clear();
 }

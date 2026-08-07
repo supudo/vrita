@@ -12,7 +12,7 @@ so they can never drift apart. Shade index 0 = lightest .. 3 = darkest. Packed 0
 #include <stdint.h>
 #include <array>
 
-// 0xAARRGGBB -> SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM
+// 0xAARRGGBB -> GL_RGBA8 (memory byte order R,G,B,A)
 inline constexpr std::array<uint32_t, 4> DMG_PALETTE_DEFAULT = { 0xFF9BBC0F, 0xFF8BAC0F, 0xFF306230, 0xFF0F380F };
 inline constexpr std::array<uint32_t, 4> DMG_PALETTE_DMG = { 0xFFE0F7D1, 0xFF8CBF6B, 0xFF386B2E, 0xFF0F260F };
 inline constexpr std::array<uint32_t, 4> DMG_PALETTE_CGB = { 0xFF9CBD0F, 0xFF8CAB0F, 0xFF306130, 0xFF0F380F };

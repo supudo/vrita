@@ -10,8 +10,7 @@ GameBoy (DMG)
 #include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
+#include <SDL2/SDL.h>
 #include <stdint.h>
 #include <iostream>
 #include <string>

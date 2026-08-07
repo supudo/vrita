@@ -15,6 +15,9 @@ void DMG_CPU::clearResources() {
 
 void DMG_CPU::step(bool ROMFileLoaded) {
     if (!ROMFileLoaded) return;
+#ifdef TRACY_ENABLE
+    ZoneScopedN("CPU::Step");
+#endif
 
     uint8_t opcode = mmu.read8(Registers.PC);
 

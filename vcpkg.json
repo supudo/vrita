@@ -2,10 +2,12 @@
   "name": "vrita",
   "version": "0.1.0",
   "dependencies": [
-    "sdl3",
+    "sdl2",
+    "glew",
     {
       "name": "imgui",
-      "features": ["sdl3-binding", "sdlgpu3-binding"]
-    }
+      "features": ["opengl3-binding"]
+    },
+    "tracy"
   ]
 }

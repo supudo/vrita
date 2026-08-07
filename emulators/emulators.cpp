@@ -2,8 +2,7 @@
 
 #include <memory>
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
+#include <SDL2/SDL.h>
 
 #include "dmg/dmg.hpp"
 #include "agb/agb.hpp"
@@ -54,12 +53,12 @@ void Emulators::init(Settings& settings) {
     debuggerDebuggerVisible = settings.GetBool("Debuggers - Debugger", "visible", false);
 }
 
-bool Emulators::createTexture(SDL_GPUDevice* device) {
-    if (!emulatorDMG->createTexture(device)) {
+bool Emulators::createTexture() {
+    if (!emulatorDMG->createTexture()) {
         logger.log("[EMULATORS] Error: Cannot create DMG texture");
         return false;
     }
-    if (!emulatorAGB->createTexture(device)) {
+    if (!emulatorAGB->createTexture()) {
         logger.log("[EMULATORS] Error: Cannot create AGB texture");
         return false;
     }
@@ -73,11 +72,11 @@ void Emulators::generateTestPattern(float time) {
         emulatorAGB->generateTestPattern(time);
 }
 
-void Emulators::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
+void Emulators::uploadFramebufferToTexture() {
     if (EMULATORS_SHOW_DMG)
-        emulatorDMG->uploadFramebufferToTexture(device, commandBuffer);
+        emulatorDMG->uploadFramebufferToTexture();
     if (EMULATORS_SHOW_AGB)
-        emulatorAGB->uploadFramebufferToTexture(device, commandBuffer);
+        emulatorAGB->uploadFramebufferToTexture();
 }
 
 void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
@@ -173,7 +172,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
 }
 
-void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
+void Emulators::release(Settings& settings) {
     settings.Set("Emulators", "show_dmg", EMULATORS_SHOW_DMG);
     settings.Set("Emulators", "show_agb", EMULATORS_SHOW_AGB);
 
@@ -200,8 +199,8 @@ void Emulators::release(SDL_GPUDevice* device, Settings& settings) {
 
     settings.Save();
 
-    emulatorDMG->release(device);
-    emulatorAGB->release(device);
+    emulatorDMG->release();
+    emulatorAGB->release();
     debuggerMemoryEditor->release();
     debuggerTileViewer->release();
     debuggerTilemapViewer->release();

@@ -7,7 +7,7 @@ GameBoy (DMG)
 #ifndef VRITA_DMG_APU_INCLUDES
 #define VRITA_DMG_APU_INCLUDES
 
-#include <SDL3/SDL.h>
+#include <SDL2/SDL.h>
 #include "apu_structs.hpp"
 #include "mmu.hpp"
 #include "utilities/logger.hpp"
@@ -16,7 +16,7 @@ class DMG_APU {
 public:
     DMG_APU(Logger& logger, DMG_MMU& mmu) : logger(logger), mmu(mmu) {}
 
-    void initAudioStream(SDL_AudioStream* audioStream);
+    void initAudioDevice(SDL_AudioDeviceID device);
     void step(bool ROMFileLoaded, uint32_t cycles);
     void clearResources();
     void powerOff();
@@ -32,7 +32,7 @@ public:
 private:
     Logger& logger;
     DMG_MMU& mmu;
-    SDL_AudioStream* audioStream = nullptr;
+    SDL_AudioDeviceID audioDevice = 0;
 
     PulseChannel ch1 { .hasSweep = true }; // pulse + sweep, NR10 -NR14
     PulseChannel ch2 { .hasSweep = false }; // pulse, NR21 - NR24

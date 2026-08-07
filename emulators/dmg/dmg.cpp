@@ -1,13 +1,13 @@
 #include "dmg.hpp"
 
+#include <algorithm>
 #include <fstream>
 #include <vector>
 #include <cstdint>
 #include <chrono>
 
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlgpu3.h>
+#include "imgui/imgui_impl_sdl2.h"
 
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 
@@ -52,24 +52,18 @@ bool DMG::initialize(int x, int y, int width, int height) {
 
 bool DMG::initAudio() {
     SDL_AudioSpec audioSpec{};
-    audioSpec.format = SDL_AUDIO_S16;
+    audioSpec.format = AUDIO_S16SYS;
     audioSpec.channels = 2;
     audioSpec.freq = 44100;
-    audioDevice = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audioSpec);
-    if (!audioDevice)
+    audioSpec.samples = 2048;
+    audioDevice = SDL_OpenAudioDevice(nullptr, 0, &audioSpec, nullptr, 0);
+    if (!audioDevice) {
         logger.log("[DMG-APU] Cannot create audio device!");
-    audioStream = SDL_CreateAudioStream(&audioSpec, &audioSpec);
-    if (!audioStream)
-        logger.log("[DMG-APU] Cannot create audio stream!");
-    SDL_BindAudioStream(audioDevice, audioStream);
-    bool result = SDL_ResumeAudioDevice(audioDevice);
-    if (!result)
-        logger.log("[DMG-APU] Cannot create audio device!");
-    else if (audioStream)
-        managerAPU->initAudioStream(audioStream);
-    else
-        logger.log("[DMG-APU] Cannot create audio stream!");
-    return result;
+        return false;
+    }
+    managerAPU->initAudioDevice(audioDevice);
+    SDL_PauseAudioDevice(audioDevice, 0);
+    return true;
 }
 
 ImVec2 DMG::getWindowPosition() {
@@ -81,6 +75,9 @@ ImVec2 DMG::getWindowSize() {
 }
 
 void DMG::stepAll() {
+#ifdef TRACY_ENABLE
+    ZoneScopedN("DMG::stepAll");
+#endif
     if (ROMFileLoaded) {
         uint64_t before = managerMMU->totalCycles;
         if (!managerInterrupts->checkForInterrupts())
@@ -139,10 +136,6 @@ void DMG::clear() {
     managerTimer->reset();
     managerCartridge->clearResources();
     managerJoypad->clearResources();
-    if (audioStream) {
-        SDL_DestroyAudioStream(audioStream);
-        audioStream = nullptr;
-    }
     if (audioDevice) {
         SDL_CloseAudioDevice(audioDevice);
         audioDevice = 0;
@@ -216,22 +209,24 @@ void DMG::handleKey(uint32_t type, uint32_t key) {
         managerJoypad->handleKey(type, key);
 }
 
-void DMG::release(SDL_GPUDevice* device) {
-    SDL_ReleaseGPUTexture(device, gTexture);
+void DMG::release() {
+    if (gTexture) {
+        glDeleteTextures(1, &gTexture);
+        gTexture = 0;
+    }
 }
 
-bool DMG::createTexture(SDL_GPUDevice* device) {
-    SDL_GPUTextureCreateInfo info = {};
-    info.type = SDL_GPU_TEXTURETYPE_2D;
-    info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-    info.width = DMG::WIDTH;
-    info.height = DMG::HEIGHT;
-    info.layer_count_or_depth = 1;
-    info.num_levels = 1;
-    info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-    gTexture = SDL_CreateGPUTexture(device, &info);
+bool DMG::createTexture() {
+    glGenTextures(1, &gTexture);
+    glBindTexture(GL_TEXTURE_2D, gTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DMG::WIDTH, DMG::HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
     if (!gTexture) {
-        logger.log("[DMG] Failed to create DMG texture: %s", SDL_GetError());
+        logger.log("[DMG] Failed to create DMG texture");
         return false;
     }
     return true;
@@ -249,39 +244,10 @@ void DMG::generateTestPattern(float time) {
     }
 }
 
-void DMG::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
-    uint32_t framebufferSize = DMG::WIDTH * DMG::HEIGHT * sizeof(uint32_t);
-
-    SDL_GPUTransferBufferCreateInfo transferInfo = {};
-    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    transferInfo.size = framebufferSize;
-
-    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
-
-    if (!transferBuffer) {
-        logger.log("[DMG] Failed to create transfer buffer");
-        return;
-    }
-
-    void* mapped = SDL_MapGPUTransferBuffer(device, transferBuffer, false);
-    memcpy(mapped, gFramebuffer, framebufferSize);
-    SDL_UnmapGPUTransferBuffer(device, transferBuffer);
-
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
-
-    SDL_GPUTextureTransferInfo source = {};
-    source.transfer_buffer = transferBuffer;
-    source.offset = 0;
-
-    SDL_GPUTextureRegion destination = {};
-    destination.texture = gTexture;
-    destination.w = DMG::WIDTH;
-    destination.h = DMG::HEIGHT;
-    destination.d = 1;
-
-    SDL_UploadToGPUTexture(copyPass, &source, &destination, false);
-    SDL_EndGPUCopyPass(copyPass);
-    SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+void DMG::uploadFramebufferToTexture() {
+    glBindTexture(GL_TEXTURE_2D, gTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, DMG::WIDTH, DMG::HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, gFramebuffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
@@ -413,9 +379,14 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     static auto lastTime = std::chrono::steady_clock::now();
     if (ROMFileLoaded && !gameIsPaused) {
-        uint64_t frameStart = managerMMU->totalCycles;
-        while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
-            stepAll();
+        {
+#ifdef TRACY_ENABLE
+            ZoneScopedN("DMG::EmulateFrame");
+#endif
+            uint64_t frameStart = managerMMU->totalCycles;
+            while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
+                stepAll();
+        }
         renderingFrames++;
         auto now = std::chrono::steady_clock::now();
         double elapsed = std::chrono::duration<double>(now - lastTime).count();
@@ -424,11 +395,14 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             renderingFrames = 0;
             lastTime = now;
             renderingSpeed = (renderingFPS / DMG_FPS) * 100.0;
+#ifdef TRACY_ENABLE
+            TracyPlot("FPS", renderingFPS);
+#endif
         }
     }
 
     ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest, nullptr);
-    ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
+    ImGui::Image((ImTextureID)(intptr_t)gTexture, ImVec2(dispW, dispH));
     ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear, nullptr);
 
     if (!ROMFileLoaded) {
@@ -469,7 +443,11 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 }
 
 void DMG::renderJoypadUI() {
-    ImVec2 size(JOYPAD_UI_WIDTH, JOYPAD_UI_HEIGHT);
+    float availW = ImGui::GetContentRegionAvail().x;
+    float scale = availW > 0.0f ? availW / JOYPAD_UI_WIDTH : 1.0f;
+    scale = std::clamp(scale, 0.4f, 2.5f);
+
+    ImVec2 size(JOYPAD_UI_WIDTH * scale, JOYPAD_UI_HEIGHT * scale);
 
     float offX = (ImGui::GetContentRegionAvail().x - size.x) * 0.5f;
     if (offX > 0.0f)
@@ -487,11 +465,14 @@ void DMG::renderJoypadUI() {
     ImU32 purplePressed = IM_COL32(65, 35, 70, 255);
     ImU32 textColor = IM_COL32(25, 25, 25, 255);
 
-    draw->AddRectFilled(origin, origin + size, bodyColor, 18.0f);
+    auto V = [&](float x, float y) { return ImVec2(x, y) * scale; };
+
+    draw->AddRectFilled(origin, origin + size, bodyColor, 18.0f * scale);
 
     // d-pad
 
-    ImVec2 dCenter = origin + ImVec2(90, 95);
+    ImVec2 dCenter = origin + V(90, 95);
+    float iconFontSize = ImGui::GetFontSize() * scale;
 
     auto DrawPadPiece = [&](const char* id, ImVec2 pos, ImVec2 sz, const char* icon, uint8_t joypadButton) {
         ImGui::SetCursorScreenPos(pos);
@@ -499,60 +480,66 @@ void DMG::renderJoypadUI() {
         bool down = ImGui::IsItemActive();
         if (ROMFileLoaded)
             managerJoypad->setButton(joypadButton, down);
-        draw->AddRectFilled(pos, pos + sz, down ? buttonPressed : buttonColor, 5);
-        ImVec2 iconSize = ImGui::CalcTextSize(icon);
-        draw->AddText(pos + (sz - iconSize) * 0.5f, IM_COL32_WHITE, icon);
+        draw->AddRectFilled(pos, pos + sz, down ? buttonPressed : buttonColor, 5.0f * scale);
+        ImVec2 iconSize = ImGui::GetFont()->CalcTextSizeA(iconFontSize, FLT_MAX, 0.0f, icon);
+        draw->AddText(ImGui::GetFont(), iconFontSize, pos + (sz - iconSize) * 0.5f, IM_COL32_WHITE, icon);
     };
 
-    constexpr float PAD_GAP = 2.0f;
-    DrawPadPiece("UP", dCenter + ImVec2(-15, -60), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_UP, DMG_JOYPAD::JOYPAD_UP);
-    DrawPadPiece("DOWN", dCenter + ImVec2(-15, 15 + PAD_GAP), ImVec2(30, 45 - PAD_GAP), ICON_FA_ARROW_DOWN, DMG_JOYPAD::JOYPAD_DOWN);
-    DrawPadPiece("LEFT", dCenter + ImVec2(-60, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_LEFT, DMG_JOYPAD::JOYPAD_LEFT);
-    DrawPadPiece("RIGHT", dCenter + ImVec2(15 + PAD_GAP, -15), ImVec2(45 - PAD_GAP, 30), ICON_FA_ARROW_RIGHT, DMG_JOYPAD::JOYPAD_RIGHT);
-    draw->AddRectFilled(dCenter + ImVec2(-15, -15), dCenter + ImVec2(15, 15), buttonColor, 4);
+    float padGap = 2.0f * scale;
+    DrawPadPiece("UP", dCenter + V(-15, -60), V(30, 45) - ImVec2(0, padGap), ICON_FA_ARROW_UP, DMG_JOYPAD::JOYPAD_UP);
+    DrawPadPiece("DOWN", dCenter + V(-15, 15) + ImVec2(0, padGap), V(30, 45) - ImVec2(0, padGap), ICON_FA_ARROW_DOWN, DMG_JOYPAD::JOYPAD_DOWN);
+    DrawPadPiece("LEFT", dCenter + V(-60, -15), V(45, 30) - ImVec2(padGap, 0), ICON_FA_ARROW_LEFT, DMG_JOYPAD::JOYPAD_LEFT);
+    DrawPadPiece("RIGHT", dCenter + V(15, -15) + ImVec2(padGap, 0), V(45, 30) - ImVec2(padGap, 0), ICON_FA_ARROW_RIGHT, DMG_JOYPAD::JOYPAD_RIGHT);
+    draw->AddRectFilled(dCenter + V(-15, -15), dCenter + V(15, 15), buttonColor, 4.0f * scale);
 
     // button B
 
-    ImVec2 bPos = origin + ImVec2(300, 115);
-    ImGui::SetCursorScreenPos(bPos - ImVec2(28, 28));
-    ImGui::InvisibleButton("B", ImVec2(56, 56));
+    float letterFontSize = ImGui::GetFontSize() * 1.8f * scale;
+    float faceRadius = 28.0f * scale;
+
+    ImVec2 bPos = origin + V(300, 115);
+    ImGui::SetCursorScreenPos(bPos - ImVec2(faceRadius, faceRadius));
+    ImGui::InvisibleButton("B", ImVec2(faceRadius * 2.0f, faceRadius * 2.0f));
     bool bHeld = ImGui::IsItemActive();
     if (ROMFileLoaded)
         managerJoypad->setButton(DMG_JOYPAD::JOYPAD_B, bHeld);
-    draw->AddCircleFilled(bPos, 28, bHeld ? purplePressed : purple, 40);
+    draw->AddCircleFilled(bPos, faceRadius, bHeld ? purplePressed : purple, 40);
 
-    float letterFontSize = ImGui::GetFontSize() * 1.8f;
     ImVec2 bLetterSize = ImGui::GetFont()->CalcTextSizeA(letterFontSize, FLT_MAX, 0.0f, ICON_FA_B);
     draw->AddText(ImGui::GetFont(), letterFontSize, bPos - bLetterSize * 0.5f, IM_COL32_WHITE, ICON_FA_B);
 
     // button A
 
-    ImVec2 aPos = origin + ImVec2(370, 80);
+    ImVec2 aPos = origin + V(370, 80);
 
-    ImGui::SetCursorScreenPos(aPos - ImVec2(28, 28));
-    ImGui::InvisibleButton("A", ImVec2(56, 56));
+    ImGui::SetCursorScreenPos(aPos - ImVec2(faceRadius, faceRadius));
+    ImGui::InvisibleButton("A", ImVec2(faceRadius * 2.0f, faceRadius * 2.0f));
     bool aHeld = ImGui::IsItemActive();
     if (ROMFileLoaded)
-        managerJoypad->setButton(DMG_JOYPAD::JOYPAD_A, bHeld);
-    draw->AddCircleFilled(aPos, 28, aHeld ? purplePressed : purple, 40);
+        managerJoypad->setButton(DMG_JOYPAD::JOYPAD_A, aHeld);
+    draw->AddCircleFilled(aPos, faceRadius, aHeld ? purplePressed : purple, 40);
     ImVec2 aLetterSize = ImGui::GetFont()->CalcTextSizeA(letterFontSize, FLT_MAX, 0.0f, ICON_FA_A);
     draw->AddText(ImGui::GetFont(), letterFontSize, aPos - aLetterSize * 0.5f, IM_COL32_WHITE, ICON_FA_A);
 
     // buttons SELECT and START
 
+    float pillFontSize = ImGui::GetFontSize() * scale;
+
     auto DrawPill = [&](const char* id, ImVec2 center, const char* label, uint8_t joypadButton) {
-        ImVec2 p = center - ImVec2(28, 16);
+        ImVec2 pillSize = V(56, 32);
+        ImVec2 p = center - pillSize * 0.5f;
         ImGui::SetCursorScreenPos(p);
-        ImGui::InvisibleButton(id, ImVec2(56, 32));
+        ImGui::InvisibleButton(id, pillSize);
         bool held = ImGui::IsItemActive();
         if (ROMFileLoaded)
             managerJoypad->setButton(joypadButton, held);
-        draw->AddRectFilled(p, p + ImVec2(56, 32), held ? buttonPressed : buttonColor, 8);
-        float labelX = (56.0f - ImGui::CalcTextSize(label).x) * 0.5f;
-        draw->AddText(p + ImVec2(labelX, 38), textColor, label);
+        draw->AddRectFilled(p, p + pillSize, held ? buttonPressed : buttonColor, 8.0f * scale);
+        ImVec2 labelSize = ImGui::GetFont()->CalcTextSizeA(pillFontSize, FLT_MAX, 0.0f, label);
+        ImVec2 labelPos = p + ImVec2((pillSize.x - labelSize.x) * 0.5f, pillSize.y + 6.0f * scale);
+        draw->AddText(ImGui::GetFont(), pillFontSize, labelPos, textColor, label);
     };
-    DrawPill("SELECT", origin + ImVec2(170, 190), "SELECT", DMG_JOYPAD::JOYPAD_SELECT);
-    DrawPill("START", origin + ImVec2(260, 190), "START", DMG_JOYPAD::JOYPAD_START);
+    DrawPill("SELECT", origin + V(170, 190), "SELECT", DMG_JOYPAD::JOYPAD_SELECT);
+    DrawPill("START", origin + V(260, 190), "START", DMG_JOYPAD::JOYPAD_START);
 
     // speaker lines
 

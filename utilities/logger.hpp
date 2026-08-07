@@ -21,7 +21,7 @@ public:
         if (guiCallback) guiCallback(message.c_str());
     }
 
-    void log(const char* fmt, va_list args) {
+    void logv(const char* fmt, va_list args) {
         char buf[8192];
         vsnprintf(buf, 8192, fmt, args);
         std::cout << "[" << currentTime() << "] " << buf << std::endl;
@@ -56,8 +56,12 @@ public:
 private:
     std::string currentTime() {
         std::time_t now = std::time(nullptr);
-        std::tm tm_struct;
+        std::tm tm_struct{};
+#ifdef _WIN32
         localtime_s(&tm_struct, &now);
+#else
+        localtime_r(&now, &tm_struct);
+#endif
         std::ostringstream oss;
         oss << std::put_time(&tm_struct, "%Y-%m-%d %H:%M:%S");
         return oss.str();

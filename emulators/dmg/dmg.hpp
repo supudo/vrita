@@ -9,8 +9,10 @@ GameBoy (DMG)
 
 #include <stdint.h>
 #include <iostream>
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
+#include <SDL2/SDL.h>
+#ifdef _WIN32
+#include <GL/glew.h>
+#endif
 #include <imgui.h>
 
 #include "emulators/emulators.hpp"
@@ -35,11 +37,11 @@ public:
     ImVec2 getWindowSize();
 
     // rendering
-    bool createTexture(SDL_GPUDevice* device);
+    bool createTexture();
     void generateTestPattern(float time);
-    void uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer);
+    void uploadFramebufferToTexture();
     void run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
-    void release(SDL_GPUDevice* device);
+    void release();
     void clear();
 
     // DMG specifics
@@ -73,7 +75,6 @@ private:
     Logger& logger;
     Settings& settings;
     SDL_AudioDeviceID audioDevice = 0;
-    SDL_AudioStream* audioStream = nullptr;
 
     bool initAudio();
     void stepAll();
@@ -104,7 +105,7 @@ private:
     static constexpr float JOYPAD_UI_WIDTH = 440.0f;
     static constexpr float JOYPAD_UI_HEIGHT = 250.0f;
     uint32_t gFramebuffer[WIDTH * HEIGHT];
-    SDL_GPUTexture* gTexture = nullptr;
+    GLuint gTexture = 0;
     int windowScale = 1;
     int lastWindowScale = -1;
     ImVec2 lastWindowPosition = ImVec2(44, 44);

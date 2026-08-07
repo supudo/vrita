@@ -89,6 +89,13 @@
     <ClCompile Include="debuggers\tilemap_viewer.cpp">
       <Filter>debuggers</Filter>
     </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_sdl2.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -193,6 +200,16 @@
     <ClInclude Include="emulators\dmg\palette_presets.hpp">
       <Filter>emulators\dmg</Filter>
     </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_sdl2.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">
@@ -224,6 +241,9 @@
     </Filter>
     <Filter Include="debuggers">
       <UniqueIdentifier>{0f1425d6-4284-4aea-b12d-32e038d55fb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{17d48d89-a9f8-473d-afff-0e93f748414d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

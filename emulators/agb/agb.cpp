@@ -1,8 +1,7 @@
 #include "agb.hpp"
 
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlgpu3.h>
+#include "imgui/imgui_impl_sdl2.h"
 
 bool AGB::initialize(int x, int y, int width, int height) {
     windowPositionX = x;
@@ -20,22 +19,24 @@ ImVec2 AGB::getWindowSize() {
     return lastWindowSize;
 }
 
-void AGB::release(SDL_GPUDevice* device) {
-    SDL_ReleaseGPUTexture(device, gTexture);
+void AGB::release() {
+    if (gTexture) {
+        glDeleteTextures(1, &gTexture);
+        gTexture = 0;
+    }
 }
 
-bool AGB::createTexture(SDL_GPUDevice* device) {
-    SDL_GPUTextureCreateInfo info = {};
-    info.type = SDL_GPU_TEXTURETYPE_2D;
-    info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-    info.width = AGB::WIDTH;
-    info.height = AGB::HEIGHT;
-    info.layer_count_or_depth = 1;
-    info.num_levels = 1;
-    info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-    gTexture = SDL_CreateGPUTexture(device, &info);
+bool AGB::createTexture() {
+    glGenTextures(1, &gTexture);
+    glBindTexture(GL_TEXTURE_2D, gTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, AGB::WIDTH, AGB::HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
     if (!gTexture) {
-        printf("[AGB] Failed to create AGB texture: %s\n", SDL_GetError());
+        logger.log("[AGB] Failed to create AGB texture");
         return false;
     }
     return true;
@@ -52,39 +53,10 @@ void AGB::generateTestPattern(float time) {
     }
 }
 
-void AGB::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
-    uint32_t framebufferSize = AGB::WIDTH * AGB::HEIGHT * sizeof(uint32_t);
-
-    SDL_GPUTransferBufferCreateInfo transferInfo = {};
-    transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    transferInfo.size = framebufferSize;
-
-    SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(device, &transferInfo);
-
-    if (!transferBuffer) {
-        printf("[AGB] Failed to create transfer buffer\n");
-        return;
-    }
-
-    void* mapped = SDL_MapGPUTransferBuffer(device, transferBuffer, false);
-    memcpy(mapped, gFramebuffer, framebufferSize);
-    SDL_UnmapGPUTransferBuffer(device, transferBuffer);
-
-    SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(commandBuffer);
-
-    SDL_GPUTextureTransferInfo source = {};
-    source.transfer_buffer = transferBuffer;
-    source.offset = 0;
-
-    SDL_GPUTextureRegion destination = {};
-    destination.texture = gTexture;
-    destination.w = AGB::WIDTH;
-    destination.h = AGB::HEIGHT;
-    destination.d = 1;
-
-    SDL_UploadToGPUTexture(copyPass, &source, &destination, false);
-    SDL_EndGPUCopyPass(copyPass);
-    SDL_ReleaseGPUTransferBuffer(device, transferBuffer);
+void AGB::uploadFramebufferToTexture() {
+    glBindTexture(GL_TEXTURE_2D, gTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, AGB::WIDTH, AGB::HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, gFramebuffer);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
@@ -145,7 +117,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    ImGui::Image((ImTextureID)gTexture, ImVec2(dispW, dispH));
+    ImGui::Image((ImTextureID)(intptr_t)gTexture, ImVec2(dispW, dispH));
 
     ImGui::End();
 }

@@ -1,6 +1,6 @@
 #include "joypad.hpp"
 
-#include <SDL3/SDL.h>
+#include <SDL2/SDL.h>
 
 #include "utilities/logger.hpp"
 #include "interrupt.hpp"
@@ -35,28 +35,28 @@ void DMG_JOYPAD::write(uint8_t value) {
 void DMG_JOYPAD::handleKey(uint32_t type, uint32_t key) {
     switch (key) {
         case SDLK_RETURN:
-            setButton(JOYPAD_START, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_START, type == SDL_KEYDOWN);
             break;
         case SDLK_SPACE:
-            setButton(JOYPAD_SELECT, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_SELECT, type == SDL_KEYDOWN);
             break;
-        case SDLK_A:
-            setButton(JOYPAD_A, type == SDL_EVENT_KEY_DOWN);
+        case SDLK_a:
+            setButton(JOYPAD_A, type == SDL_KEYDOWN);
             break;
-        case SDLK_B:
-            setButton(JOYPAD_B, type == SDL_EVENT_KEY_DOWN);
+        case SDLK_b:
+            setButton(JOYPAD_B, type == SDL_KEYDOWN);
             break;
         case SDLK_LEFT:
-            setButton(JOYPAD_LEFT, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_LEFT, type == SDL_KEYDOWN);
             break;
         case SDLK_RIGHT:
-            setButton(JOYPAD_RIGHT, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_RIGHT, type == SDL_KEYDOWN);
             break;
         case SDLK_UP:
-            setButton(JOYPAD_UP, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_UP, type == SDL_KEYDOWN);
             break;
         case SDLK_DOWN:
-            setButton(JOYPAD_DOWN, type == SDL_EVENT_KEY_DOWN);
+            setButton(JOYPAD_DOWN, type == SDL_KEYDOWN);
             break;
     }
 }

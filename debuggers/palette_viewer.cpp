@@ -4,8 +4,7 @@
 #include <cstring>
 #include <string>
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlgpu3.h>
+#include "imgui/imgui_impl_sdl2.h"
 
 #include "utilities/settings.hpp"
 #include "debuggers_defines_dmg.hpp"

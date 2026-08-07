@@ -1,4 +1,5 @@
-#include "SDL3/SDL_main.h"
+#define SDL_MAIN_HANDLED
+
 #include "utilities/settings.hpp"
 
 #include <stdio.h>
@@ -6,13 +7,15 @@
 #include <math.h>
 #include <memory>
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
-
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlgpu3.h>
+#include "imgui/imgui_impl_sdl2.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+#ifdef TRACY_ENABLE
+#define TRACY_OPENGL_AUTO_CALIBRATION
+#include <tracy/tracy/TracyOpenGL.hpp>
+#endif
 
 #include "utilities/logger.hpp"
 #include "emulators/emulators.hpp"
@@ -21,7 +24,20 @@
 #include "gui/log.hpp"
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 
+#ifdef  TRACY_ENABLE
+void* operator new(size_t size) {
+    void* ptr = malloc(size);
+    TracyAlloc(ptr, size);
+    return ptr;
+}
+void operator delete(void* ptr) noexcept {
+    TracyFree(ptr);
+    free(ptr);
+}
+#endif 
+
 SDL_Window* appWindow;
+SDL_GLContext glContext;
 
 Settings appSettings("app_settings.ini");
 
@@ -93,7 +109,7 @@ void ShowMainMenu() {
 }
 
 void showFileBrowser(const char* type) {
-    guiFileBrowserVisible = true;
+    guiFileBrowserVisible = !guiFileBrowserVisible;
     emulatorType = type;
 }
 
@@ -148,11 +164,10 @@ void saveAppSettings() {
     appSettings.Set("Visibility", "gui_metrics_visible", guiMetricsVisible);
     appSettings.Set("Visibility", "gui_log_visible", guiLogVisible);
 
-    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     int width, height;
-    SDL_GetWindowSize(appWindow, &width, &height);
-    appSettings.Set("MainWindow", "width", (int)(width / main_scale));
-    appSettings.Set("MainWindow", "height", (int)(height / main_scale));
+    SDL_GetWindowSizeInPixels(appWindow, &width, &height);
+    appSettings.Set("MainWindow", "width", width);
+    appSettings.Set("MainWindow", "height", height);
     int x, y;
     SDL_GetWindowPosition(appWindow, &x, &y);
     appSettings.Set("MainWindow", "has_position", true);
@@ -181,56 +196,91 @@ void loadFonts() {
     io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSize, &icons_config, icons_ranges);
 }
 
-int main(int argc, char** argv) {
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+bool initBackend() {
+    bool initialized = true;
+    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("[VRITA] Error: SDL_Init(): %s\n", SDL_GetError());
-        return 1;
+        return false;
     }
 
-    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
-    SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#ifdef Def_Kuplung_DEBUG_BUILD
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+#endif
+
+    SDL_SetHint(SDL_HINT_MAC_CTRL_CLICK_EMULATE_RIGHT_CLICK, "1");
+    SDL_SetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED, "0");
+
+#ifdef SDL_HINT_IME_SHOW_UI
+    SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#endif
+
+    float main_scale = ImGui_ImplSDL2_GetContentScaleForDisplay(0);
+    Uint32 window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     int windowWidth = appSettings.GetInt("MainWindow", "width", WINDOW_WIDTH);
     int windowHeight = appSettings.GetInt("MainWindow", "height", WINDOW_HEIGHT);
-    appWindow = SDL_CreateWindow(AppTitle, (int)(windowWidth * main_scale), (int)(windowHeight * main_scale), window_flags);
+    appWindow = SDL_CreateWindow(AppTitle, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, (int)(windowWidth * main_scale), (int)(windowHeight * main_scale), window_flags);
     if (appWindow == nullptr) {
-        printf("[VRITA] Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-        return 1;
+        printf("[VRITA] Error: Window could not be created! SDL Error: %s\n", SDL_GetError());
+        initialized = false;
     }
-    bool hasSavedPos = appSettings.GetBool("MainWindow", "has_position", false);
-    if (hasSavedPos) {
-        int windowX = appSettings.GetInt("MainWindow", "x", 0);
-        int windowY = appSettings.GetInt("MainWindow", "y", 0);
-        SDL_SetWindowPosition(appWindow, windowX, windowY);
+    else {
+        glContext = SDL_GL_CreateContext(appWindow);
+        if (!glContext) {
+            printf("[VRITA] Error: Unable to create OpenGL context! SDL Error: %s\n", SDL_GetError());
+            initialized = false;
+        }
+        else {
+            if (SDL_GL_MakeCurrent(appWindow, glContext) != 0) {
+                printf("[VRITA] Warning: Unable to set current context! SDL Error: %s\n", SDL_GetError());
+                initialized = false;
+            }
+            else {
+                if (SDL_GL_SetSwapInterval(1) != 0) {
+                    printf("[VRITA] Warning: Unable to set VSync! SDL Error: %s\n", SDL_GetError());
+                    initialized = false;
+                }
+#ifdef _WIN32
+                const GLenum glewInitCode = glewInit();
+                if (glewInitCode != GLEW_OK) {
+                    printf("[VRITA] Cannot initialize GLEW.\n");
+                    initialized = false;
+                }
+#endif
+#ifdef TRACY_ENABLE
+                TracyGpuContext;
+#endif
+                printf("[VRITA] GL_VERSION:  %s\n", (const char*)glGetString(GL_VERSION));
+                printf("[VRITA] GL_VENDOR:   %s\n", (const char*)glGetString(GL_VENDOR));
+                printf("[VRITA] GL_RENDERER: %s\n", (const char*)glGetString(GL_RENDERER));
+                int glMajor = 0, glMinor = 0, glProfile = 0;
+                glGetIntegerv(GL_MAJOR_VERSION, &glMajor);
+                glGetIntegerv(GL_MINOR_VERSION, &glMinor);
+                glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &glProfile);
+                printf("[VRITA] GL_MAJOR_VERSION.GL_MINOR_VERSION: %d.%d, CONTEXT_PROFILE_MASK: 0x%X (core=0x1)\n", glMajor, glMinor, glProfile);
+            }
+        }
     }
-    else
-        SDL_SetWindowPosition(appWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    SDL_ShowWindow(appWindow);
+    return initialized;
+}
 
-    SDL_GPUDevice* gpu_device = SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL | SDL_GPU_SHADERFORMAT_METALLIB, true, nullptr);
-
-    if (gpu_device == nullptr) {
-        printf("[VRITA] Error: SDL_CreateGPUDevice(): %s\n", SDL_GetError());
-        return 1;
-    }
-
-    if (!SDL_ClaimWindowForGPUDevice(gpu_device, appWindow)) {
-        printf("[VRITA] Error: SDL_ClaimWindowForGPUDevice(): %s\n", SDL_GetError());
-        return 1;
-    }
-
-    SDL_SetGPUSwapchainParameters(gpu_device, appWindow, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, SDL_GPU_PRESENTMODE_VSYNC);
-
-    initComponents();
-
-    eyeCandy_Dots = std::make_shared<Dots>();
-
-    if (!managerEmulators->createTexture(gpu_device)) {
-        logger->log("[VRITA] Error: Cannot create emulator texture");
-        return 1;
-    }
-    if (!eyeCandy_Dots->createTexture(gpu_device)) {
-        logger->log("[VRITA] Error: Cannot create dots texture");
-        return 1;
+int main(int argc, char** argv) {
+#ifdef TRACY_ENABLE
+    ZoneScoped;
+#endif
+    bool backendInitialized = initBackend();
+    if (!backendInitialized) {
+        printf("[VRITA] Error: Backend not initialized.\n");
+        exit(EXIT_FAILURE);
     }
 
     IMGUI_CHECKVERSION();
@@ -239,49 +289,68 @@ int main(int argc, char** argv) {
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
     io.IniFilename = "gui_options.ini";
+    ImGui_ImplSDL2_InitForOpenGL(appWindow, glContext);
+    ImGui_ImplOpenGL3_Init("#version 410 core");
 
     ImGui::StyleColorsDark();
 
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);
-    style.FontScaleDpi = main_scale;
-
-    ImGui_ImplSDL3_InitForSDLGPU(appWindow);
-
-    ImGui_ImplSDLGPU3_InitInfo init_info = {};
-    init_info.Device = gpu_device;
-    init_info.ColorTargetFormat = SDL_GetGPUSwapchainTextureFormat(gpu_device, appWindow);
-    init_info.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
-    init_info.SwapchainComposition = SDL_GPU_SWAPCHAINCOMPOSITION_SDR;
-    init_info.PresentMode = SDL_GPU_PRESENTMODE_VSYNC;
-    ImGui_ImplSDLGPU3_Init(&init_info);
-
     loadFonts();
 
-    ImVec4 clear_color = ImVec4(188.0f / 255.0f, 190.0f / 255.0f, 194.0f / 255.0f, 1.00f);
+    bool hasSavedPos = appSettings.GetBool("MainWindow", "has_position", false);
+    if (hasSavedPos) {
+        int windowX = appSettings.GetInt("MainWindow", "x", 0);
+        int windowY = appSettings.GetInt("MainWindow", "y", 0);
+        SDL_SetWindowPosition(appWindow, windowX, windowY);
+    }
+    else
+        SDL_SetWindowPosition(appWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+    initComponents();
+
+    eyeCandy_Dots = std::make_shared<Dots>();
+
+    if (!managerEmulators->createTexture()) {
+        logger->log("[VRITA] Error: Cannot create emulator texture");
+        return 1;
+    }
+    if (!eyeCandy_Dots->createTexture()) {
+        logger->log("[VRITA] Error: Cannot create dots texture");
+        return 1;
+    }
+
+    ImVec4 clear_color = ImVec4(145.0f / 255.0f, 145.0f / 255.0f, 145.0f / 255.0f, 1.00f);
 
     std::vector<std::string> droppedFiles;
     bool showDropCountError = false;
     while (!vritaRunning) {
+#ifdef TRACY_ENABLE
+        ZoneScoped;
+#endif
         SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL3_ProcessEvent(&event);
-            if (event.type == SDL_EVENT_QUIT)
-                vritaRunning = true;
-            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(appWindow))
-                vritaRunning = true;
-            if (event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
-                managerEmulators->handleKey(event.type, event.key.key);
-            if (event.type == SDL_EVENT_DROP_FILE) {
-                logger->log("[VRITA] File dropped: %s", event.drop.data);
-                droppedFiles.emplace_back(event.drop.data);
-            }
-            if (event.type == SDL_EVENT_DROP_COMPLETE) {
-                if (droppedFiles.size() == 1)
-                    loadROM(droppedFiles[0].c_str());
-                else if (droppedFiles.size() > 1)
-                    showDropCountError = true;
-                droppedFiles.clear();
+        {
+#ifdef TRACY_ENABLE
+            ZoneScopedN("PollEvents");
+#endif
+            while (SDL_PollEvent(&event)) {
+                ImGui_ImplSDL2_ProcessEvent(&event);
+                if (event.type == SDL_QUIT)
+                    vritaRunning = true;
+                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(appWindow))
+                    vritaRunning = true;
+                if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+                    managerEmulators->handleKey(event.type, event.key.keysym.sym);
+                if (event.type == SDL_DROPFILE) {
+                    logger->log("[VRITA] File dropped: %s", event.drop.file);
+                    droppedFiles.emplace_back(event.drop.file);
+                    SDL_free(event.drop.file);
+                }
+                if (event.type == SDL_DROPCOMPLETE) {
+                    if (droppedFiles.size() == 1)
+                        loadROM(droppedFiles[0].c_str());
+                    else if (droppedFiles.size() > 1)
+                        showDropCountError = true;
+                    droppedFiles.clear();
+                }
             }
         }
 
@@ -290,12 +359,18 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        int fbW, fbH;
+        SDL_GetWindowSizeInPixels(appWindow, &fbW, &fbH);
+        glViewport(0, 0, fbW, fbH);
+        glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         float emulatorTime = (float)SDL_GetTicks() / 1000.0f;
 
         managerEmulators->generateTestPattern(emulatorTime);
 
-        ImGui_ImplSDLGPU3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
         ImGui::NewFrame();
 
         if (showDropCountError) {
@@ -318,49 +393,63 @@ int main(int argc, char** argv) {
 
         renderGUIComponents();
 
-        managerEmulators->run(std::bind(&loadROM, std::placeholders::_1), std::bind(&showFileBrowser, std::placeholders::_1), [] (const char* type) { emulatorType = type; });
+        {
+#ifdef TRACY_ENABLE
+            ZoneScopedN("Emulators::Run");
+#endif
+            managerEmulators->run(std::bind(&loadROM, std::placeholders::_1), std::bind(&showFileBrowser, std::placeholders::_1), [] (const char* type) { emulatorType = type; });
+        }
 
         if (SHOW_DOTS)
             eyeCandy_Dots->run();
 
-        ImGui::Render();
-
-        ImDrawData* draw_data = ImGui::GetDrawData();
-        bool is_minimized = (draw_data->DisplaySize.x <= 0.0f || draw_data->DisplaySize.y <= 0.0f);
-        SDL_GPUCommandBuffer* command_buffer = SDL_AcquireGPUCommandBuffer(gpu_device);
-        managerEmulators->uploadFramebufferToTexture(gpu_device, command_buffer);
-        eyeCandy_Dots->uploadFramebufferToTexture(gpu_device, command_buffer);
-        SDL_GPUTexture* swapchain_texture;
-        SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer, appWindow, &swapchain_texture, nullptr, nullptr);
-
-        if (swapchain_texture != nullptr && !is_minimized) {
-            ImGui_ImplSDLGPU3_PrepareDrawData(draw_data, command_buffer);
-            SDL_GPUColorTargetInfo target_info = {};
-            target_info.texture = swapchain_texture;
-            target_info.clear_color = SDL_FColor{ clear_color.x, clear_color.y, clear_color.z, clear_color.w };
-            target_info.load_op = SDL_GPU_LOADOP_CLEAR;
-            target_info.store_op = SDL_GPU_STOREOP_STORE;
-            SDL_GPURenderPass* render_pass = SDL_BeginGPURenderPass(command_buffer, &target_info, 1, nullptr);
-            ImGui_ImplSDLGPU3_RenderDrawData(draw_data, command_buffer, render_pass);
-            SDL_EndGPURenderPass(render_pass);
+        {
+#ifdef TRACY_ENABLE
+            ZoneScopedN("ImGui::Render");
+#endif
+            ImGui::Render();
         }
 
-        SDL_SubmitGPUCommandBuffer(command_buffer);
+        {
+#ifdef TRACY_ENABLE
+            TracyGpuZone("Framebuffer Upload");
+#endif
+            managerEmulators->uploadFramebufferToTexture();
+            eyeCandy_Dots->uploadFramebufferToTexture();
+        }
+
+        ImDrawData* draw_data = ImGui::GetDrawData();
+        {
+#ifdef TRACY_ENABLE
+            TracyGpuZone("ImGui Draw");
+#endif
+            ImGui_ImplOpenGL3_RenderDrawData(draw_data);
+        }
+
+        {
+#ifdef TRACY_ENABLE
+            ZoneScopedN("SwapWindow (vsync wait)");
+#endif
+            SDL_GL_SwapWindow(appWindow);
+        }
+
+#ifdef TRACY_ENABLE
+        TracyGpuCollect;
+        FrameMark;
+#endif
     }
 
-    SDL_WaitForGPUIdle(gpu_device);
-
-    managerEmulators->release(gpu_device, appSettings);
-    eyeCandy_Dots->release(gpu_device);
+    managerEmulators->release(appSettings);
+    eyeCandy_Dots->release();
     saveAppSettings();
 
     ImGui::SaveIniSettingsToDisk("gui_options.ini"); 
 
-    ImGui_ImplSDL3_Shutdown();
-    ImGui_ImplSDLGPU3_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
-    SDL_ReleaseWindowFromGPUDevice(gpu_device, appWindow);
-    SDL_DestroyGPUDevice(gpu_device);
+
+    SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(appWindow);
     SDL_Quit();
 

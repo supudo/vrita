@@ -8,7 +8,7 @@
 
 namespace VritaUtils {
     struct FBEntity {
-        bool isFile;
+        bool isFile = false;
         std::string path, title, extension, modifiedDate, size;
     };
 
@@ -89,7 +89,7 @@ namespace VritaUtils {
                     else
                         entity.size = convertSize(std::filesystem::file_size(iteratorFolder->path()));
 
-                    entity.modifiedDate = getDateToStringFormatted(std::filesystem::last_write_time(iteratorFolder->path()).time_since_epoch(), "%Y-%m-%d %H:%M:%S");
+                    entity.modifiedDate = getDateToStringFormatted(std::filesystem::last_write_time(iteratorFolder->path()), "%Y-%m-%d %H:%M:%S");
 
                     folderContents[entity.path] = entity;
                 }

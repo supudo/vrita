@@ -2,33 +2,34 @@
 
 #include <algorithm>
 #include <imgui.h>
-#include <imgui_impl_sdl3.h>
-#include <imgui_impl_sdlgpu3.h>
+#include "imgui/imgui_impl_sdl2.h"
 
-void Dots::release(SDL_GPUDevice* device) {
+void Dots::release() {
     if (gTexture) {
-        SDL_ReleaseGPUTexture(device, gTexture);
-        gTexture = nullptr;
+        glDeleteTextures(1, &gTexture);
+        gTexture = 0;
     }
 }
 
-bool Dots::createTexture(SDL_GPUDevice* device) {
-    this->device = device;
+static GLuint Dots_CreateTexture(uint32_t width, uint32_t height) {
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return tex;
+}
+
+bool Dots::createTexture() {
     width = 160;
     height = 144;
     framebuffer.resize(width * height);
-
-    SDL_GPUTextureCreateInfo info = {};
-    info.type = SDL_GPU_TEXTURETYPE_2D;
-    info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-    info.width = width;
-    info.height = height;
-    info.layer_count_or_depth = 1;
-    info.num_levels = 1;
-    info.sample_count = SDL_GPU_SAMPLECOUNT_1;
-    info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-    gTexture = SDL_CreateGPUTexture(device, &info);
-    return gTexture != nullptr;
+    gTexture = Dots_CreateTexture(width, height);
+    return gTexture != 0;
 }
 
 void Dots::generateTestPattern(float fwidth, float fheight, float time) {
@@ -41,20 +42,11 @@ void Dots::generateTestPattern(float fwidth, float fheight, float time) {
         framebuffer.resize((size_t)width * height);
 
         if (gTexture) {
-            SDL_ReleaseGPUTexture(device, gTexture);
-            gTexture = nullptr;
+            glDeleteTextures(1, &gTexture);
+            gTexture = 0;
         }
 
-        SDL_GPUTextureCreateInfo info = {};
-        info.type = SDL_GPU_TEXTURETYPE_2D;
-        info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
-        info.width = width;
-        info.height = height;
-        info.layer_count_or_depth = 1;
-        info.num_levels = 1;
-        info.sample_count = SDL_GPU_SAMPLECOUNT_1;
-        info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER | SDL_GPU_TEXTUREUSAGE_COLOR_TARGET;
-        gTexture = SDL_CreateGPUTexture(device, &info);
+        gTexture = Dots_CreateTexture(width, height);
     }
 
     for (uint32_t i = 0, c = 0; i < height; i++)
@@ -62,39 +54,13 @@ void Dots::generateTestPattern(float fwidth, float fheight, float time) {
             framebuffer[c] = (uint32_t)(i * i + j * j + (uint32_t)time) | 0xff000000;
 }
 
-void Dots::uploadFramebufferToTexture(SDL_GPUDevice* device, SDL_GPUCommandBuffer* commandBuffer) {
+void Dots::uploadFramebufferToTexture() {
     if (!gTexture || framebuffer.empty())
         return;
 
-    const uint32_t size = width * height * sizeof(uint32_t);
-
-    SDL_GPUTransferBufferCreateInfo tbInfo = {};
-    tbInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
-    tbInfo.size = size;
-
-    SDL_GPUTransferBuffer* transfer = SDL_CreateGPUTransferBuffer(device, &tbInfo);
-    if (!transfer)
-        return;
-
-    void* mapped = SDL_MapGPUTransferBuffer(device, transfer, false);
-    std::memcpy(mapped, framebuffer.data(), size);
-    SDL_UnmapGPUTransferBuffer(device, transfer);
-
-    SDL_GPUCopyPass* copy = SDL_BeginGPUCopyPass(commandBuffer);
-
-    SDL_GPUTextureTransferInfo src = {};
-    src.transfer_buffer = transfer;
-    src.offset = 0;
-
-    SDL_GPUTextureRegion dst = {};
-    dst.texture = gTexture;
-    dst.w = width;
-    dst.h = height;
-    dst.d = 1;
-
-    SDL_UploadToGPUTexture(copy, &src, &dst, false);
-    SDL_EndGPUCopyPass(copy);
-    SDL_ReleaseGPUTransferBuffer(device, transfer);
+    glBindTexture(GL_TEXTURE_2D, gTexture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, framebuffer.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Dots::run() {
@@ -102,6 +68,6 @@ void Dots::run() {
     ImVec2 avail = ImGui::GetContentRegionAvail();
     generateTestPattern(avail.x, avail.y, (float)SDL_GetTicks());
     if (gTexture)
-        ImGui::Image(gTexture, avail);
+        ImGui::Image((ImTextureID)(intptr_t)gTexture, avail);
     ImGui::End();
 }

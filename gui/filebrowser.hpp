@@ -1,8 +1,7 @@
 #ifndef VRITA_FILEBROWSER_INCLUDES
 #define VRITA_FILEBROWSER_INCLUDES
 
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_gpu.h>
+#include <SDL2/SDL.h>
 #include <functional>
 #include <map>
 #include <stdint.h>

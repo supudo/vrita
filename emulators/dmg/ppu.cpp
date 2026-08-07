@@ -15,6 +15,9 @@ void DMG_PPU::clearResources() {
 
 void DMG_PPU::step(bool ROMFileLoaded, uint32_t cycles) {
     if (!ROMFileLoaded) return;
+#ifdef TRACY_ENABLE
+    ZoneScopedN("PPU::step");
+#endif
     if (!(mmu.memory[addressLCDC] & 0x80)) {
         mmu.memory[addressLY] = 0;
         mmu.memory[addressSTAT] = mmu.memory[addressSTAT] & 0xF8;

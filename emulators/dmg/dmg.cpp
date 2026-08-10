@@ -16,6 +16,11 @@ bool DMG::initialize(int x, int y, int width, int height) {
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
+    droppedFrames = 0;
+    droppedFramesPerSecond = 0;
+    lastFPSTime = std::chrono::steady_clock::now();
+    lastStepTime = std::chrono::steady_clock::now();
+    frameAccumulator = 0.0;
 
     windowPositionX = x;
     windowPositionY = y;
@@ -121,6 +126,11 @@ std::string DMG::loadROM(const char* path) {
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
+    droppedFrames = 0;
+    droppedFramesPerSecond = 0;
+    lastFPSTime = std::chrono::steady_clock::now();
+    lastStepTime = std::chrono::steady_clock::now();
+    frameAccumulator = 0.0;
     return "";
 }
 
@@ -129,6 +139,8 @@ void DMG::clear() {
     renderingFrames = 0;
     renderingFPS = 0.0;
     renderingSpeed = 0.0;
+    droppedFrames = 0;
+    droppedFramesPerSecond = 0;
     managerCPU->clearResources();
     managerMMU->clearResources();
     managerPPU->clearResources();
@@ -164,6 +176,10 @@ void DMG::stepAPU(uint32_t cycles) {
 
 void DMG::toggleGameState() {
     gameIsPaused = !gameIsPaused;
+    if (!gameIsPaused) {
+        lastStepTime = std::chrono::steady_clock::now();
+        frameAccumulator = 0.0;
+    }
 }
 
 void DMG::stopGame() {
@@ -172,6 +188,8 @@ void DMG::stopGame() {
 
 void DMG::startGame() {
     gameIsPaused = false;
+    lastStepTime = std::chrono::steady_clock::now();
+    frameAccumulator = 0.0;
 }
 
 bool DMG::isGameRunning() {
@@ -377,26 +395,48 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     if (offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
-    static auto lastTime = std::chrono::steady_clock::now();
     if (ROMFileLoaded && !gameIsPaused) {
-        {
-#ifdef TRACY_ENABLE
-            ZoneScopedN("DMG::EmulateFrame");
-#endif
-            uint64_t frameStart = managerMMU->totalCycles;
-            while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
-                stepAll();
+        const double frameDuration = 1.0 / DMG_FPS;
+
+        auto stepNow = std::chrono::steady_clock::now();
+        double dt = std::chrono::duration<double>(stepNow - lastStepTime).count();
+        lastStepTime = stepNow;
+
+        double maxAccumulator = frameDuration * MAX_CATCHUP_FRAMES;
+        frameAccumulator += dt;
+        if (frameAccumulator > maxAccumulator) {
+            // backlog beyond the catch-up cap is discarded, not deferred: count as dropped frames
+            droppedFrames += (uint32_t)((frameAccumulator - maxAccumulator) / frameDuration);
+            frameAccumulator = maxAccumulator;
         }
-        renderingFrames++;
+
+        uint32_t framesStepped = 0;
+        while (frameAccumulator >= frameDuration && framesStepped < MAX_CATCHUP_FRAMES) {
+            {
+#ifdef TRACY_ENABLE
+                ZoneScopedN("DMG::EmulateFrame");
+#endif
+                uint64_t frameStart = managerMMU->totalCycles;
+                while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
+                    stepAll();
+            }
+            frameAccumulator -= frameDuration;
+            renderingFrames++;
+            framesStepped++;
+        }
+
         auto now = std::chrono::steady_clock::now();
-        double elapsed = std::chrono::duration<double>(now - lastTime).count();
+        double elapsed = std::chrono::duration<double>(now - lastFPSTime).count();
         if (elapsed >= 1.0) {
             renderingFPS = renderingFrames / elapsed;
             renderingFrames = 0;
-            lastTime = now;
+            lastFPSTime = now;
             renderingSpeed = (renderingFPS / DMG_FPS) * 100.0;
+            droppedFramesPerSecond = droppedFrames;
+            droppedFrames = 0;
 #ifdef TRACY_ENABLE
             TracyPlot("FPS", renderingFPS);
+            TracyPlot("Dropped Frames", (int64_t)droppedFramesPerSecond);
 #endif
         }
     }
@@ -434,7 +474,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
 
     ImGui::Separator();
 
-    ImGui::Text("FPS: %.2f, Speed: %.2f%%", renderingFPS, renderingSpeed);
+    ImGui::Text("FPS: %6.2f, Speed: %6.2f%%, Dropped: %3u/s", renderingFPS, renderingSpeed, droppedFramesPerSecond);
 
     lastBelowImageH = ImGui::GetCursorPosY() - cursorYAfterImage;
     lastDecorH = ImGui::GetWindowSize().y - dispH;

@@ -9,6 +9,7 @@ GameBoy (DMG)
 
 #include <stdint.h>
 #include <iostream>
+#include <chrono>
 #include <SDL2/SDL.h>
 #ifdef _WIN32
 #include <GL/glew.h>
@@ -86,6 +87,14 @@ private:
     double renderingFPS = 0.0;
     double renderingSpeed = 0.0;
     const double DMG_FPS = 59.7275;
+
+    uint32_t droppedFrames = 0;
+    uint32_t droppedFramesPerSecond = 0;
+
+    std::chrono::steady_clock::time_point lastFPSTime = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point lastStepTime = std::chrono::steady_clock::now();
+    double frameAccumulator = 0.0;
+    static const uint32_t MAX_CATCHUP_FRAMES = 4;
 
     bool gameIsPaused = false;
     void toggleGameState();

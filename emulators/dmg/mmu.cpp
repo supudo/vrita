@@ -86,6 +86,8 @@ void DMG_MMU::clearMemory() {
 void DMG_MMU::clearResources() {
     totalCycles = 0;
     firstRAMWrite = true;
+    isHalted = false;
+    triggerHaltBug = false;
     clearMemory();
 }
 

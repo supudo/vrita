@@ -328,7 +328,8 @@ void SpriteViewer::renderInfo() {
         textRightAligned("Tile index");
         ImGui::TableSetColumnIndex(1);
         if (hoveredSprite.TileTop) {
-            ImGui::Text("%d ($%02X) @ VRAM 00:%04X", hoveredSprite.TileTop->TileItemID, static_cast<uint8_t>(hoveredSprite.TileTop->TileItemID), hoveredSprite.TileTop->TileAddress);
+            if (emulatorType == 1)
+                ImGui::Text("%d ($%02X) @ VRAM 00:%04X", hoveredSprite.TileTop->TileItemID, static_cast<uint8_t>(hoveredSprite.TileTop->TileItemID), hoveredSprite.TileTop->TileAddress);
         }
         else
             ImGui::Text("...");

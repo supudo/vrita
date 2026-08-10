@@ -95,7 +95,7 @@ void DMG_MMU::clearResources() {
 }
 
 uint16_t DMG_MMU::getOAMWriteSource(uint16_t oamAddress) const {
-    if (oamAddress < 0xFE00 || oamAddress > 0xFE9F) return 0;
+    if (oamAddress < addressOAMStart || oamAddress > 0xFE9F) return 0;
     return oamWriteSourcePC[oamAddress];
 }
 
@@ -110,7 +110,7 @@ uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
         return managerTimer->read(address);
     if (address >= 0xFF10 && address <= 0xFF3F)
         return managerAPU->readRegister(address);
-    if (dmaActive && address >= 0xFE00 && address <= 0xFE9F)
+    if (dmaActive && address >= addressOAMStart && address <= 0xFE9F)
         return 0xFF;
     return memory[address];
 }
@@ -168,8 +168,8 @@ void DMG_MMU::tick(uint32_t cycles) {
         while (dmaActive && dmaTCycles >= 4) {
             dmaTCycles -= 4;
             uint16_t src = dmaSource + dmaProgress;
-            memory[0xFE00 + dmaProgress] = rawRead(src);
-            oamWriteSourcePC[0xFE00 + dmaProgress] = oamWriteSourcePC[src] ? oamWriteSourcePC[src] : managerCPU->currentInstructionPC;
+            memory[addressOAMStart + dmaProgress] = rawRead(src);
+            oamWriteSourcePC[addressOAMStart + dmaProgress] = oamWriteSourcePC[src] ? oamWriteSourcePC[src] : managerCPU->currentInstructionPC;
             dmaProgress++;
             if (dmaProgress >= 160)
                 dmaActive = false;

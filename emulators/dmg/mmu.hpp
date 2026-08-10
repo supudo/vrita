@@ -56,6 +56,8 @@ private:
     DMG_PPU* managerPPU = nullptr;
     DMG_APU* managerAPU = nullptr;
     DMG_JOYPAD* managerJoypad = nullptr;
+
+    uint16_t addressOAMStart = 0xFE00;
 };
 
 #endif

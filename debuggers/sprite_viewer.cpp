@@ -54,27 +54,25 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
         isSprite8x16 = funcMemoryRead(DMG_Address_LCDC) & 0x04;
 
-        tiles.clear();
-        tiles.reserve(DMG_TilesCount);
+        tiles.resize(DMG_TilesCount);
         const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
         for (uint32_t i = 0; i < DMG_TilesCount; i++) {
             const uint8_t* vramAddress = vramTiles + i * 16;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
             TileItem tile(i, address);
             decodeTile(vramAddress, tile);
-            tiles.push_back(tile);
+            tiles[i] = tile;
         }
 
         const uint8_t* oam = memoryData + DMG_Address_SpritesStart;
-        spriteItems.clear();
-        spriteItems.reserve(DMG_SpriteCount);
+        spriteItems.resize(DMG_SpriteCount);
         for (uint32_t i = 0; i < DMG_SpriteCount; ++i) {
             const uint8_t* entry = oam + i * 4;
             uint16_t address = static_cast<uint16_t>(entry - memoryData);
             const uint8_t tileIndex = entry[2];
             const uint8_t firstTile = isSprite8x16 ? (tileIndex & 0xFE) : tileIndex;
             SpriteItem spriteTile(i, entry[1], entry[0], tileIndex, entry[3], static_cast<uint8_t>(i), address, &tiles[firstTile], isSprite8x16 ? &tiles[firstTile + 1] : nullptr);
-            spriteItems.push_back(spriteTile);
+            spriteItems[i] = spriteTile;
         }
     }
 }

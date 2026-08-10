@@ -39,6 +39,8 @@ void DMG_PPU::step(bool ROMFileLoaded, uint32_t cycles) {
             mmu.memory[addressLY] = 0;
             windowLine = 0;
         }
+        if (mmu.memory[addressLY] == mmu.memory[addressLYC] && (mmu.memory[addressSTAT] & 0x40))
+            interrupts.setInterruptFlag(INTERRUPT_LCD);
     }
     uint8_t mode;
     if (mmu.memory[addressLY] >= 144)

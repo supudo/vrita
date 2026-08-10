@@ -22,6 +22,7 @@ C/C++ Emulator - GameBoy (DMG), etc.
 	 - [x] mem_timing
 	 - [ ] oam_bug
 	 - [ ] halt_bug
+ - [x] [dmg-acid2](https://github.com/mattcurrie/dmg-acid2)
 
 
 ![Vrita](https://github.com/supudo/vrita/blob/main/screenshot-2026-08-07.png "Vrita")

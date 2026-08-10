@@ -348,39 +348,40 @@ void SpriteViewer::renderInfo() {
             ImGui::Text("Flip X: %s | Flip Y: %s | Palette: %s | Priority: %s", flipX ? "true" : "false", flipY ? "true" : "false", isOBP1 ? "OBP1" : "OBP0", isPriority ? "true" : "false");
         }
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-        textRightAligned("Source Y");
-        ImGui::TableSetColumnIndex(1);
-        if (hoveredSprite.TileTop)
-            ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress));
-        else
-            ImGui::Text("...");
+        // TODO
+        //ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+        //ImGui::TableSetColumnIndex(0);
+        //ImGui::AlignTextToFramePadding();
+        //textRightAligned("Source Y");
+        //ImGui::TableSetColumnIndex(1);
+        //if (hoveredSprite.TileTop)
+        //    ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress));
+        //else
+        //    ImGui::Text("...");
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-        textRightAligned("Source X");
-        ImGui::TableSetColumnIndex(1);
-        if (hoveredSprite.TileTop)
-            ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress + 1));
-        else
-            ImGui::Text("...");
+        //ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+        //ImGui::TableSetColumnIndex(0);
+        //ImGui::AlignTextToFramePadding();
+        //textRightAligned("Source X");
+        //ImGui::TableSetColumnIndex(1);
+        //if (hoveredSprite.TileTop)
+        //    ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress + 1));
+        //else
+        //    ImGui::Text("...");
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-        textRightAligned("Source tile index");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        //ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+        //ImGui::TableSetColumnIndex(0);
+        //ImGui::AlignTextToFramePadding();
+        //textRightAligned("Source tile index");
+        //ImGui::TableSetColumnIndex(1);
+        //ImGui::Text("...");
 
-        ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
-        ImGui::TableSetColumnIndex(0);
-        ImGui::AlignTextToFramePadding();
-        textRightAligned("Source attributes");
-        ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        //ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+        //ImGui::TableSetColumnIndex(0);
+        //ImGui::AlignTextToFramePadding();
+        //textRightAligned("Source attributes");
+        //ImGui::TableSetColumnIndex(1);
+        //ImGui::Text("...");
 
         ImGui::EndTable();
     }

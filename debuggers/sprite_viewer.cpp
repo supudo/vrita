@@ -72,7 +72,7 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
             uint16_t address = static_cast<uint16_t>(entry - memoryData);
             const uint8_t tileIndex = entry[2];
             const uint8_t firstTile = isSprite8x16 ? (tileIndex & 0xFE) : tileIndex;
-            SpriteItem spriteTile(i, entry[0], entry[1], tileIndex, entry[3], static_cast<uint8_t>(i), address, &tiles[firstTile], isSprite8x16 ? &tiles[firstTile + 1] : nullptr);
+            SpriteItem spriteTile(i, entry[1], entry[0], tileIndex, entry[3], static_cast<uint8_t>(i), address, &tiles[firstTile], isSprite8x16 ? &tiles[firstTile + 1] : nullptr);
             spriteItems.push_back(spriteTile);
         }
     }
@@ -203,6 +203,8 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
                 draw_list->AddRectFilled(posTop, posBottom, IM_COL32(0, 0, 0, 0));
                 break;
             case 3: // line
+                draw_list->AddRectFilled(posTop, posBottom, IM_COL32(0, 0, 0, 0));
+                draw_list->AddLine(posTop, posBottom, IM_COL32(255, 0, 0, 255),2.0f);
                 break;
             default: // red
                 draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 0, 0, 255));
@@ -220,16 +222,31 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
 void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder) {
     bool flipX = Flags & 0x20;
     bool flipY = Flags & 0x40;
-    bool useOBP1 = Flags & 0x01;
+    bool useOBP1 = Flags & 0x10;
+    bool objPriority = Flags & 0x80;
+    // transparency background
+    for (int y = 0; y < 8; y++) {
+        for (int x = 0; x < 8; x++) {
+            ImU32 bg = ((x + y) & 1) ? IM_COL32(180, 180, 180, 255) : IM_COL32(220, 220, 220, 255);
+            ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
+            ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
+            draw_list->AddRectFilled(p0, p1, bg);
+        }
+    }
     for (int y = 0; y < 8; y++) {
         int srcY = flipY ? (7 - y) : y;
         for (int x = 0; x < 8; x++) {
             int srcX = flipX ? (7 - x) : x;
-            PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[srcX][srcY]);
+            uint8_t pixel = tile.Pixels[srcX][srcY];
+            if (pixel == 0)
+                continue;
+            PaletteColor color = paletteViewer.getColorPalette(pixel);
             ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
             draw_list->AddRectFilled(p0, p1, col);
+            if (objPriority)
+                draw_list->AddLine(p0, p1, IM_COL32(255, 0, 0, 255), 2.0f);
         }
     }
     if (showGrid && drawBorder) {

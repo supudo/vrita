@@ -4,6 +4,10 @@ void DMG_INTERRUPT::setCPURegisters(DMGCpuRegisters& registers) {
     cpuRegisters = &registers;
 }
 
+void DMG_INTERRUPT::clearResources() {
+    IME = false;
+}
+
 bool DMG_INTERRUPT::isInterruptEnabled(uint8_t flag) {
     return mmu.memory[addressInterruptEnabled] & flag;
 }

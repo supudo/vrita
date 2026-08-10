@@ -6,6 +6,7 @@
 #include "interrupt.hpp"
 
 void DMG_JOYPAD::clearResources() {
+    buttonsVal = 0xFF;
     selectBits = 0x30;
     stateDPad = 0x0F;
     stateButtons = 0x0F;

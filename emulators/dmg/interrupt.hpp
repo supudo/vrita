@@ -20,6 +20,7 @@ public:
     DMG_INTERRUPT(DMG_MMU& mmu) : mmu(mmu) {}
 
     void setCPURegisters(DMGCpuRegisters& registers);
+    void clearResources();
 
     bool IME = false; // interrupts are OFF on start
 

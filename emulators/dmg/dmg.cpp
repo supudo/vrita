@@ -143,6 +143,7 @@ void DMG::clear() {
     droppedFramesPerSecond = 0;
     managerCPU->clearResources();
     managerMMU->clearResources();
+    managerInterrupts->clearResources();
     managerPPU->clearResources();
     managerAPU->clearResources();
     managerTimer->reset();

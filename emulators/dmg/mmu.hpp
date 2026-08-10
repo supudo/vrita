@@ -30,6 +30,11 @@ public:
     uint64_t totalCycles = 0;
     bool firstRAMWrite = true;
 
+    bool dmaActive = false;
+    uint16_t dmaSource = 0;
+    int dmaProgress = 0;
+    int dmaTCycles = 0;
+
     uint8_t read8(uint16_t address, bool no_tick = false);
     void write8(uint16_t address, uint8_t value, bool no_tick = false);
     inline uint16_t read16(uint16_t address, bool no_tick = false) { return read8(address, no_tick) | (read8(address + 1, no_tick) << 8); }
@@ -41,6 +46,8 @@ public:
     uint16_t getOAMWriteSource(uint16_t oamAddress) const;
 
 private:
+    uint8_t rawRead(uint16_t address);
+
     Logger* logger = nullptr;
     DMG_CARTRIDGE* managerCartridge = nullptr;
     DMG_CPU* managerCPU = nullptr;

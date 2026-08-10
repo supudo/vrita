@@ -88,6 +88,9 @@ void DMG_MMU::clearResources() {
     firstRAMWrite = true;
     isHalted = false;
     triggerHaltBug = false;
+    dmaActive = false;
+    dmaProgress = 0;
+    dmaTCycles = 0;
     clearMemory();
 }
 
@@ -107,6 +110,14 @@ uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
         return managerTimer->read(address);
     if (address >= 0xFF10 && address <= 0xFF3F)
         return managerAPU->readRegister(address);
+    if (dmaActive && address >= 0xFE00 && address <= 0xFE9F)
+        return 0xFF;
+    return memory[address];
+}
+
+uint8_t DMG_MMU::rawRead(uint16_t address) {
+    if (address < 0x8000 || (address > 0xA000 && address < 0xC000))
+        return managerCartridge->read(address);
     return memory[address];
 }
 
@@ -139,11 +150,10 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
     }
     if (address == 0xFF46) {
         memory[address] = value;
-        uint16_t source = (uint16_t)value << 8;
-        for (uint16_t i = 0; i < 0xA0; i++) {
-            memory[0xFE00 + i] = read8(source + i, false);
-            oamWriteSourcePC[0xFE00 + i] = oamWriteSourcePC[source + i] ? oamWriteSourcePC[source + i] : managerCPU->currentInstructionPC;
-        }
+        dmaSource = (uint16_t)value << 8;
+        dmaActive = true;
+        dmaProgress = 0;
+        dmaTCycles = -8;
         return;
     }
     memory[address] = value;
@@ -153,4 +163,16 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
 void DMG_MMU::tick(uint32_t cycles) {
     totalCycles += cycles;
     managerTimer->tick(cycles);
+    if (dmaActive) {
+        dmaTCycles += cycles;
+        while (dmaActive && dmaTCycles >= 4) {
+            dmaTCycles -= 4;
+            uint16_t src = dmaSource + dmaProgress;
+            memory[0xFE00 + dmaProgress] = rawRead(src);
+            oamWriteSourcePC[0xFE00 + dmaProgress] = oamWriteSourcePC[src] ? oamWriteSourcePC[src] : managerCPU->currentInstructionPC;
+            dmaProgress++;
+            if (dmaProgress >= 160)
+                dmaActive = false;
+        }
+    }
 }

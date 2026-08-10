@@ -16,6 +16,7 @@ bool SpriteViewer::init() {
     windowWidth = settings.GetInt("Debuggers - Sprite Viewer", "width", 300);
     windowHeight = settings.GetInt("Debuggers - Sprite Viewer", "height", 300);
     zoomPerPixel = settings.GetFloat("Debuggers - Sprite Viewer", "zoom_per_pixel", 3.0);
+    transperancyChoicesSelected = settings.GetInt("Debuggers - Sprite Viewer", "chosen_sprite_transperancy", 1);
     return true;
 }
 
@@ -194,7 +195,19 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
     else {
         ImVec2 posTop(pos.x, pos.y + pixelSize * 8.0f);
         ImVec2 posBottom(pos.x + pixelSize * 8.0f, pos.y + (pixelSize * 8.0f * 2));
-        draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 0, 0, 255));
+        switch (transperancyChoicesSelected) {
+            case 1: // pink
+                draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 192, 203, 255));
+                break;
+            case 2: // transparent
+                draw_list->AddRectFilled(posTop, posBottom, IM_COL32(0, 0, 0, 0));
+                break;
+            case 3: // line
+                break;
+            default: // red
+                draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 0, 0, 255));
+                break;
+        }
     }
 
     if (showGrid) {
@@ -255,7 +268,12 @@ void SpriteViewer::renderInfo() {
         ImGui::AlignTextToFramePadding();
         textRightAligned("Transparency");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        ImGui::SetNextItemWidth(120);
+        static const char* transperancyChoices[] = { "Default", "Pink", "Transparent", "Line" };
+        if (ImGui::Combo("##transperancyChoicesCombo", &transperancyChoicesSelected, transperancyChoices, IM_ARRAYSIZE(transperancyChoices))) {
+            settings.Set("Debuggers - Sprite Viewer", "chosen_sprite_transperancy", transperancyChoicesSelected);
+            settings.Save();
+        }
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

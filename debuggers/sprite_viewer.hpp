@@ -44,6 +44,7 @@ private:
     float zoomPerPixel = 2.0f;
     bool autoRefresh = true;
     bool showGrid = true;
+    int transperancyChoicesSelected = 0;
 
     bool isSprite8x16 = false;
     ImVector<TileItem> tiles;

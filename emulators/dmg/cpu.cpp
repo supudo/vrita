@@ -19,6 +19,8 @@ void DMG_CPU::step(bool ROMFileLoaded) {
     ZoneScopedN("CPU::Step");
 #endif
 
+    currentInstructionPC = Registers.PC;
+
     uint8_t opcode = mmu.read8(Registers.PC);
 
     if (!mmu.triggerHaltBug)

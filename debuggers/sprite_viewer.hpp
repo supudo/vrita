@@ -19,7 +19,7 @@ public:
 
     bool init();
     void setMemory(const char* emulatorType, uint8_t* data);
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource);
     void release();
     void render(bool* windowOpened);
 
@@ -30,6 +30,7 @@ private:
 
     std::function<uint8_t(uint16_t)> funcMemoryRead;
     std::function<void(uint16_t, uint8_t)> funcMemoryWrite;
+    std::function<uint16_t(uint16_t)> funcOAMSource;
 
     int windowPositionX = 40;
     int windowPositionY = 40;

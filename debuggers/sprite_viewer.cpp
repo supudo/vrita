@@ -44,9 +44,10 @@ void SpriteViewer::setMemory(const char* emulatorType, uint8_t* data) {
         initializeData(et);
 }
 
-void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
+void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
+    funcOAMSource = oamSource;
 }
 
 void SpriteViewer::initializeData(uint8_t emulatorType) {
@@ -352,14 +353,20 @@ void SpriteViewer::renderInfo() {
         ImGui::AlignTextToFramePadding();
         textRightAligned("Source Y");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        if (hoveredSprite.TileTop)
+            ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress));
+        else
+            ImGui::Text("...");
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
         textRightAligned("Source X");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        if (hoveredSprite.TileTop)
+            ImGui::Text("ROM 00:%04X (see ROM 00:)", funcOAMSource(hoveredSprite.OAMAddress + 1));
+        else
+            ImGui::Text("...");
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

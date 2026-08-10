@@ -40,7 +40,9 @@ public:
     inline void setFlag(uint8_t flag, bool enabled) { if (enabled) Registers.F |= flag; else Registers.F &= ~flag; Registers.F &= 0xF0; }
     inline bool isFlagSet(uint8_t flag) const { return (Registers.F & flag) != 0; }
     inline void printFlags() { logger.log("[DMG-CPU] Z: 0x%02X, N: 0x%02X, H: 0x%02X, C: 0x%02X", isFlagSet(FLAG_ZERO), isFlagSet(FLAG_SUBTRACT), isFlagSet(FLAG_HALF_CARRY), isFlagSet(FLAG_CARRY)); }
+    
     bool logCalls = false;
+    uint16_t currentInstructionPC = 0;
 
 private:
     Logger& logger;

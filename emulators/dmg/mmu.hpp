@@ -2,6 +2,7 @@
 #define VRITA_DMG_MMU_INCLUDES
 
 #include <stdint.h>
+#include <array>
 #include <vector>
 
 class Logger;
@@ -35,6 +36,9 @@ public:
     inline void write16(uint16_t address, uint16_t value, bool no_tick = false) { write8(address, value & 0xFF, no_tick); write8(address + 1, value >> 8, no_tick); }
     inline void writeStack(uint16_t* sp, uint16_t value) { (*sp)--; write8(*sp, (uint8_t)((value & 0xFF00) >> 8), false); (*sp)--; write8(*sp, (uint8_t)(value & 0x00FF), false); }
     inline uint16_t readStack(uint16_t* sp) { uint16_t value = read16(*sp); *sp += 2; return value; }
+
+    std::array<uint16_t, 0x10000> oamWriteSourcePC{};
+    uint16_t getOAMWriteSource(uint16_t oamAddress) const;
 
 private:
     Logger* logger = nullptr;

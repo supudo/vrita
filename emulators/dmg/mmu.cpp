@@ -72,18 +72,26 @@ void DMG_MMU::resetRegisters() {
     memory[0xFF4B] = 0x00; // WX
 
     memory[0xFFFF] = 0x00; // IE
+
+    oamWriteSourcePC.fill(0);
 }
 
 void DMG_MMU::clearMemory() {
     memorySize = 0x10000;
     memory.assign(memorySize, 0);
     resetRegisters();
+    oamWriteSourcePC.fill(0);
 }
 
 void DMG_MMU::clearResources() {
     totalCycles = 0;
     firstRAMWrite = true;
     clearMemory();
+}
+
+uint16_t DMG_MMU::getOAMWriteSource(uint16_t oamAddress) const {
+    if (oamAddress < 0xFE00 || oamAddress > 0xFE9F) return 0;
+    return oamWriteSourcePC[oamAddress];
 }
 
 uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
@@ -130,11 +138,14 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
     if (address == 0xFF46) {
         memory[address] = value;
         uint16_t source = (uint16_t)value << 8;
-        for (uint16_t i = 0; i < 0xA0; i++)
+        for (uint16_t i = 0; i < 0xA0; i++) {
             memory[0xFE00 + i] = read8(source + i, false);
+            oamWriteSourcePC[0xFE00 + i] = oamWriteSourcePC[source + i] ? oamWriteSourcePC[source + i] : managerCPU->currentInstructionPC;
+        }
         return;
     }
     memory[address] = value;
+    oamWriteSourcePC[address] = managerCPU->currentInstructionPC;
 }
 
 void DMG_MMU::tick(uint32_t cycles) {

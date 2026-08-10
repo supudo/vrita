@@ -186,6 +186,10 @@ int SpriteViewer::pickHoveredSlot(ImVec2 start, float tileStep) {
     return slot;
 }
 
+bool SpriteViewer::isSpriteOffScreen(const SpriteItem& sprite) const {
+    return sprite.Y == 0 || sprite.Y >= DMG_Height + 16 || sprite.X == 0 || sprite.X >= DMG_Width + 8;
+}
+
 void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) {
     if (sprite.TileTop)
         drawTile(draw_list, *sprite.TileTop, pos, pixelSize, sprite.Flags, false);
@@ -202,10 +206,6 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
             case 2: // transparent
                 draw_list->AddRectFilled(posTop, posBottom, IM_COL32(0, 0, 0, 0));
                 break;
-            case 3: // line
-                draw_list->AddRectFilled(posTop, posBottom, IM_COL32(0, 0, 0, 0));
-                draw_list->AddLine(posTop, posBottom, IM_COL32(255, 0, 0, 255),2.0f);
-                break;
             default: // red
                 draw_list->AddRectFilled(posTop, posBottom, IM_COL32(255, 0, 0, 255));
                 break;
@@ -216,6 +216,12 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
         float w = pixelSize * 8.0f;
         float h = pixelSize * 8.0f * 2.0f;
         draw_list->AddRect(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(60, 60, 60, 255));
+    }
+
+    if (isSpriteOffScreen(sprite)) {
+        float w = pixelSize * 8.0f;
+        float h = pixelSize * 8.0f * 2.0f;
+        draw_list->AddLine(pos, ImVec2(pos.x + w, pos.y + h), IM_COL32(255, 0, 0, 255), 3.0f);
     }
 }
 
@@ -246,7 +252,7 @@ void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
             draw_list->AddRectFilled(p0, p1, col);
             if (objPriority)
-                draw_list->AddLine(p0, p1, IM_COL32(255, 0, 0, 255), 2.0f);
+                draw_list->AddLine(p0, p1, IM_COL32(255, 0, 0, 255), 3.0f);
         }
     }
     if (showGrid && drawBorder) {
@@ -286,7 +292,7 @@ void SpriteViewer::renderInfo() {
         textRightAligned("Transparency");
         ImGui::TableSetColumnIndex(1);
         ImGui::SetNextItemWidth(120);
-        static const char* transperancyChoices[] = { "Default", "Pink", "Transparent", "Line" };
+        static const char* transperancyChoices[] = { "Default", "Pink", "Transparent" };
         if (ImGui::Combo("##transperancyChoicesCombo", &transperancyChoicesSelected, transperancyChoices, IM_ARRAYSIZE(transperancyChoices))) {
             settings.Set("Debuggers - Sprite Viewer", "chosen_sprite_transperancy", transperancyChoicesSelected);
             settings.Save();
@@ -305,7 +311,16 @@ void SpriteViewer::renderInfo() {
         ImGui::AlignTextToFramePadding();
         textRightAligned("Y / X");
         ImGui::TableSetColumnIndex(1);
-        ImGui::Text("...");
+        if (hoveredSprite.TileTop) {
+            int screenX = (int)hoveredSprite.X - 8;
+            int screenY = (int)hoveredSprite.Y - 16;
+            if (isSpriteOffScreen(hoveredSprite))
+                ImGui::Text("Y: %d, X: %d (raw %d,%d) - Off-screen", screenY, screenX, hoveredSprite.Y, hoveredSprite.X);
+            else
+                ImGui::Text("Y: %d, X: %d (raw %d,%d)", screenY, screenX, hoveredSprite.Y, hoveredSprite.X);
+        }
+        else
+            ImGui::Text("...");
 
         ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
         ImGui::TableSetColumnIndex(0);

@@ -57,6 +57,7 @@ private:
     void renderSprites(float height);
     void drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize);
     int pickHoveredSlot(ImVec2 start, float tileStep);
+    bool isSpriteOffScreen(const SpriteItem& sprite) const;
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder = true);
     void renderInfo();
     void textRightAligned(const char* text);

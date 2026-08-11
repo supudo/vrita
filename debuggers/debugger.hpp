@@ -10,6 +10,8 @@
 #include "utilities/logger.hpp"
 #include "debuggers_defines.hpp"
 
+#include "ImGuiColorTextEdit/TextEditor.h"
+
 class Settings;
 struct DMGCpuRegisters;
 struct MemoryRegion;
@@ -60,6 +62,13 @@ private:
     int selectedMemoryRegion = 0;
 
     bool logCPUCalls = false;
+
+    TextEditor editorAssembly;
+    void initEditor();
+    TextEditor::Language editorLanguage;
+    bool editorInitialized = false;
+    bool editorSourceSet = false;
+    const TextEditor::Language* initializeLanguage();
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();

@@ -205,6 +205,8 @@
     <ClCompile Include="eyecandy\dots.cpp" />
     <ClCompile Include="gui\filebrowser.cpp" />
     <ClCompile Include="gui\log.cpp" />
+    <ClCompile Include="ImGuiColorTextEdit\TextDiff.cpp" />
+    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
     <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="imgui\imgui_impl_sdl2.cpp" />
     <ClCompile Include="main.cpp" />
@@ -244,6 +246,9 @@
     <ClInclude Include="eyecandy\dots.hpp" />
     <ClInclude Include="gui\filebrowser.hpp" />
     <ClInclude Include="gui\log.hpp" />
+    <ClInclude Include="ImGuiColorTextEdit\dtl.h" />
+    <ClInclude Include="ImGuiColorTextEdit\TextDiff.h" />
+    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="imgui\imgui_impl_sdl2.h" />
@@ -264,6 +269,7 @@
     </Font>
   </ItemGroup>
   <ItemGroup>
+    <None Include="debuggers\assembly_dmg.inl" />
     <None Include="debuggers\debuggers_defines_agb.inl" />
     <None Include="debuggers\debuggers_defines_cgb.inl" />
     <None Include="debuggers\debuggers_defines_dmg.inl" />
@@ -274,6 +280,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Vrita.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ImGuiColorTextEdit\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

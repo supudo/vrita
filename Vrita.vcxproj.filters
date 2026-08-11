@@ -96,6 +96,12 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="ImGuiColorTextEdit\TextDiff.cpp">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">
@@ -210,6 +216,15 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="ImGuiColorTextEdit\dtl.h">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiColorTextEdit\TextDiff.h">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">
@@ -245,6 +260,9 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{17d48d89-a9f8-473d-afff-0e93f748414d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ImGuiColorTextEdit">
+      <UniqueIdentifier>{c062a372-9e4e-4b0f-8c29-6de8b3fc2726}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\fonts\fa-regular-400.ttf">
@@ -267,6 +285,9 @@
     <None Include="resources\Vrita.icns">
       <Filter>resources</Filter>
     </None>
+    <None Include="debuggers\assembly_dmg.inl">
+      <Filter>debuggers</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\Vrita.ico">
@@ -277,5 +298,10 @@
     <ResourceCompile Include="resources\Vrita.rc">
       <Filter>resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ImGuiColorTextEdit\LICENSE.txt">
+      <Filter>ImGuiColorTextEdit</Filter>
+    </Text>
   </ItemGroup>
 </Project>

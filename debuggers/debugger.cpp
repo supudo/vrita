@@ -26,6 +26,7 @@ bool Debugger::init() {
     windowHeight = settings.GetInt("Debuggers - Debugger", "height", 300);
 
     initRegisters();
+    initEditor();
 
     logCPUCalls = false;
 

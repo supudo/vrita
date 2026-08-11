@@ -68,7 +68,6 @@ private:
     TextEditor::Language editorLanguage;
     bool editorInitialized = false;
     bool editorSourceSet = false;
-    const TextEditor::Language* initializeLanguage();
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly();

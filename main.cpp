@@ -24,6 +24,9 @@
 #include "gui/log.hpp"
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 
+#include "utilities/fonts.hpp"
+ImFont* VritaFontSmall = nullptr;
+
 #ifdef  TRACY_ENABLE
 void* operator new(size_t size) {
     void* ptr = malloc(size);
@@ -185,15 +188,29 @@ void loadFonts() {
     base_config.SizePixels = baseFontSize;
     io.Fonts->AddFontDefault(&base_config);
 
-    float iconFontSize = baseFontSize * 1.5f;
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
-    ImFontConfig icons_config;
-    icons_config.MergeMode = true;
-    icons_config.PixelSnapH = true;
-    icons_config.GlyphMinAdvanceX = iconFontSize;
-    icons_config.GlyphOffset = ImVec2(0.0f, 4.0f);
-    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-regular-400.ttf", iconFontSize, &icons_config, icons_ranges);
-    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSize, &icons_config, icons_ranges);
+
+    float iconFontSizeNormal = baseFontSize * 1.5f;
+    ImFontConfig iconsConfigNormal;
+    iconsConfigNormal.MergeMode = true;
+    iconsConfigNormal.PixelSnapH = true;
+    iconsConfigNormal.GlyphMinAdvanceX = iconFontSizeNormal;
+    iconsConfigNormal.GlyphOffset = ImVec2(0.0f, 4.0f);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-regular-400.ttf", iconFontSizeNormal, &iconsConfigNormal, icons_ranges);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSizeNormal, &iconsConfigNormal, icons_ranges);
+
+    float iconFontSizeSmall = baseFontSize;
+    ImFontConfig smallBaseConfig;
+    smallBaseConfig.SizePixels = iconFontSizeSmall;
+    VritaFontSmall = io.Fonts->AddFontDefault(&smallBaseConfig);
+
+    ImFontConfig iconsConfigSmall;
+    iconsConfigSmall.MergeMode = true;
+    iconsConfigSmall.PixelSnapH = true;
+    iconsConfigSmall.GlyphMinAdvanceX = iconFontSizeSmall;
+    iconsConfigSmall.GlyphOffset = ImVec2(0.0f, 2.0f);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-regular-400.ttf", iconFontSizeSmall, &iconsConfigSmall, icons_ranges);
+    io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSizeSmall, &iconsConfigSmall, icons_ranges);
 }
 
 bool initBackend() {

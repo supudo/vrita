@@ -1,6 +1,7 @@
 #include "debugger.hpp"
 #include "assembly_dmg.inl"
 #include "utilities/iconfonts/IconsFontAwesome7.h"
+#include "utilities/fonts.hpp"
 
 void Debugger::initEditor() {
     editorAssembly.SetLanguage(CreateDMGLanguage());
@@ -15,34 +16,83 @@ void Debugger::renderAssembly(float height) {
 
     ImGui::BeginChild("childAssembly", ImVec2(0, height), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
 
+    ImGui::PushFont(VritaFontSmall);
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.5f, 0.5f, 1.0));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    if (ImGui::Button(gameIsRunning ? ICON_FA_PAUSE : ICON_FA_PLAY, ImVec2(40, 32))) {
-        gameIsRunning = !gameIsRunning;
-        if (gameIsRunning) funcStartGame();
-        else funcStopGame();
+    bool wasGameRunning = gameIsRunning;
+    if (wasGameRunning) ImGui::BeginDisabled();
+    if (ImGui::Button(ICON_FA_PLAY)) {
+        gameIsRunning = true;
+        funcStartGame();
     }
-    ImGui::SetItemTooltip(gameIsRunning ? "Pause" : "Run");
+    if (wasGameRunning) ImGui::EndDisabled();
+    ImGui::SetItemTooltip("Run");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(40, 32))) {
+    if (!wasGameRunning) ImGui::BeginDisabled();
+    if (ImGui::Button(ICON_FA_PAUSE)) {
+        gameIsRunning = false;
+        funcStopGame();
     }
-    ImGui::SetItemTooltip("Step Over");
+    if (!wasGameRunning) ImGui::EndDisabled();
+    ImGui::SetItemTooltip("Pause");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN, ImVec2(40, 32))) {
+    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN)) {
     }
     ImGui::SetItemTooltip("Step In");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_UP, ImVec2(40, 32))) {
+    if (ImGui::Button(ICON_FA_ARROW_DOWN)) {
+    }
+    ImGui::SetItemTooltip("Step Over");
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_ARROW_UP)) {
     }
     ImGui::SetItemTooltip("Step Back");
     ImGui::SameLine();
-    if (ImGui::Button(logCPUCalls ? "Log CPU Calls OFF" : "Log CPU Calls ON", ImVec2(120, 32))) {
+    if (ImGui::Button(ICON_FA_ARROW_TURN_UP)) {
+    }
+    ImGui::SetItemTooltip("Step Return");
+    ImGui::SameLine();
+    if (ImGui::Button(ICON_FA_UP_RIGHT_FROM_SQUARE)) {
+    }
+    ImGui::SetItemTooltip("Advance Frame");
+
+    // separator
+    ImGui::SameLine();
+    {
+        float spacing = 8.0f;
+        float lineHeight = ImGui::GetFrameHeight();
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        float lineX = p.x + spacing * 0.5f;
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(lineX, p.y), ImVec2(lineX, p.y + lineHeight), ImGui::GetColorU32(ImGuiCol_Separator), 1.0f);
+        ImGui::Dummy(ImVec2(spacing, lineHeight));
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button(breakpointsDisabled ? ICON_FA_TOGGLE_ON : ICON_FA_TOGGLE_OFF)) {
+        breakpointsDisabled = !breakpointsDisabled;
+    }
+    ImGui::SetItemTooltip(breakpointsDisabled ? "Disable Breakpoints" : "Enable Breakpoints");
+
+    // separator
+    ImGui::SameLine();
+    {
+        float spacing = 8.0f;
+        float lineHeight = ImGui::GetFrameHeight();
+        ImVec2 p = ImGui::GetCursorScreenPos();
+        float lineX = p.x + spacing * 0.5f;
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(lineX, p.y), ImVec2(lineX, p.y + lineHeight), ImGui::GetColorU32(ImGuiCol_Separator), 1.0f);
+        ImGui::Dummy(ImVec2(spacing, lineHeight));
+    }
+
+    ImGui::SameLine();
+    if (ImGui::Button(logCPUCalls ? "Log CPU Calls OFF" : "Log CPU Calls ON")) {
         logCPUCalls = !logCPUCalls;
         funcLogCPUCalls(logCPUCalls);
     }
     ImGui::SetItemTooltip("Log CPU calls");
     ImGui::PopStyleColor(3);
+    ImGui::PopFont();
 
     ImGui::Separator();
 

@@ -225,6 +225,9 @@
     <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
       <Filter>ImGuiColorTextEdit</Filter>
     </ClInclude>
+    <ClInclude Include="utilities\fonts.hpp">
+      <Filter>utilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

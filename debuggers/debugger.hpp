@@ -68,6 +68,7 @@ private:
     TextEditor::Language editorLanguage;
     bool editorInitialized = false;
     bool editorSourceSet = false;
+    bool breakpointsDisabled = false;
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly(float height);

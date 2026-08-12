@@ -70,7 +70,7 @@ private:
     bool editorSourceSet = false;
 
     void renderPerspective(DMGCpuRegisters& registers);
-    void renderAssembly();
+    void renderAssembly(float height);
 
     void renderRest();
     void renderRestMemory();

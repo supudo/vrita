@@ -86,42 +86,6 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
         ImGui::End();
         return;
     }
-
-    if (!gameIsRunning && funcIsGameRunning())
-        funcStopGame();
-    else if (gameIsRunning && !funcIsGameRunning())
-        funcStartGame();
-
-    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.9f, 0.5f, 0.5f, 1.0));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.2f, 0.2f, 1.0));
-    if (ImGui::Button(gameIsRunning ? ICON_FA_PAUSE : ICON_FA_PLAY, ImVec2(40, 32))) {
-        gameIsRunning = !gameIsRunning;
-        if (gameIsRunning) funcStartGame();
-        else funcStopGame();
-    }
-    ImGui::SetItemTooltip(gameIsRunning ? "Pause" : "Run");
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_DOWN, ImVec2(40, 32))) {
-    }
-    ImGui::SetItemTooltip("Step Over");
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN, ImVec2(40, 32))) {
-    }
-    ImGui::SetItemTooltip("Step In");
-    ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_UP, ImVec2(40, 32))) {
-    }
-    ImGui::SetItemTooltip("Step Back");
-    ImGui::SameLine();
-    if (ImGui::Button(logCPUCalls ? "Log CPU Calls OFF" : "Log CPU Calls ON", ImVec2(120, 32))) {
-        logCPUCalls = !logCPUCalls;
-        funcLogCPUCalls(logCPUCalls);
-    }
-    ImGui::SetItemTooltip("Log CPU calls");
-    ImGui::PopStyleColor(3);
-
-    ImGui::Separator();
     
     renderPerspective(registers);
     
@@ -145,9 +109,7 @@ void Debugger::renderPerspective(DMGCpuRegisters& registers) {
         float memH = std::clamp(memoryPanelHeight, 50.0f, availH - heightSplitter - 50.0f);
         float assemblyH = availH - memH - heightSplitter;
 
-        ImGui::BeginChild("childAssembly", ImVec2(0, assemblyH), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
-        renderAssembly();
-        ImGui::EndChild();
+        renderAssembly(assemblyH);
 
         ImGui::InvisibleButton("splitterLeftH", ImVec2(-1, heightSplitter));
         if (ImGui::IsItemActive())

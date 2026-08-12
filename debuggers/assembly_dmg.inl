@@ -103,9 +103,20 @@ inline std::string instructionFormat(const DisassembledInstruction& instruction)
     return result;
 }
 
-inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t opcode, std::function<uint8_t(uint16_t)> read8) {
+std::string formatBytes(const DisassembledInstruction& instruction) {
+    std::string result;
+    for (uint8_t i = 0; i < instruction.length; ++i) {
+        if (i > 0)
+            result += ' ';
+        result += std::format("{:02X}", instruction.bytes[i]);
+    }
+    return result;
+}
+
+inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t opcode, const std::function<uint8_t(uint32_t)>& read8) {
     DisassembledInstruction instruction;
     instruction.address = address;
+    instruction.bytes[0] = opcode;
     instruction.opcode = opcode;
     instruction.length = instructionLengths(opcode);
     instruction.mnemonic = InstructionMnemonic::UNKNOWN;
@@ -113,6 +124,12 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
 
     const uint8_t d8 = instruction.length >= 2 ? read8(address + 1) : 0;
     const uint16_t d16 = instruction.length >= 3 ? static_cast<uint16_t>(d8) | (static_cast<uint16_t>(read8(address + 2)) << 8) : 0;
+
+    if (instruction.length >= 2)
+        instruction.bytes[1] = read8(address + 1);
+
+    if (instruction.length >= 3)
+        instruction.bytes[2] = read8(address + 2);
 
     if (opcode == 0x00)
         instruction.mnemonic = InstructionMnemonic::NOP;

@@ -1,6 +1,8 @@
 #ifndef VRITA_DEBUGGERS_ASSEMBLY_DEFINES_INCLUDES
 #define VRITA_DEBUGGERS_ASSEMBLY_DEFINES_INCLUDES
 
+#include <array>
+
 enum InstructionFlags {
     None = 0,
     Branch = 1 << 0, // JP, JR
@@ -85,6 +87,8 @@ struct DisassembledInstruction {
     InstructionMnemonic mnemonic;
 
     Operand operands[2];
+
+    std::array<uint8_t, 3> bytes;
 };
 
 constexpr std::string_view InstructionMnemonicNames[] = {

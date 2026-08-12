@@ -21,6 +21,7 @@ void Debugger::disassemblySource() {
         uint32_t address = 0x0000;
         int line = 0;
         const int maxInstructions = 0x8000;
+        assemblySource.reserve(static_cast<size_t>(maxInstructions) * 24);
         
         for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
             const uint16_t instructionAddress = static_cast<uint16_t>(address);
@@ -30,7 +31,29 @@ void Debugger::disassemblySource() {
             char prefix[8];
             snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
             assemblySource += prefix;
-            assemblySource += instructionFormat(instruction);
+
+            assemblySource += formatBytes(instruction);
+
+            // Padding so instructions line up
+            for (uint8_t i = instruction.length; i < 3; ++i)
+                assemblySource += "   ";
+
+            assemblySource += "  ";
+
+            assemblySource += instructionToString(instruction.mnemonic);
+
+            bool first = true;
+
+            for (const auto& operand : instruction.operands) {
+                if (operand.type == OperandType::None)
+                    continue;
+                assemblySource += first ? " " : ", ";
+                assemblySource += instructionFormatOperand(operand);
+
+                first = false;
+            }
+
+            //assemblySource += instructionFormat(instruction);
             assemblySource += "\n";
 
             line++;

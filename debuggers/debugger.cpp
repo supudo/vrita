@@ -87,9 +87,9 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
         return;
     }
 
-    if (!gameIsRunning && funcIsGameRunning)
+    if (!gameIsRunning && funcIsGameRunning())
         funcStopGame();
-    else if (gameIsRunning && !funcIsGameRunning)
+    else if (gameIsRunning && !funcIsGameRunning())
         funcStartGame();
 
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.9f, 0.2f, 0.2f, 1.0));

@@ -228,6 +228,9 @@
     <ClInclude Include="utilities\fonts.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
+    <ClInclude Include="debuggers\debugger_assembly_defines.hpp">
+      <Filter>debuggers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

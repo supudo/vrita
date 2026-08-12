@@ -109,7 +109,7 @@ void Debugger::renderPerspective(DMGCpuRegisters& registers) {
         float memH = std::clamp(memoryPanelHeight, 50.0f, availH - heightSplitter - 50.0f);
         float assemblyH = availH - memH - heightSplitter;
 
-        renderAssembly(assemblyH);
+        renderAssembly(registers, assemblyH);
 
         ImGui::InvisibleButton("splitterLeftH", ImVec2(-1, heightSplitter));
         if (ImGui::IsItemActive())

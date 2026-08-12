@@ -71,7 +71,8 @@ private:
     bool breakpointsDisabled = false;
 
     void renderPerspective(DMGCpuRegisters& registers);
-    void renderAssembly(float height);
+    void renderAssembly(DMGCpuRegisters& registers, float height);
+    void disassemblySource();
 
     void renderRest();
     void renderRestMemory();

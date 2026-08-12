@@ -8,7 +8,42 @@ void Debugger::initEditor() {
     editorAssembly.SetReadOnlyEnabled(true);
 }
 
-void Debugger::renderAssembly(float height) {
+void Debugger::disassemblySource() {
+    if (!editorSourceSet) {
+        if (!funcMemoryRead)
+            return; // try next frame?
+
+        editorSourceSet = true;
+
+        // editorAssembly.SetText(assemblySampleDMG);
+
+        std::string assemblySource;
+        uint32_t address = 0x0000;
+        int line = 0;
+        const int maxInstructions = 0x8000;
+        
+        for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
+            const uint16_t instructionAddress = static_cast<uint16_t>(address);
+            const uint8_t opcode = funcMemoryRead(instructionAddress);
+            DisassembledInstruction instruction = disassembleInstruction(instructionAddress, opcode, funcMemoryRead);
+
+            char prefix[8];
+            snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
+            assemblySource += prefix;
+            assemblySource += instructionFormat(instruction);
+            assemblySource += "\n";
+
+            line++;
+            address += instruction.length;
+        }
+
+        editorAssembly.SetText(assemblySource);
+    }
+}
+
+void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
+    disassemblySource();
+
     if (!gameIsRunning && funcIsGameRunning())
         funcStopGame();
     else if (gameIsRunning && !funcIsGameRunning())
@@ -95,40 +130,6 @@ void Debugger::renderAssembly(float height) {
     ImGui::PopFont();
 
     ImGui::Separator();
-
-    if (!editorSourceSet) {
-        editorSourceSet = true;
-        editorAssembly.SetText(R"(
-
-; Game Boy boot code
-
-SECTION "Start", ROM0[$0100]
-
-Start:
-    nop
-    jp $0150
-
-    db $CE
-    db %10101010
-
-Main:
-    ld   sp,$FFFE
-    xor  a
-    ld   hl,$C000
-
-Loop:
-    ld   (hl+),a
-    inc  a
-    cp   $10
-    jr   nz,Loop
-
-    call $1234
-    jp   Main
-
-    halt
-
-)");
-    }
 
     editorAssembly.ClearMarkers();
     editorAssembly.AddMarker(editorAssembly.GetCurrentCursorPosition().line, IM_COL32(55, 55, 60, 255), IM_COL32(55, 55, 60, 255), "", "");

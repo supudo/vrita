@@ -223,6 +223,7 @@
     <ClInclude Include="debuggers\debuggers_defines_agb.hpp" />
     <ClInclude Include="debuggers\debuggers_defines_cgb.hpp" />
     <ClInclude Include="debuggers\debuggers_defines_dmg.hpp" />
+    <ClInclude Include="debuggers\debugger_assembly_defines.hpp" />
     <ClInclude Include="debuggers\memory_editor.hpp" />
     <ClInclude Include="debuggers\palette_viewer.hpp" />
     <ClInclude Include="debuggers\sprite_viewer.hpp" />

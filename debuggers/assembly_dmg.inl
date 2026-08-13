@@ -71,9 +71,9 @@ inline std::string instructionFormatOperand(const Operand& operand) {
         case OperandType::None:
             return "";
         case OperandType::Register8:
-            return getRegisterName8(operand.value);
+            return getRegisterName8(static_cast<uint8_t>(operand.value));
         case OperandType::Register16:
-            return getRegisterName16(operand.value);
+            return getRegisterName16(static_cast<uint8_t>(operand.value));
         case OperandType::Immediate8:
             return std::format("${:02X}", operand.value);
         case OperandType::Immediate16:
@@ -83,7 +83,7 @@ inline std::string instructionFormatOperand(const Operand& operand) {
         case OperandType::Relative8:
             return std::format("${:04X}", operand.value);
         case OperandType::Condition:
-            return getConditionName(operand.value);
+            return getConditionName(static_cast<uint8_t>(operand.value));
         case OperandType::Bit:
             return std::to_string(operand.value);
     }
@@ -111,6 +111,18 @@ std::string formatBytes(const DisassembledInstruction& instruction) {
         result += std::format("{:02X}", instruction.bytes[i]);
     }
     return result;
+}
+
+inline std::string formatHex8(uint8_t value) {
+    char buffer[8];
+    snprintf(buffer, sizeof(buffer), "$%02X", value);
+    return buffer;
+}
+
+inline std::string formatHex16(uint16_t value) {
+    char buffer[8];
+    snprintf(buffer, sizeof(buffer), "$%04X", value);
+    return buffer;
 }
 
 inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t opcode, const std::function<uint8_t(uint32_t)>& read8) {
@@ -148,6 +160,114 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
         instruction.mnemonic = InstructionMnemonic::LD;
         instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>((opcode >> 3) & 7) };
         instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(opcode & 7) };
+    }
+    else if (opcode == 0x06 || opcode == 0x0E || opcode == 0x16 || opcode == 0x1E || opcode == 0x26 || opcode == 0x2E || opcode == 0x36 || opcode == 0x3E) {
+        // LD r,d8 -- dst register encoded same as the LD r,r' block (bits 3-5)
+        const uint8_t dst = (opcode >> 3) & 7;
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(dst) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xC6) {
+        instruction.mnemonic = InstructionMnemonic::ADD;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xCE) {
+        instruction.mnemonic = InstructionMnemonic::ADC;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xD6) {
+        instruction.mnemonic = InstructionMnemonic::SUB;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xDE) {
+        instruction.mnemonic = InstructionMnemonic::SBC;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xE6) {
+        instruction.mnemonic = InstructionMnemonic::AND;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xEE) {
+        instruction.mnemonic = InstructionMnemonic::XOR;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xF6) {
+        instruction.mnemonic = InstructionMnemonic::OR;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xFE) {
+        instruction.mnemonic = InstructionMnemonic::CP;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xE0) {
+        instruction.mnemonic = InstructionMnemonic::LDH;
+        instruction.operands[0] = { OperandType::Address16, static_cast<uint16_t>(0xFF00 + d8) };
+        instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(7) };
+    }
+    else if (opcode == 0xF0) {
+        instruction.mnemonic = InstructionMnemonic::LDH;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Address16, static_cast<uint16_t>(0xFF00 + d8) };
+    }
+    else if (opcode == 0x01) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(0) };
+        instruction.operands[1] = { OperandType::Immediate16, static_cast<uint16_t>(d16) };
+    }
+    else if (opcode == 0x11) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(1) };
+        instruction.operands[1] = { OperandType::Immediate16, static_cast<uint16_t>(d16) };
+    }
+    else if (opcode == 0x21) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(2) };
+        instruction.operands[1] = { OperandType::Immediate16, static_cast<uint16_t>(d16) };
+    }
+    else if (opcode == 0x31) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(3) };
+        instruction.operands[1] = { OperandType::Immediate16, static_cast<uint16_t>(d16) };
+    }
+    else if (opcode == 0x08) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Address16, static_cast<uint16_t>(d16) };
+        instruction.operands[1] = { OperandType::Register16, static_cast<uint16_t>(3) };
+    }
+    else if (opcode == 0xEA) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Address16, static_cast<uint16_t>(d16) };
+        instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(7) };
+    }
+    else if (opcode == 0xFA) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) };
+        instruction.operands[1] = { OperandType::Address16, static_cast<uint16_t>(d16) };
+    }
+    else if (opcode == 0x18) {
+        instruction.mnemonic = InstructionMnemonic::JR;
+        const uint16_t jumpTarget = static_cast<uint16_t>(address + 2 + static_cast<int8_t>(d8));
+        instruction.operands[0] = { OperandType::Relative8, jumpTarget };
+        instruction.target = jumpTarget;
+        instruction.flags = InstructionFlags::Branch;
+    }
+    else if (opcode == 0x20 || opcode == 0x28 || opcode == 0x30 || opcode == 0x38) {
+        instruction.mnemonic = InstructionMnemonic::JR;
+        const uint16_t jumpTarget = static_cast<uint16_t>(address + 2 + static_cast<int8_t>(d8));
+        const uint8_t condition = (opcode >> 3) & 3;
+        instruction.operands[0] = { OperandType::Condition, condition };
+        instruction.operands[1] = { OperandType::Relative8, jumpTarget };
+        instruction.target = jumpTarget;
+        instruction.flags = InstructionFlags::Branch | InstructionFlags::Conditional;
     }
     else
         instruction.mnemonic = InstructionMnemonic::UNKNOWN;

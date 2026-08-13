@@ -34,8 +34,7 @@ void Debugger::disassemblySource() {
 
             assemblySource += formatBytes(instruction);
 
-            // Padding so instructions line up
-            for (uint8_t i = instruction.length; i < 3; ++i)
+            for (uint8_t j = instruction.length; j < 3; ++j)
                 assemblySource += "   ";
 
             assemblySource += "  ";

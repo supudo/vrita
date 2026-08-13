@@ -495,6 +495,7 @@ inline const std::unordered_set<std::string>& Instructions() {
     static const std::unordered_set<std::string> instructions = {
         // 8-bit / 16-bit loads
         "ld",
+        "ldh",
         "ldi",
         "ldd",
 

@@ -2,6 +2,7 @@
 #include "assembly_dmg.inl"
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 #include "utilities/fonts.hpp"
+#include "emulators/dmg/cpu_registers.hpp"
 
 void Debugger::initEditor() {
     editorAssembly.SetLanguage(CreateDMGLanguage());
@@ -15,18 +16,20 @@ void Debugger::disassemblySource() {
 
         editorSourceSet = true;
 
-        // editorAssembly.SetText(assemblySampleDMG);
+        addressToLine.fill(-1);
 
         std::string assemblySource;
         uint32_t address = 0x0000;
         int line = 0;
         const int maxInstructions = 0x8000;
         assemblySource.reserve(static_cast<size_t>(maxInstructions) * 24);
-        
+
         for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
             const uint16_t instructionAddress = static_cast<uint16_t>(address);
             const uint8_t opcode = funcMemoryRead(instructionAddress);
             DisassembledInstruction instruction = disassembleInstruction(instructionAddress, opcode, funcMemoryRead);
+
+            addressToLine[instructionAddress] = line;
 
             char prefix[8];
             snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
@@ -36,7 +39,6 @@ void Debugger::disassemblySource() {
 
             for (uint8_t j = instruction.length; j < 3; ++j)
                 assemblySource += "   ";
-
             assemblySource += "  ";
 
             assemblySource += instructionToString(instruction.mnemonic);
@@ -52,7 +54,6 @@ void Debugger::disassemblySource() {
                 first = false;
             }
 
-            //assemblySource += instructionFormat(instruction);
             assemblySource += "\n";
 
             line++;
@@ -63,8 +64,48 @@ void Debugger::disassemblySource() {
     }
 }
 
+void Debugger::scrollToAddress(uint16_t address) {
+    const int32_t line = addressToLine[address];
+    if (line < 0)
+        return;
+
+    followedLine = static_cast<size_t>(line);
+    editorAssembly.SetCursor(TextEditor::DocPos(followedLine, 0));
+    editorAssembly.SelectLine(followedLine);
+    editorAssembly.ScrollToLine(followedLine, TextEditor::Scroll::alignMiddle);
+}
+
+void Debugger::followPC(DMGCpuRegisters& registers) {
+    if (!gameIsRunning)
+        return;
+    const int32_t line = addressToLine[registers.PC];
+    if (line < 0 || static_cast<size_t>(line) == followedLine)
+        return;
+    scrollToAddress(registers.PC);
+}
+
+void Debugger::stepIn() {
+}
+
+void Debugger::stepOver(DMGCpuRegisters& registers) {
+    if (gameIsRunning || !funcStepInstruction)
+        return;
+    funcStepInstruction();
+    scrollToAddress(registers.PC);
+}
+
+void Debugger::stepBack() {
+}
+
+void Debugger::stepReturn() {
+}
+
+void Debugger::advanceFrame() {
+}
+
 void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     disassemblySource();
+    followPC(registers);
 
     if (!gameIsRunning && funcIsGameRunning())
         funcStopGame();
@@ -94,24 +135,24 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     if (!wasGameRunning) ImGui::EndDisabled();
     ImGui::SetItemTooltip("Pause");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN)) {
-    }
+    if (ImGui::Button(ICON_FA_ARROW_TURN_DOWN))
+        stepIn();
     ImGui::SetItemTooltip("Step In");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_DOWN)) {
-    }
+    if (ImGui::Button(ICON_FA_ARROW_DOWN))
+        stepOver(registers);
     ImGui::SetItemTooltip("Step Over");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_UP)) {
-    }
+    if (ImGui::Button(ICON_FA_ARROW_UP))
+        stepBack();
     ImGui::SetItemTooltip("Step Back");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_ARROW_TURN_UP)) {
-    }
+    if (ImGui::Button(ICON_FA_ARROW_TURN_UP))
+        stepReturn();
     ImGui::SetItemTooltip("Step Return");
     ImGui::SameLine();
-    if (ImGui::Button(ICON_FA_UP_RIGHT_FROM_SQUARE)) {
-    }
+    if (ImGui::Button(ICON_FA_UP_RIGHT_FROM_SQUARE))
+        advanceFrame();
     ImGui::SetItemTooltip("Advance Frame");
 
     // separator
@@ -154,7 +195,8 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     ImGui::Separator();
 
     editorAssembly.ClearMarkers();
-    editorAssembly.AddMarker(editorAssembly.GetCurrentCursorPosition().line, IM_COL32(55, 55, 60, 255), IM_COL32(55, 55, 60, 255), "", "");
+    const size_t markerLine = (gameIsRunning && followedLine != SIZE_MAX) ? followedLine : editorAssembly.GetCurrentCursorPosition().line;
+    editorAssembly.AddMarker(markerLine, IM_COL32(55, 55, 60, 255), IM_COL32(55, 55, 60, 255), "", "");
 
     editorAssembly.Render("Assembly");
 

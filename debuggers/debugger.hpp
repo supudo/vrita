@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <cstdint>
+#include <array>
 #include <string>
 #include <vector>
 #include <imgui.h>
@@ -28,7 +29,8 @@ public:
                       std::function<bool()> isGameRunning,
                       std::function<void()> stopGame,
                       std::function<void()> startGame,
-                      std::function<void(bool)> logCPUCalls);
+                      std::function<void(bool)> logCPUCalls,
+                      std::function<void()> stepInstruction);
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -52,6 +54,7 @@ private:
     std::function<void()> funcStopGame;
     std::function<void()> funcStartGame;
     std::function<void(bool)> funcLogCPUCalls;
+    std::function<void()> funcStepInstruction;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
@@ -70,9 +73,19 @@ private:
     bool editorSourceSet = false;
     bool breakpointsDisabled = false;
 
+    std::array<int32_t, 0x10000> addressToLine {};
+    size_t followedLine = SIZE_MAX;
+    void followPC(DMGCpuRegisters& registers);
+    void scrollToAddress(uint16_t address);
+
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly(DMGCpuRegisters& registers, float height);
     void disassemblySource();
+    void stepIn();
+    void stepOver(DMGCpuRegisters& registers);
+    void stepBack();
+    void stepReturn();
+    void advanceFrame();
 
     void renderRest();
     void renderRestMemory();

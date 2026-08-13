@@ -40,7 +40,8 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                             std::function<bool()> isGameRunning,
                             std::function<void()> stopGame,
                             std::function<void()> startGame,
-                            std::function<void(bool)> logCPUCalls) {
+                            std::function<void(bool)> logCPUCalls,
+                            std::function<void()> stepInstruction) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcCpuGetFlag = getFlag;
@@ -49,6 +50,7 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcStopGame = stopGame;
     funcStartGame = startGame;
     funcLogCPUCalls = logCPUCalls;
+    funcStepInstruction = stepInstruction;
 }
 
 void Debugger::release() {

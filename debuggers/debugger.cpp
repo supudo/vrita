@@ -29,6 +29,8 @@ bool Debugger::init() {
     initEditor();
 
     logCPUCalls = false;
+    isThinking = false;
+    thinkingPercentage = 0.0f;
 
     return true;
 }
@@ -54,11 +56,24 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
 }
 
 void Debugger::release() {
+    if (disassemblyThread.joinable())
+        disassemblyThread.join();
+
     settings.Set("Debuggers - Debugger", "position_x", (int)lastWindowPosition.x);
     settings.Set("Debuggers - Debugger", "position_y", (int)lastWindowPosition.y);
     settings.Set("Debuggers - Debugger", "width", (int)lastWindowSize.x);
     settings.Set("Debuggers - Debugger", "height", (int)lastWindowSize.y);
     settings.Save();
+    isThinking = false;
+    thinkingPercentage = 0.0f;
+}
+
+void Debugger::showThinking() {
+    isThinking = true;
+}
+
+void Debugger::hideThinking() {
+    isThinking = false;
 }
 
 void Debugger::setMemory(const char* emulatorType, uint32_t size) {
@@ -88,9 +103,40 @@ void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
         ImGui::End();
         return;
     }
-    
+
+    const bool wasThinking = isThinking;
+    if (wasThinking)
+        ImGui::BeginDisabled();
+
     renderPerspective(registers);
-    
+
+    if (wasThinking) {
+        ImGui::EndDisabled();
+
+        ImVec2 winPos = ImGui::GetWindowPos();
+        ImVec2 winSize = ImGui::GetWindowSize();
+
+        ImGui::SetCursorScreenPos(winPos);
+        ImGui::BeginChild("ThinkingOverlay", winSize, ImGuiChildFlags_None, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoBackground);
+        ImGui::GetWindowDrawList()->AddRectFilled(winPos, ImVec2(winPos.x + winSize.x, winPos.y + winSize.y), IM_COL32(0, 0, 0, 200));
+
+        const char* label = "Processing...";
+        ImVec2 textSize = ImGui::CalcTextSize(label);
+        ImVec2 boxSize = ImVec2(std::max(textSize.x, 200.0f) + 20.0f, textSize.y * 2 + 40.0f);
+        ImVec2 boxPos = ImVec2(winPos.x + (winSize.x - boxSize.x) * 0.5f, winPos.y + (winSize.y - boxSize.y) * 0.5f);
+
+        ImGui::SetCursorScreenPos(boxPos);
+        ImGui::BeginChild("ThinkingBox", boxSize, ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::SetCursorPosX((boxSize.x - textSize.x) * 0.5f);
+        ImGui::Text("%s", label);
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, static_cast<ImVec4>(ImColor::HSV(0.1f / 7.0f, 0.8f, 0.8f)));
+        ImGui::ProgressBar(thinkingPercentage / 100.0f, ImVec2(boxSize.x - 20.0f, 0.0f));
+        ImGui::PopStyleColor(1);
+        ImGui::EndChild();
+
+        ImGui::EndChild();
+    }
+
     ImGui::End();
 }
 

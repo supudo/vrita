@@ -1,4 +1,9 @@
 #include "debugger.hpp"
+
+#include <chrono>
+#include <memory>
+#include <thread>
+
 #include "assembly_dmg.inl"
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 #include "utilities/fonts.hpp"
@@ -10,61 +15,94 @@ void Debugger::initEditor() {
 }
 
 void Debugger::disassemblySource() {
-    if (!editorSourceSet) {
-        if (!funcMemoryRead)
-            return; // try next frame?
+    if (disassemblyDone.load()) {
+        if (disassemblyThread.joinable())
+            disassemblyThread.join();
 
+        addressToLine = pendingAddressToLine;
+        editorAssembly.SetText(pendingAssemblySource);
+        pendingAssemblySource.clear();
+        pendingAssemblySource.shrink_to_fit();
+
+        disassemblyDone.store(false);
         editorSourceSet = true;
+        hideThinking();
+        return;
+    }
 
-        addressToLine.fill(-1);
+    if (editorSourceSet || disassemblyStarted)
+        return;
 
-        std::string assemblySource;
-        uint32_t address = 0x0000;
-        int line = 0;
-        const int maxInstructions = 0x8000;
-        assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
+    if (!funcMemoryRead)
+        return; // try next frame?
 
-        for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
-            const uint16_t instructionAddress = static_cast<uint16_t>(address);
-            const uint8_t opcode = funcMemoryRead(instructionAddress);
-            DisassembledInstruction instruction = disassembleInstruction(instructionAddress, opcode, funcMemoryRead);
+    disassemblyStarted = true;
+    showThinking();
+    disassemblyThread = std::thread(&Debugger::disassembleWork, this);
+}
 
-            addressToLine[instructionAddress] = line;
+void Debugger::disassembleWork() {
+    const auto startTime = std::chrono::steady_clock::now();
 
-            char prefix[16];
-            snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
-            assemblySource += prefix;
+    auto localAddressToLine = std::make_unique<std::array<int32_t, 0x10000>>();
+    localAddressToLine->fill(-1);
 
-            assemblySource += formatBytes(instruction);
+    std::string assemblySource;
+    uint32_t address = 0x0000;
+    int line = 0;
+    const int maxInstructions = 0x8000;
+    assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
 
-            for (uint8_t j = instruction.length; j < 3; ++j)
-                assemblySource += "    ";
-            assemblySource += "  ";
+    for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
+        const uint16_t instructionAddress = static_cast<uint16_t>(address);
+        const uint8_t opcode = funcMemoryRead(instructionAddress);
+        DisassembledInstruction instruction = disassembleInstruction(instructionAddress, opcode, funcMemoryRead);
 
-            assemblySource += instructionToString(instruction.mnemonic);
+        (*localAddressToLine)[instructionAddress] = line;
 
-            bool first = true;
+        char prefix[16];
+        snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
+        assemblySource += prefix;
 
-            for (const auto& operand : instruction.operands) {
-                if (operand.type == OperandType::None)
-                    continue;
-                assemblySource += first ? " " : ", ";
-                assemblySource += instructionFormatOperand(operand);
+        assemblySource += formatBytes(instruction);
 
-                first = false;
-            }
+        for (uint8_t j = instruction.length; j < 3; ++j)
+            assemblySource += "    ";
+        assemblySource += "  ";
 
-            assemblySource += "\n";
+        assemblySource += instructionToString(instruction.mnemonic);
 
-            line++;
-            address += instruction.length;
+        bool first = true;
+
+        for (const auto& operand : instruction.operands) {
+            if (operand.type == OperandType::None)
+                continue;
+            assemblySource += first ? " " : ", ";
+            assemblySource += instructionFormatOperand(operand);
+
+            first = false;
         }
 
-        editorAssembly.SetText(assemblySource);
+        assemblySource += "\n";
+
+        line++;
+        address += instruction.length;
+        thinkingPercentage.store(100.0f * static_cast<float>(address) / 0x10000);
     }
+
+    pendingAddressToLine = *localAddressToLine;
+    pendingAssemblySource = std::move(assemblySource);
+
+    const auto elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - startTime).count();
+    logger.log("[Debugger] Disassembly took %.2f ms", elapsedMs);
+
+    disassemblyDone.store(true);
 }
 
 void Debugger::scrollToAddress(uint16_t address) {
+    if (!editorSourceSet)
+        return;
+
     const int32_t line = addressToLine[address];
     if (line < 0)
         return;

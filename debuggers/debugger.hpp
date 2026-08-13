@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <cstdint>
 #include <array>
+#include <atomic>
+#include <thread>
 #include <string>
 #include <vector>
 #include <imgui.h>
@@ -67,11 +69,18 @@ private:
     bool logCPUCalls = false;
 
     TextEditor editorAssembly;
-    void initEditor();
     TextEditor::Language editorLanguage;
     bool editorInitialized = false;
     bool editorSourceSet = false;
     bool breakpointsDisabled = false;
+    void initEditor();
+    void disassembleWork();
+
+    std::thread disassemblyThread;
+    std::atomic<bool> disassemblyDone { false };
+    bool disassemblyStarted = false;
+    std::string pendingAssemblySource;
+    std::array<int32_t, 0x10000> pendingAddressToLine{};
 
     std::array<int32_t, 0x10000> addressToLine {};
     size_t followedLine = SIZE_MAX;
@@ -86,6 +95,11 @@ private:
     void stepBack();
     void stepReturn();
     void advanceFrame();
+
+    bool isThinking = false;
+    std::atomic<float> thinkingPercentage = 0.0f;
+    void showThinking();
+    void hideThinking();
 
     void renderRest();
     void renderRestMemory();

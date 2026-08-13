@@ -89,7 +89,7 @@ private:
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly(DMGCpuRegisters& registers, float height);
-    void disassemblySource();
+    void disassemblySource(DMGCpuRegisters& registers);
     void stepIn();
     void stepOver(DMGCpuRegisters& registers);
     void stepBack();

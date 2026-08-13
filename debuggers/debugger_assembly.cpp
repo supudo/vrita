@@ -14,7 +14,7 @@ void Debugger::initEditor() {
     editorAssembly.SetReadOnlyEnabled(true);
 }
 
-void Debugger::disassemblySource() {
+void Debugger::disassemblySource(DMGCpuRegisters& registers) {
     if (disassemblyDone.load()) {
         if (disassemblyThread.joinable())
             disassemblyThread.join();
@@ -27,6 +27,8 @@ void Debugger::disassemblySource() {
         disassemblyDone.store(false);
         editorSourceSet = true;
         hideThinking();
+
+        scrollToAddress(registers.PC);
         return;
     }
 
@@ -142,7 +144,7 @@ void Debugger::advanceFrame() {
 }
 
 void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
-    disassemblySource();
+    disassemblySource(registers);
     followPC(registers);
 
     if (!gameIsRunning && funcIsGameRunning())

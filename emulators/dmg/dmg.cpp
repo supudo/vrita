@@ -411,6 +411,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             frameAccumulator = maxAccumulator;
         }
 
+        auto cpuStart = std::chrono::steady_clock::now();
         uint32_t framesStepped = 0;
         while (frameAccumulator >= frameDuration && framesStepped < MAX_CATCHUP_FRAMES) {
             {
@@ -425,6 +426,9 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             renderingFrames++;
             framesStepped++;
         }
+        auto cpuEnd = std::chrono::steady_clock::now();
+        if (framesStepped > 0)
+            lastFrameStepMs = std::chrono::duration<double, std::milli>(cpuEnd - cpuStart).count() / framesStepped;
 
         auto now = std::chrono::steady_clock::now();
         double elapsed = std::chrono::duration<double>(now - lastFPSTime).count();

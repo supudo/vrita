@@ -36,6 +36,7 @@ public:
     void setMemory(const char* emulatorType, uint32_t size);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
+    void pushCPUFrameTime(float ms);
 
 private:
     Logger& logger;
@@ -122,6 +123,10 @@ private:
     void renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit);
     void renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit);
     void renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type);
+
+    static constexpr int cpuLoadHistorySize = 90;
+    float cpuLoadHistory[cpuLoadHistorySize] = {};
+    int cpuLoadHistoryOffset = 0;
 
     void renderCPULoad();
 };

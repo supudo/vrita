@@ -348,26 +348,23 @@ void Debugger::renderMemoryRegion() {
 
 // region: CPU Load quadrant
 
+void Debugger::pushCPUFrameTime(float ms) {
+    cpuLoadHistory[cpuLoadHistoryOffset] = ms;
+    cpuLoadHistoryOffset = (cpuLoadHistoryOffset + 1) % cpuLoadHistorySize;
+}
+
 void Debugger::renderCPULoad() {
-    ImGui::SeparatorText("CPU Usage (% per Frame)");
+    ImGui::SeparatorText("CPU Usage (%/ms per Frame)");
 
-    static float values[90] = {};
-    static int values_offset = 0;
-    static double refresh_time = 0.0;
-    if (!gameIsRunning || refresh_time == 0.0)
-        refresh_time = ImGui::GetTime();
-    while (refresh_time < ImGui::GetTime()) // Create data at fixed 60 Hz rate for the demo
-    {
-        static float phase = 0.0f;
-        values[values_offset] = cosf(phase);
-        values_offset = (values_offset + 1) % IM_COUNTOF(values);
-        phase += 0.10f * values_offset;
-        refresh_time += 1.0f / 60.0f;
-    }
+    float averageMs = 0.0f;
+    for (int n = 0; n < cpuLoadHistorySize; n++)
+        averageMs += cpuLoadHistory[n];
+    averageMs /= (float)cpuLoadHistorySize;
 
-    float average = 0.0f;
-    for (int n = 0; n < IM_COUNTOF(values); n++)
-        average += values[n];
-    average /= (float)IM_COUNTOF(values);
-    ImGui::PlotLines("##cpuload", values, IM_COUNTOF(values), values_offset, nullptr, -1.0f, 1.0f, ImGui::GetContentRegionAvail());
+    constexpr double dmgFrameBudgetMs = 1000.0 / 59.7275;
+    float averagePercent = static_cast<float>(averageMs / dmgFrameBudgetMs * 100.0);
+
+    char overlay[32];
+    snprintf(overlay, sizeof(overlay), "avg %.2f%% / %.2f ms", averagePercent, averageMs);
+    ImGui::PlotLines("##cpuload", cpuLoadHistory, cpuLoadHistorySize, cpuLoadHistoryOffset, overlay, 0.0f, FLT_MAX, ImGui::GetContentRegionAvail());
 }

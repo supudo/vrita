@@ -92,6 +92,8 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
 
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->managerCPU && emulatorDMG->ROMFileLoaded) {
+        if (emulatorDMG->isGameRunning())
+            debuggerDebugger->pushCPUFrameTime(static_cast<float>(emulatorDMG->lastFrameStepMs));
         debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->memorySize);
         debuggerMemoryEditor->setCallbacks(
             [&] (uint32_t addr) {

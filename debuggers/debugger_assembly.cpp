@@ -22,7 +22,7 @@ void Debugger::disassemblySource() {
         uint32_t address = 0x0000;
         int line = 0;
         const int maxInstructions = 0x8000;
-        assemblySource.reserve(static_cast<size_t>(maxInstructions) * 24);
+        assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
 
         for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
             const uint16_t instructionAddress = static_cast<uint16_t>(address);
@@ -31,7 +31,7 @@ void Debugger::disassemblySource() {
 
             addressToLine[instructionAddress] = line;
 
-            char prefix[8];
+            char prefix[16];
             snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
             assemblySource += prefix;
 

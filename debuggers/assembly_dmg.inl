@@ -3,7 +3,6 @@
 
 #include <cctype>
 #include <cstdint>
-#include <format>
 #include <string>
 #include <unordered_set>
 
@@ -66,6 +65,24 @@ constexpr std::string getConditionName(uint8_t index) {
     return std::string(conditionNames[index & 3]);
 }
 
+inline std::string formatHex8(uint8_t value) {
+    char buffer[8];
+    snprintf(buffer, sizeof(buffer), "$%02X", value);
+    return buffer;
+}
+
+inline std::string formatHex16(uint16_t value) {
+    char buffer[8];
+    snprintf(buffer, sizeof(buffer), "$%04X", value);
+    return buffer;
+}
+
+inline std::string formatHex16Brackets(uint16_t value) {
+    char buffer[8];
+    snprintf(buffer, sizeof(buffer), "($%04X)", value);
+    return buffer;
+}
+
 inline std::string instructionFormatOperand(const Operand& operand) {
     switch (operand.type) {
         case OperandType::None:
@@ -75,20 +92,20 @@ inline std::string instructionFormatOperand(const Operand& operand) {
         case OperandType::Register16:
             return getRegisterName16(static_cast<uint8_t>(operand.value));
         case OperandType::Immediate8:
-            return std::format("${:02X}", operand.value);
+            return formatHex8(static_cast<uint8_t>(operand.value));
         case OperandType::Immediate16:
-            return std::format("${:04X}", operand.value);
+            return formatHex16(operand.value);
         case OperandType::Address16:
-            return std::format("(${:04X})", operand.value);
+            return formatHex16Brackets(operand.value);
         case OperandType::Relative8:
-            return std::format("${:04X}", operand.value);
+            return formatHex16(operand.value);
         case OperandType::Condition:
             return getConditionName(static_cast<uint8_t>(operand.value));
         case OperandType::Bit:
             return std::to_string(operand.value);
         case OperandType::SPRelative8: {
             const int8_t offset = static_cast<int8_t>(operand.value);
-            return offset >= 0 ? std::format("SP+${:02X}", offset) : std::format("SP-${:02X}", -offset);
+            return offset >= 0 ? "SP+" + formatHex8(offset) : "SP-" + formatHex8(-offset);
         }
     }
     return "???";
@@ -112,21 +129,9 @@ std::string formatBytes(const DisassembledInstruction& instruction) {
     for (uint8_t i = 0; i < instruction.length; ++i) {
         if (i > 0)
             result += ' ';
-        result += std::format("{:02X}", instruction.bytes[i]);
+        result += formatHex8(instruction.bytes[i]);
     }
     return result;
-}
-
-inline std::string formatHex8(uint8_t value) {
-    char buffer[8];
-    snprintf(buffer, sizeof(buffer), "$%02X", value);
-    return buffer;
-}
-
-inline std::string formatHex16(uint16_t value) {
-    char buffer[8];
-    snprintf(buffer, sizeof(buffer), "$%04X", value);
-    return buffer;
 }
 
 inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t opcode, const std::function<uint8_t(uint32_t)>& read8) {
@@ -158,7 +163,7 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
     }
     else if (opcode == 0xC9) {
         instruction.mnemonic = InstructionMnemonic::RET;
-        instruction.flags = InstructionFlags::Terminates;
+        instruction.flags = InstructionFlags::Return;
     }
     else if (opcode >= 0x40 && opcode <= 0x7F) {
         instruction.mnemonic = InstructionMnemonic::LD;

@@ -238,6 +238,15 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     const size_t markerLine = (gameIsRunning && followedLine != SIZE_MAX) ? followedLine : editorAssembly.GetCurrentCursorPosition().line;
     editorAssembly.AddMarker(markerLine, IM_COL32(55, 55, 60, 255), IM_COL32(55, 55, 60, 255), "", "");
 
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
+    ImGui::SameLine(54);
+    ImGui::Text("Address");
+    ImGui::SameLine(128);
+    ImGui::Text("Bytes");
+    ImGui::SameLine(216);
+    ImGui::Text("Code");
+    ImGui::PopStyleColor();
+
     editorAssembly.Render("Assembly");
 
     ImGui::EndChild();

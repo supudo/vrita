@@ -53,16 +53,16 @@ constexpr std::string_view instructionToString(InstructionMnemonic m) {
     return InstructionMnemonicNames[static_cast<uint8_t>(m)];
 }
 
-inline std::string getRegisterName8(uint8_t index) {
-    return std::string(registerNames8[index & 7]);
+constexpr std::string_view getRegisterName8(uint8_t index) {
+    return registerNames8[index & 7];
 }
 
-inline std::string getRegisterName16(uint8_t index) {
-    return std::string(registerNames16[index & 3]);
+constexpr std::string_view getRegisterName16(uint8_t index) {
+    return registerNames16[index & 3];
 }
 
-constexpr std::string getConditionName(uint8_t index) {
-    return std::string(conditionNames[index & 3]);
+constexpr std::string_view getConditionName(uint8_t index) {
+    return conditionNames[index & 3];
 }
 
 inline std::string formatHex8(uint8_t value) {
@@ -88,9 +88,9 @@ inline std::string instructionFormatOperand(const Operand& operand) {
         case OperandType::None:
             return "";
         case OperandType::Register8:
-            return getRegisterName8(static_cast<uint8_t>(operand.value));
+            return std::string(getRegisterName8(static_cast<uint8_t>(operand.value)));
         case OperandType::Register16:
-            return getRegisterName16(static_cast<uint8_t>(operand.value));
+            return std::string(getRegisterName16(static_cast<uint8_t>(operand.value)));
         case OperandType::Immediate8:
             return formatHex8(static_cast<uint8_t>(operand.value));
         case OperandType::Immediate16:
@@ -100,7 +100,7 @@ inline std::string instructionFormatOperand(const Operand& operand) {
         case OperandType::Relative8:
             return formatHex16(operand.value);
         case OperandType::Condition:
-            return getConditionName(static_cast<uint8_t>(operand.value));
+            return std::string(getConditionName(static_cast<uint8_t>(operand.value)));
         case OperandType::Bit:
             return std::to_string(operand.value);
         case OperandType::SPRelative8: {

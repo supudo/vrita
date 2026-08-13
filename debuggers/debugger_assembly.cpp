@@ -38,7 +38,7 @@ void Debugger::disassemblySource() {
             assemblySource += formatBytes(instruction);
 
             for (uint8_t j = instruction.length; j < 3; ++j)
-                assemblySource += "   ";
+                assemblySource += "    ";
             assemblySource += "  ";
 
             assemblySource += instructionToString(instruction.mnemonic);

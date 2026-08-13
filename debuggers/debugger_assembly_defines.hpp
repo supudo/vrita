@@ -55,6 +55,7 @@ enum class InstructionMnemonic : uint8_t {
     SRL,
     STOP,
     SUB,
+    SWAP,
     XOR,
     UNKNOWN
 };
@@ -69,6 +70,7 @@ enum class OperandType : uint8_t {
     Relative8,
     Condition,
     Bit,
+    SPRelative8,
 };
 
 struct Operand {
@@ -135,6 +137,7 @@ constexpr std::string_view InstructionMnemonicNames[] = {
     "SRL",
     "STOP",
     "SUB",
+    "SWAP",
     "XOR",
     "???"
 };
@@ -142,6 +145,16 @@ constexpr std::string_view InstructionMnemonicNames[] = {
 constexpr std::string_view registerNames8[] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
 constexpr std::string_view registerNames16[] = { "BC", "DE", "HL", "SP" };
 constexpr std::string_view conditionNames[] = { "NZ", "Z", "NC", "C" };
+static constexpr InstructionMnemonic rotateShiftMnemonics[] = {
+    InstructionMnemonic::RLC,
+    InstructionMnemonic::RRC,
+    InstructionMnemonic::RL,
+    InstructionMnemonic::RR,
+    InstructionMnemonic::SLA,
+    InstructionMnemonic::SRA,
+    InstructionMnemonic::SWAP,
+    InstructionMnemonic::SRL
+};
 
 std::string assemblySampleDMG = R"(; Game Boy boot code
 

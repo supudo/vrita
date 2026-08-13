@@ -86,6 +86,10 @@ inline std::string instructionFormatOperand(const Operand& operand) {
             return getConditionName(static_cast<uint8_t>(operand.value));
         case OperandType::Bit:
             return std::to_string(operand.value);
+        case OperandType::SPRelative8: {
+            const int8_t offset = static_cast<int8_t>(operand.value);
+            return offset >= 0 ? std::format("SP+${:02X}", offset) : std::format("SP-${:02X}", -offset);
+        }
     }
     return "???";
 }
@@ -268,6 +272,81 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
         instruction.operands[1] = { OperandType::Relative8, jumpTarget };
         instruction.target = jumpTarget;
         instruction.flags = InstructionFlags::Branch | InstructionFlags::Conditional;
+    }
+    else if (opcode == 0xC3) {
+        instruction.mnemonic = InstructionMnemonic::JP;
+        instruction.operands[0] = { OperandType::Immediate16, d16 };
+        instruction.target = d16;
+        instruction.flags = InstructionFlags::Branch;
+    }
+    else if (opcode == 0xC2 || opcode == 0xCA || opcode == 0xD2 || opcode == 0xDA) {
+        instruction.mnemonic = InstructionMnemonic::JP;
+        const uint8_t condition = (opcode >> 3) & 3;
+        instruction.operands[0] = { OperandType::Condition, condition };
+        instruction.operands[1] = { OperandType::Immediate16, d16 };
+        instruction.target = d16;
+        instruction.flags = InstructionFlags::Branch | InstructionFlags::Conditional;
+    }
+    else if (opcode == 0xE9) {
+        instruction.mnemonic = InstructionMnemonic::JP;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(6) };
+        instruction.flags = InstructionFlags::Branch;
+    }
+    else if (opcode == 0xCD) {
+        instruction.mnemonic = InstructionMnemonic::CALL;
+        instruction.operands[0] = { OperandType::Immediate16, d16 };
+        instruction.target = d16;
+        instruction.flags = InstructionFlags::Call;
+    }
+    else if (opcode == 0xC4 || opcode == 0xCC || opcode == 0xD4 || opcode == 0xDC) {
+        instruction.mnemonic = InstructionMnemonic::CALL;
+        const uint8_t condition = (opcode >> 3) & 3;
+        instruction.operands[0] = { OperandType::Condition, condition };
+        instruction.operands[1] = { OperandType::Immediate16, d16 };
+        instruction.target = d16;
+        instruction.flags = InstructionFlags::Call | InstructionFlags::Conditional;
+    }
+    else if (opcode == 0xC0 || opcode == 0xC8 || opcode == 0xD0 || opcode == 0xD8) {
+        instruction.mnemonic = InstructionMnemonic::RET;
+        const uint8_t condition = (opcode >> 3) & 3;
+        instruction.operands[0] = { OperandType::Condition, condition };
+        instruction.flags = InstructionFlags::Return | InstructionFlags::Conditional;
+    }
+    else if (opcode == 0xD9) {
+        instruction.mnemonic = InstructionMnemonic::RETI;
+        instruction.flags = InstructionFlags::Return;
+    }
+    else if (opcode == 0xC7 || opcode == 0xCF || opcode == 0xD7 || opcode == 0xDF || opcode == 0xE7 || opcode == 0xEF || opcode == 0xF7 || opcode == 0xFF) {
+        instruction.mnemonic = InstructionMnemonic::RST;// rst vector = bits 3-5, e.g. 0xD7 -> $10
+        const uint16_t vector = opcode & 0x38;
+        instruction.target = vector;
+        instruction.operands[0] = { OperandType::Immediate8, vector };
+        instruction.flags = InstructionFlags::Call;
+    }
+    else if (opcode == 0xE8) {
+        instruction.mnemonic = InstructionMnemonic::ADD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(3) };
+        instruction.operands[1] = { OperandType::Immediate8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xF8) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(2) };
+        instruction.operands[1] = { OperandType::SPRelative8, static_cast<uint16_t>(d8) };
+    }
+    else if (opcode == 0xCB) {
+        const uint8_t group = (d8 >> 6) & 3;
+        const uint8_t field = (d8 >> 3) & 7;
+        const uint8_t reg = d8 & 7;
+
+        if (group == 0) {
+            instruction.mnemonic = rotateShiftMnemonics[field];
+            instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(reg) };
+        }
+        else {
+            instruction.mnemonic = group == 1 ? InstructionMnemonic::BIT : group == 2 ? InstructionMnemonic::RES : InstructionMnemonic::SET;
+            instruction.operands[0] = { OperandType::Bit, static_cast<uint16_t>(field) };
+            instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(reg) };
+        }
     }
     else
         instruction.mnemonic = InstructionMnemonic::UNKNOWN;

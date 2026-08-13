@@ -122,14 +122,17 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
     instruction.mnemonic = InstructionMnemonic::UNKNOWN;
     instruction.flags = InstructionFlags::None;
 
-    const uint8_t d8 = instruction.length >= 2 ? read8(address + 1) : 0;
-    const uint16_t d16 = instruction.length >= 3 ? static_cast<uint16_t>(d8) | (static_cast<uint16_t>(read8(address + 2)) << 8) : 0;
+    const uint8_t dv1 = read8(address + 1);
+    const uint8_t dv2 = read8(address + 2);
+
+    const uint8_t d8 = instruction.length >= 2 ? dv1 : 0;
+    const uint16_t d16 = instruction.length >= 3 ? static_cast<uint16_t>(d8) | (static_cast<uint16_t>(dv2) << 8) : 0;
 
     if (instruction.length >= 2)
-        instruction.bytes[1] = read8(address + 1);
+        instruction.bytes[1] = dv1;
 
     if (instruction.length >= 3)
-        instruction.bytes[2] = read8(address + 2);
+        instruction.bytes[2] = dv2;
 
     if (opcode == 0x00)
         instruction.mnemonic = InstructionMnemonic::NOP;

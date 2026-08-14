@@ -176,7 +176,6 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
         instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(opcode & 7) };
     }
     else if (opcode == 0x06 || opcode == 0x0E || opcode == 0x16 || opcode == 0x1E || opcode == 0x26 || opcode == 0x2E || opcode == 0x36 || opcode == 0x3E) {
-        // LD r,d8 -- dst register encoded same as the LD r,r' block (bits 3-5)
         const uint8_t dst = (opcode >> 3) & 7;
         instruction.mnemonic = InstructionMnemonic::LD;
         instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(dst) };
@@ -327,7 +326,7 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
         instruction.flags = InstructionFlags::Return;
     }
     else if (opcode == 0xC7 || opcode == 0xCF || opcode == 0xD7 || opcode == 0xDF || opcode == 0xE7 || opcode == 0xEF || opcode == 0xF7 || opcode == 0xFF) {
-        instruction.mnemonic = InstructionMnemonic::RST;// rst vector = bits 3-5, e.g. 0xD7 -> $10
+        instruction.mnemonic = InstructionMnemonic::RST;
         const uint16_t vector = opcode & 0x38;
         instruction.target = vector;
         instruction.operands[0] = { OperandType::Immediate8, vector };
@@ -814,52 +813,32 @@ inline const TextEditor::Language* CreateDMGLanguage() {
     language.name = "Game Boy Assembly";
     language.caseSensitive = false;
 
-    // --------------------------------------------------------
     // Comments
-    //
-    // RGBDS uses ';' for single-line comments.
-    // --------------------------------------------------------
     language.singleLineComment = ";";
 
-    // --------------------------------------------------------
     // Strings
-    // --------------------------------------------------------
     language.hasSingleQuotedStrings = true;
     language.hasDoubleQuotedStrings = true;
 
-    // --------------------------------------------------------
     // Keywords = CPU instructions
-    // --------------------------------------------------------
     language.keywords = Instructions();
 
-    // --------------------------------------------------------
     // Declarations = assembler directives
-    // --------------------------------------------------------
     language.declarations = Directives();
 
-    // --------------------------------------------------------
     // Identifiers = registers / conditions
-    // --------------------------------------------------------
     language.identifiers = Registers();
 
-    // --------------------------------------------------------
     // Punctuation
-    // --------------------------------------------------------
     language.isPunctuation = IsPunctuation;
 
-    // --------------------------------------------------------
     // Custom identifier tokenizer
-    // --------------------------------------------------------
     language.getIdentifier = GetIdentifier;
 
-    // --------------------------------------------------------
     // Custom number tokenizer
-    // --------------------------------------------------------
     language.getNumber = GetNumber;
 
-    // --------------------------------------------------------
     // Special tokens
-    // --------------------------------------------------------
     language.customTokenizer = CustomTokenizer;
 
     return &language;

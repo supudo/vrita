@@ -227,16 +227,25 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
                 ImGui::Text("%d", funcAPUChannelOutput(0));
                 break;
             case 3: // Cycles until length expires
-                ImGui::Text("%d", funcAPUChannel1().length.counter);
+                if (funcAPUChannel1().length.enabled)
+                    ImGui::Text("%d", funcAPUChannel1().length.counter);
+                else
+                    ImGui::Text("Never");
                 break;
             case 4: // Volume
                 ImGui::Text("%d", funcAPUChannel1().envelope.volumeCurrent);
                 break;
             case 5: // Envelope Direction
-                ImGui::Text("%d", funcAPUChannel1().envelope.increase);
+                if (funcAPUChannel1().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%s", funcAPUChannel1().envelope.increase ? "Louder" : "Quieter");
                 break;
             case 6: // Cycles to next envelope
-                ImGui::Text("%d", funcAPUChannel1().envelope.timer.remaining);
+                if (funcAPUChannel1().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%d", funcAPUChannel1().envelope.timer.remaining);
                 break;
             case 7: // Sweep Frequency
                 ImGui::Text("%d", funcAPUChannel1().shadowFrequency);
@@ -267,10 +276,16 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
                 ImGui::Text("%d", funcAPUChannel2().envelope.volumeCurrent);
                 break;
             case 5: // Envelope Direction
-                ImGui::Text("%d", funcAPUChannel2().envelope.increase);
+                if (funcAPUChannel2().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%s", funcAPUChannel2().envelope.increase ? "Louder" : "Quieter");
                 break;
             case 6: // Cycles to next envelope
-                ImGui::Text("%d", funcAPUChannel2().envelope.timer.remaining);
+                if (funcAPUChannel2().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%d", funcAPUChannel2().envelope.timer.remaining);
                 break;
         }
     }
@@ -288,9 +303,11 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
             case 3: // Cycles until length expires
                 ImGui::Text("%d", funcAPUChannelWave().length.counter);
                 break;
-            case 4: // Volume
-                ImGui::Text("%d", funcAPUChannelWave().volumeCode);
+            case 4: { // Volume
+                static constexpr uint8_t volumePercent[4] = { 0, 100, 50, 25 };
+                ImGui::Text("%d%%", volumePercent[funcAPUChannelWave().volumeCode & 0x03]);
                 break;
+            }
         }
     }
     else if (channel == 3) { // channel 4 (NOI)
@@ -308,14 +325,26 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
                 ImGui::Text("%d", funcAPUChannelNoise().envelope.volumeCurrent);
                 break;
             case 4: // Envelope direction
-                ImGui::Text("%d", funcAPUChannelNoise().envelope.increase);
+                if (funcAPUChannelNoise().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%s", funcAPUChannelNoise().envelope.increase ? "Louder" : "Quieter");
                 break;
             case 5: // Cycles to next envelope
-                ImGui::Text("%d", funcAPUChannelNoise().envelope.timer.remaining);
+                if (funcAPUChannelNoise().envelope.timer.period == 0)
+                    ImGui::Text("Disabled");
+                else
+                    ImGui::Text("%d", funcAPUChannelNoise().envelope.timer.remaining);
                 break;
-            case 6: // LSFR
-                ImGui::Text("%d", funcAPUChannelNoise().lfsr);
+            case 6: { // LSFR
+                uint16_t lfsr = funcAPUChannelNoise().lfsr;
+                char bits[17];
+                for (int i = 0; i < 16; i++)
+                    bits[i] = (lfsr & (1 << (15 - i))) ? '1' : '0';
+                bits[16] = '\0';
+                ImGui::Text("%s", bits);
                 break;
+            }
             case 7: // Noise counter
                 ImGui::Text("%d", funcAPUChannelNoise().timer);
                 break;

@@ -129,6 +129,13 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerDebugger->setAPUCallbacks(
+            [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel1(); },
+            [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel2(); },
+            [&] () -> const WaveChannel& { return emulatorDMG->managerAPU->getChannelWave(); },
+            [&] () -> const NoiseChannel& { return emulatorDMG->managerAPU->getChannelNoise(); },
+            [&] (uint8_t channel) -> uint8_t { return emulatorDMG->managerAPU->channelOutput(channel); }
+        );
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);

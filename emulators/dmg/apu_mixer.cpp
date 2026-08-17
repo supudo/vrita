@@ -11,7 +11,7 @@
 // 2 = CH3
 // 3 = CH4
 // ------------------------------------------------------------
-uint8_t DMG_APU::channelOutput(uint8_t channel) {
+uint8_t DMG_APU::channelOutput(uint8_t channel) const {
     switch (channel) {
         case 0: return pulseOutput(ch1);
         case 1: return pulseOutput(ch2);

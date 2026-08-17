@@ -21,7 +21,7 @@ void DMG_APU::stepWaveChannel() {
 }
 
 // CH3 output
-uint8_t DMG_APU::waveOutput() {
+uint8_t DMG_APU::waveOutput() const {
     if (!wave.state.enabled || !wave.state.dacEnabled)
         return 0;
     uint8_t sample = wave.currentSample;

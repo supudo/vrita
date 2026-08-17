@@ -37,7 +37,7 @@ void DMG_APU::stepNoiseChannel() {
 }
 
 // Output
-uint8_t DMG_APU::noiseOutput() {
+uint8_t DMG_APU::noiseOutput() const {
     if (!noise.state.enabled || !noise.state.dacEnabled)
         return 0;
     // LFSR bit 0 is inverted output.

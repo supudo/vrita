@@ -11,6 +11,13 @@ GameBoy (DMG)
 #include <cstdint>
 #include <vector>
 
+static constexpr uint8_t dutyTable[4][8] = {
+    { 0, 0, 0, 0, 0, 0, 0, 1 }, // 12.5%
+    { 1, 0, 0, 0, 0, 0, 0, 1 }, // 25%
+    { 1, 0, 0, 0, 0, 1, 1, 1 }, // 50% 
+    { 0, 1, 1, 1, 1, 1, 1, 0 } // 75%
+};
+
 struct APURegisters {
     uint8_t NR50 = 0;
     uint8_t NR51 = 0;

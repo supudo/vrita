@@ -28,6 +28,12 @@ public:
     uint8_t getUserVolume() const;
     void setMuted(bool muted);
     bool isMuted() const;
+    uint8_t channelOutput(uint8_t channel) const;
+
+    const PulseChannel& getChannel1() const { return ch1; }
+    const PulseChannel& getChannel2() const { return ch2; }
+    const WaveChannel& getChannelWave() const { return wave; }
+    const NoiseChannel& getChannelNoise() const { return noise; }
 
 private:
     Logger& logger;
@@ -88,24 +94,23 @@ private:
         channel.envelope.timer.remaining = channel.envelope.timer.period;
     }
 
-    uint8_t pulseOutput(PulseChannel& channel);
+    uint8_t pulseOutput(const PulseChannel& channel) const;
 
     void triggerPulse(PulseChannel& channel);
     uint16_t calculateSweepFrequency();
 
     // wave
     void stepWaveChannel();
-    uint8_t waveOutput();
+    uint8_t waveOutput() const;
     void triggerWave();
 
     // noise
     void stepNoiseChannel();
-    uint8_t noiseOutput();
+    uint8_t noiseOutput() const;
     void triggerNoise();
 
     // mixer
     void mixSample(int16_t& left, int16_t& right);
-    uint8_t channelOutput(uint8_t channel);
 };
 
 #endif

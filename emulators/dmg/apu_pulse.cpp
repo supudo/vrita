@@ -1,12 +1,5 @@
 #include "apu.hpp"
 
-static constexpr uint8_t dutyTable[4][8] = {
-    { 0, 0, 0, 0, 0, 0, 0, 1 }, // 12.5%
-    { 1, 0, 0, 0, 0, 0, 0, 1 }, // 25%
-    { 1, 0, 0, 0, 0, 1, 1, 1 }, // 50% 
-    { 0, 1, 1, 1, 1, 1, 1, 0 } // 75%
-};
-
 void DMG_APU::stepPulseChannel(PulseChannel& channel) {
     if (!channel.state.enabled)
         return;
@@ -20,7 +13,7 @@ void DMG_APU::stepPulseChannel(PulseChannel& channel) {
         channel.frequency.timer--;
 }
 
-uint8_t DMG_APU::pulseOutput(PulseChannel& channel) {
+uint8_t DMG_APU::pulseOutput(const PulseChannel& channel) const {
     if (!channel.state.enabled || !channel.state.dacEnabled)
         return 0;
     uint8_t bit = dutyTable[channel.duty][channel.dutyPosition];

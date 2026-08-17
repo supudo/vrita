@@ -102,42 +102,42 @@ void Debugger::initRegisters() {
         { nullptr, "[$FF3F]", 0xFF3F, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
 
         // Channel 1 children
-        { nullptr, "Cycles to next sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Index", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles until length expires", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Volume", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Envelope Direction", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles to next envelope", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sweep Frequency", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sweep Addend", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles to next sweep", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 7); }, "Sweep Frequency", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 8); }, "Sweep Addend", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 9); }, "Cycles to next sweep", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 2 children
-        { nullptr, "Cycles to next sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Index", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles until length expires", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Volume", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Envelope Direction", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles to next envelope", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 3 children
-        { nullptr, "Cycles to next sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Index", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles until length expires", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Volume", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 4 children
-        { nullptr, "Cycles to next sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Sample", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles until length expires", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Volume", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Envelope direction", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Cycles to next envelope", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "LSFR", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Noise counter", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 1); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 2); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 3); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 4); }, "Envelope direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 5); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 6); }, "LSFR", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Cartridge
         { nullptr, "Cartridge", 0, 111, 14, NDT_None, NVS_None, 0, true, true },
@@ -194,6 +194,133 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 3); }, "Serial Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 4); }, "Joypad Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
     };
+}
+
+
+void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> channelPulse1,
+                               std::function<const PulseChannel& ()> channelPulse2,
+                               std::function<const WaveChannel& ()> channelWave,
+                               std::function<const NoiseChannel& ()> channelNoise,
+                               std::function<uint8_t(uint8_t)> channelOutput) {
+    funcAPUChannel1 = channelPulse1;
+    funcAPUChannel2 = channelPulse2;
+    funcAPUChannelWave = channelWave;
+    funcAPUChannelNoise = channelNoise;
+    funcAPUChannelOutput = channelOutput;
+}
+
+void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) {
+    if (!funcAPUChannel1) {
+        ImGui::Text("n/a");
+        return;
+    }
+
+    if (channel == 0) { // channel 1 (SQ1)
+        switch (prop) {
+            case 0: // Cycles to next sample
+                ImGui::Text("%d", funcAPUChannel1().frequency.timer);
+                break;
+            case 1: // Index
+                ImGui::Text("%d", funcAPUChannel1().dutyPosition);
+                break;
+            case 2: // Sample
+                ImGui::Text("%d", funcAPUChannelOutput(0));
+                break;
+            case 3: // Cycles until length expires
+                ImGui::Text("%d", funcAPUChannel1().length.counter);
+                break;
+            case 4: // Volume
+                ImGui::Text("%d", funcAPUChannel1().envelope.volumeCurrent);
+                break;
+            case 5: // Envelope Direction
+                ImGui::Text("%d", funcAPUChannel1().envelope.increase);
+                break;
+            case 6: // Cycles to next envelope
+                ImGui::Text("%d", funcAPUChannel1().envelope.timer.remaining);
+                break;
+            case 7: // Sweep Frequency
+                ImGui::Text("%d", funcAPUChannel1().shadowFrequency);
+                break;
+            case 8: // Sweep Addend
+                ImGui::Text("%d", funcAPUChannel1().shadowFrequency >> funcAPUChannel1().sweepShift);
+                break;
+            case 9: // Cycles to next sweep
+                ImGui::Text("%d", funcAPUChannel1().sweep.remaining);
+                break;
+        }
+    }
+    else if (channel == 1) { // channel 2 (SQ2)
+        switch (prop) {
+            case 0: // Cycles to next sample
+                ImGui::Text("%d", funcAPUChannel2().frequency.timer);
+                break;
+            case 1: // Index
+                ImGui::Text("%d", funcAPUChannel2().dutyPosition);
+                break;
+            case 2: // Sample
+                ImGui::Text("%d", funcAPUChannelOutput(1));
+                break;
+            case 3: // Cycles until length expires
+                ImGui::Text("%d", funcAPUChannel2().length.counter);
+                break;
+            case 4: // Volume
+                ImGui::Text("%d", funcAPUChannel2().envelope.volumeCurrent);
+                break;
+            case 5: // Envelope Direction
+                ImGui::Text("%d", funcAPUChannel2().envelope.increase);
+                break;
+            case 6: // Cycles to next envelope
+                ImGui::Text("%d", funcAPUChannel2().envelope.timer.remaining);
+                break;
+        }
+    }
+    else if (channel == 2) { // channel 3 (WAV)
+        switch (prop) {
+            case 0: // Cycles to next sample
+                ImGui::Text("%d", funcAPUChannelWave().frequency.timer);
+                break;
+            case 1: // Index
+                ImGui::Text("%d", funcAPUChannelWave().wavePosition);
+                break;
+            case 2: // Sample
+                ImGui::Text("%d", funcAPUChannelOutput(2));
+                break;
+            case 3: // Cycles until length expires
+                ImGui::Text("%d", funcAPUChannelWave().length.counter);
+                break;
+            case 4: // Volume
+                ImGui::Text("%d", funcAPUChannelWave().volumeCode);
+                break;
+        }
+    }
+    else if (channel == 3) { // channel 4 (NOI)
+        switch (prop) {
+            case 0: // Cycles to next sample
+                ImGui::Text("%d", funcAPUChannelNoise().timer);
+                break;
+            case 1: // Sample
+                ImGui::Text("%d", funcAPUChannelOutput(3));
+                break;
+            case 2: // Cycles until length expires
+                ImGui::Text("%d", funcAPUChannelNoise().length.counter);
+                break;
+            case 3: // Volume
+                ImGui::Text("%d", funcAPUChannelNoise().envelope.volumeCurrent);
+                break;
+            case 4: // Envelope direction
+                ImGui::Text("%d", funcAPUChannelNoise().envelope.increase);
+                break;
+            case 5: // Cycles to next envelope
+                ImGui::Text("%d", funcAPUChannelNoise().envelope.timer.remaining);
+                break;
+            case 6: // LSFR
+                ImGui::Text("%d", funcAPUChannelNoise().lfsr);
+                break;
+            case 7: // Noise counter
+                ImGui::Text("%d", funcAPUChannelNoise().timer);
+                break;
+        }
+    }
 }
 
 void Debugger::renderRegisterValue(DebuggerRegisterTreeNode* node) {

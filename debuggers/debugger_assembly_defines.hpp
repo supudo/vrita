@@ -139,7 +139,7 @@ constexpr std::string_view InstructionMnemonicNames[] = {
     "SUB",
     "SWAP",
     "XOR",
-    "???"
+    ""
 };
 
 constexpr std::string_view registerNames8[] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };

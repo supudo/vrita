@@ -108,7 +108,7 @@ inline std::string instructionFormatOperand(const Operand& operand) {
             return offset >= 0 ? "SP+" + formatHex8(offset) : "SP-" + formatHex8(-offset);
         }
     }
-    return "???";
+    return "";
 }
 
 inline std::string instructionFormat(const DisassembledInstruction& instruction) {

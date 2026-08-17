@@ -73,7 +73,7 @@ void Debugger::initRegisters() {
         { nullptr, "NR42 ($FF21)", 0xFF21, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR43 ($FF22)", 0xFF22, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR44 ($FF23)", 0xFF23, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "Wave pattern", 0, 64, 16, NDT_Hex8, NVS_None, 0, false },
+        { [this](DebuggerRegisterTreeNode* n) { renderWavePattern(n); }, "Wave pattern", 0, 64, 16, NDT_Custom, NVS_None, 0, false },
         { nullptr, "Channel 1 (SQ1)", 0, 80, 10, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "Channel 2 (SQ2)", 0, 90, 7, NDT_Hex8, NVS_None, 0, false },
         { nullptr, "Channel 3 (WAV)", 0, 97, 5, NDT_Hex8, NVS_None, 0, false },
@@ -196,6 +196,44 @@ void Debugger::initRegisters() {
     };
 }
 
+void Debugger::renderWavePattern(DebuggerRegisterTreeNode* node) {
+    if (!funcAPUChannelWave) {
+        ImGui::Text("n/a");
+        return;
+    }
+
+    const auto& waveRAM = funcAPUChannelWave().waveRAM;
+    uint8_t samples[32];
+    for (int i = 0; i < 32; i++) {
+        uint8_t byte = waveRAM[i / 2];
+        samples[i] = (i % 2 == 0) ? (byte >> 4) : (byte & 0x0F);
+    }
+
+    float width = ImGui::GetContentRegionAvail().x;
+    float height = ImGui::GetTextLineHeight();
+    float barWidth = width / 32.0f;
+
+    ImGui::Dummy(ImVec2(width, height));
+    ImVec2 p0Box = ImGui::GetItemRectMin();
+    ImVec2 p1Box = ImGui::GetItemRectMax();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImU32 lineColor = ImGui::GetColorU32(ImGuiCol_Text);
+
+    draw_list->PushClipRect(p0Box, p1Box, true);
+    ImDrawListFlags oldFlags = draw_list->Flags;
+    draw_list->Flags &= ~ImDrawListFlags_AntiAliasedLines;
+    float prevY = floorf(p1Box.y - (samples[0] / 15.0f) * height);
+    for (int i = 0; i < 32; i++) {
+        float x0 = floorf(p0Box.x + i * barWidth);
+        float x1 = floorf(x0 + barWidth);
+        float y = floorf(p1Box.y - (samples[i] / 15.0f) * height);
+        draw_list->AddLine(ImVec2(x0, prevY), ImVec2(x0, y), lineColor);
+        draw_list->AddLine(ImVec2(x0, y), ImVec2(x1, y), lineColor);
+        prevY = y;
+    }
+    draw_list->Flags = oldFlags;
+    draw_list->PopClipRect();
+}
 
 void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> channelPulse1,
                                std::function<const PulseChannel& ()> channelPulse2,

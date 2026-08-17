@@ -135,6 +135,7 @@ private:
     void renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit);
     void renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit);
     void renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type);
+    void renderWavePattern(DebuggerRegisterTreeNode* node);
     void renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop);
 
     static constexpr int cpuLoadHistorySize = 90;

@@ -1,5 +1,7 @@
 #include "debugger.hpp"
 
+#include <sstream>
+
 #include "emulators/dmg/cpu_registers.hpp"
 #include "debuggers_defines_dmg.inl"
 
@@ -194,6 +196,23 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 3); }, "Serial Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 4); }, "Joypad Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
     };
+
+
+    if (settings.GetBool("Debuggers - Debugger", "tree_state_saved", false)) {
+        for (auto& node : registerNodes) {
+            if (node.ChildCount > 0)
+                node.isOpenedByDefault = false;
+        }
+
+        std::string openIndices = settings.GetString("Debuggers - Debugger", "tree_open_indices", "");
+        std::stringstream ss(openIndices);
+        std::string token;
+        while (std::getline(ss, token, ',')) {
+            int idx = std::stoi(token);
+            if (idx > 0 && idx < (int)registerNodes.size())
+                registerNodes[idx].isOpenedByDefault = true;
+        }
+    }
 }
 
 void Debugger::renderWavePattern(DebuggerRegisterTreeNode* node) {
@@ -415,6 +434,7 @@ void Debugger::renderRegisterNode(DebuggerRegisterTreeNode* node, bool isRoot) {
         if (node->isOpenedByDefault)
             node_flags |= ImGuiTreeNodeFlags_DefaultOpen;
         bool open = ImGui::TreeNodeEx(node->Name, node_flags);
+        node->isOpenedByDefault = open;
         if ((node_flags & ImGuiTreeNodeFlags_LabelSpanAllColumns) == 0) {
             ImGui::TableNextColumn();
             renderRegisterValue(node);

@@ -66,6 +66,17 @@ void Debugger::release() {
     settings.Save();
     isThinking = false;
     thinkingPercentage = 0.0f;
+
+    std::string openIndices;
+    for (size_t i = 0; i < registerNodes.size(); i++) {
+        if (registerNodes[i].ChildCount > 0 && registerNodes[i].isOpenedByDefault) {
+            if (!openIndices.empty())
+                openIndices += ",";
+            openIndices += std::to_string(i);
+        }
+    }
+    settings.Set("Debuggers - Debugger", "tree_open_indices", openIndices);
+    settings.Set("Debuggers - Debugger", "tree_state_saved", true);
 }
 
 void Debugger::showThinking() {

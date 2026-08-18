@@ -573,7 +573,7 @@ void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uin
     uint8_t addressValue = funcMemoryRead(node->Address);
     bool set = (addressValue & (1 << bit)) != 0;
     if (isIE)
-        ImGui::Text("%s", set ? "Enabled" : "Disabled");
+        ImGui::Text("%s", set ? "1 (Enabled)" : "0");
     else
         ImGui::Text("%s", set ? "Requested" : "Not requested");
 }

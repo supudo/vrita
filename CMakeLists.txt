@@ -14,10 +14,6 @@ find_package(GLEW REQUIRED)
 
 if(NOT APPLE)
     find_package(imgui CONFIG REQUIRED)
-    find_package(GLFW3 REQUIRED)
-    if(GLFW3_FOUND)
-        target_include_directories(${GLFW3_INCLUDE_DIRS})
-    enfif(GLFW3_FOUND)
 else()
     # No vcpkg on macOS build machines (just cmake + compilers) - fetch imgui
     # source at configure time instead of vendoring the full tree in-repo.
@@ -33,11 +29,8 @@ else()
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
     )
-    target_include_directories(imgui_vendored PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-    target_link_libraries(imgui_vendored PUBLIC SDL2::SDL2)
+    target_include_directories(imgui_vendored PUBLIC ${imgui_SOURCE_DIR})
     add_library(imgui::imgui ALIAS imgui_vendored)
 endif()
 
@@ -72,15 +65,11 @@ set(SOURCES
     eyecandy/dots.cpp
     gui/filebrowser.cpp
     gui/log.cpp
+    third_party/imgui/imgui_impl_sdl2.cpp
+    third_party/imgui/imgui_impl_opengl3.cpp
+    third_party/ImGuiColorTextEdit/TextEditor.cpp
+    third_party/ImGuiColorTextEdit/TextDiff.cpp
 )
-
-if(NOT APPLE)
-    # macOS builds imgui_impl_sdl2.cpp/imgui_impl_opengl3.cpp inside imgui_vendored instead
-    # (fetched to match the FetchContent'd core imgui version - see find_package(imgui) branch above).
-    list(APPEND SOURCES
-        imgui/imgui_impl_sdl2.cpp
-        imgui/imgui_impl_opengl3.cpp)
-endif()
 
 if(WIN32)
     enable_language(RC)
@@ -105,13 +94,12 @@ endif()
 
 target_include_directories(Vrita PRIVATE ${CMAKE_SOURCE_DIR})
 
-target_compile_definitions(Vrita PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+target_compile_definitions(Vrita PRIVATE IMGUI_DEFINE_MATH_OPERATORS IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
 
 target_link_libraries(Vrita PRIVATE
     SDL2::SDL2
-	OpenGL::GL
-	GLEW::GLEW
-    GLFW3:GLFW3
+    OpenGL::GL
+    GLEW::GLEW
     imgui::imgui
 )
 

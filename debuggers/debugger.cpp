@@ -272,9 +272,6 @@ void Debugger::renderRestMemory() {
 
 void Debugger::renderRestCustomExpression() {
 }
-
-void Debugger::renderRestBreakpoints() {}
-
 void Debugger::renderRestOverlays() {}
 
 void Debugger::renderMemoryRegion() {
@@ -377,5 +374,12 @@ void Debugger::renderCPULoad() {
 
     char overlay[32];
     snprintf(overlay, sizeof(overlay), "avg %.2f%% / %.2f ms", averagePercent, averageMs);
-    ImGui::PlotLines("##cpuload", cpuLoadHistory, cpuLoadHistorySize, cpuLoadHistoryOffset, overlay, 0.0f, FLT_MAX, ImGui::GetContentRegionAvail());
+    
+    const ImVec2 plotSize = ImGui::GetContentRegionAvail();
+    const ImVec2 plotPos = ImGui::GetCursorScreenPos();
+    ImGui::PlotLines("##cpuload", cpuLoadHistory, cpuLoadHistorySize, cpuLoadHistoryOffset, nullptr, 0.0f, FLT_MAX, plotSize);
+
+    const ImVec2 textSize = ImGui::CalcTextSize(overlay);
+    const ImVec2 textPos(plotPos.x + (plotSize.x - textSize.x) * 0.5f, plotPos.y + plotSize.y - textSize.y - 4.0f);
+    ImGui::GetWindowDrawList()->AddText(textPos, ImGui::GetColorU32(ImGuiCol_Text), overlay);
 }

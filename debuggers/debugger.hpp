@@ -94,11 +94,15 @@ private:
     bool disassemblyStarted = false;
     std::string pendingAssemblySource;
     std::array<int32_t, 0x10000> pendingAddressToLine{};
+    std::vector<uint16_t> pendingLineToAddress;
 
     std::array<int32_t, 0x10000> addressToLine {};
+    std::vector<uint16_t> lineToAddress;
     size_t followedLine = SIZE_MAX;
     void followPC(DMGCpuRegisters& registers);
     void scrollToAddress(uint16_t address);
+
+    std::map<uint32_t, DebuggerBreakpoint> breakpoints;
 
     void renderPerspective(DMGCpuRegisters& registers);
     void renderAssembly(DMGCpuRegisters& registers, float height);

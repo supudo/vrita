@@ -113,4 +113,12 @@ struct DebuggerRegisterTreeNode {
     bool isRoot;
 };
 
+struct DebuggerBreakpoint {
+    uint32_t address;
+    int32_t line;
+    bool enabled;
+    bool isHit;
+    std::string description;
+};
+
 #endif

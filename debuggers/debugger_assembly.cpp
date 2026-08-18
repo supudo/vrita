@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <thread>
 
 #include "assembly_dmg.inl"
@@ -12,6 +13,16 @@
 void Debugger::initEditor() {
     editorAssembly.SetLanguage(CreateDMGLanguage());
     editorAssembly.SetReadOnlyEnabled(true);
+
+    editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
+        const int32_t line = static_cast<int32_t>(data.pos.line);
+        const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
+        if (ImGui::MenuItem("Set Breakpoint")) {
+            breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
+        }
+        if (ImGui::MenuItem("Remove Breakpoint"))
+            breakpoints.erase(addr);
+    });
 }
 
 void Debugger::disassemblySource(DMGCpuRegisters& registers) {
@@ -20,6 +31,7 @@ void Debugger::disassemblySource(DMGCpuRegisters& registers) {
             disassemblyThread.join();
 
         addressToLine = pendingAddressToLine;
+        lineToAddress = std::move(pendingLineToAddress);
         editorAssembly.SetText(pendingAssemblySource);
         pendingAssemblySource.clear();
         pendingAssemblySource.shrink_to_fit();
@@ -50,10 +62,14 @@ void Debugger::disassembleWork() {
     localAddressToLine->fill(-1);
 
     std::string assemblySource;
+    std::vector<uint16_t> localLineToAddress;
     uint32_t address = 0x0000;
     int line = 0;
     const int maxInstructions = 0x8000;
     assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
+    localLineToAddress.reserve(maxInstructions);
+
+    breakpoints.clear();
 
     for (int i = 0; i < maxInstructions && address <= 0xFFFF; i++) {
         const uint16_t instructionAddress = static_cast<uint16_t>(address);
@@ -87,12 +103,14 @@ void Debugger::disassembleWork() {
 
         assemblySource += "\n";
 
+        localLineToAddress.push_back(instructionAddress);
         line++;
         address += instruction.length;
         thinkingPercentage.store(100.0f * static_cast<float>(address) / 0x10000);
     }
 
     pendingAddressToLine = *localAddressToLine;
+    pendingLineToAddress = std::move(localLineToAddress);
     pendingAssemblySource = std::move(assemblySource);
 
     const auto elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - startTime).count();
@@ -116,8 +134,22 @@ void Debugger::scrollToAddress(uint16_t address) {
 }
 
 void Debugger::followPC(DMGCpuRegisters& registers) {
+    if (!breakpointsDisabled) {
+        for (auto& [addr, bp] : breakpoints)
+            bp.isHit = (bp.enabled && addr == registers.PC);
+    }
+
     if (!gameIsRunning)
         return;
+
+    if (!breakpointsDisabled) {
+        auto it = breakpoints.find(registers.PC);
+        if (it != breakpoints.end() && it->second.enabled) {
+            gameIsRunning = false;
+            funcStopGame();
+        }
+    }
+
     const int32_t line = addressToLine[registers.PC];
     if (line < 0 || static_cast<size_t>(line) == followedLine)
         return;
@@ -238,6 +270,12 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     const size_t markerLine = (gameIsRunning && followedLine != SIZE_MAX) ? followedLine : editorAssembly.GetCurrentCursorPosition().line;
     editorAssembly.AddMarker(markerLine, IM_COL32(55, 55, 60, 255), IM_COL32(55, 55, 60, 255), "", "");
 
+    for (const auto& [addr, bp] : breakpoints) {
+        const int32_t bpLine = (addr < addressToLine.size()) ? addressToLine[addr] : -1;
+        if (bpLine >= 0)
+            editorAssembly.AddMarker(static_cast<size_t>(bpLine), breakpointsDisabled ? IM_COL32(255, 0, 0, 100) : IM_COL32(255, 0, 0, 255), 0, "", "Breakpoint");
+    }
+
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
     ImGui::SameLine(54);
     ImGui::Text("Address");
@@ -247,7 +285,69 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
     ImGui::Text("Code");
     ImGui::PopStyleColor();
 
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
     editorAssembly.Render("Assembly");
+    ImGui::PopStyleVar();
 
     ImGui::EndChild();
+}
+
+void Debugger::renderRestBreakpoints() {
+    float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
+    ImGuiTableFlags table_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_HighlightHoveredColumn;
+    std::optional<int32_t> breakpointToRemove;
+
+    if (ImGui::BeginTable("tableBreakpoints", 5, table_flags)) {
+        ImGui::TableSetupColumn("Line", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 8.0f);
+        ImGui::TableSetupColumn("Disable", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 8.0f);
+        ImGui::TableSetupColumn("Hit", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 8.0f);
+        ImGui::TableSetupColumn("Address", ImGuiTableColumnFlags_WidthFixed, TEXT_BASE_WIDTH * 18.0f);
+        ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_NoResize);
+        ImGui::TableHeadersRow();
+
+        for (auto& [addr, bp] : breakpoints) {
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            char lineLabel[16];
+            snprintf(lineLabel, sizeof(lineLabel), "%d", bp.line);
+            if (ImGui::Selectable(lineLabel, false, ImGuiSelectableFlags_SpanAllColumns, ImVec2(0, ImGui::GetFrameHeight())))
+                scrollToAddress(static_cast<uint16_t>(bp.address));
+
+            if (ImGui::BeginPopupContextItem()) {
+                if (ImGui::Selectable("Remove breakpoint"))
+                    breakpointToRemove = addr;
+                ImGui::EndPopup();
+            }
+
+            ImGui::TableNextColumn();
+            {
+                const float checkboxWidth = ImGui::GetFrameHeight();
+                const float cellWidth = ImGui::GetContentRegionAvail().x;
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (cellWidth - checkboxWidth) * 0.5f);
+                ImGui::Checkbox("##bpEnabled", &bp.enabled);
+            }
+
+            ImGui::TableNextColumn();
+            {
+                const float checkboxWidth = ImGui::GetFrameHeight();
+                const float cellWidth = ImGui::GetContentRegionAvail().x;
+                ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (cellWidth - checkboxWidth) * 0.5f);
+                ImGui::BeginDisabled();
+                ImGui::Checkbox("##bpHit", &bp.isHit);
+                ImGui::EndDisabled();
+            }
+
+            ImGui::TableNextColumn();
+            ImGui::Text("$%04X", bp.address);
+
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", bp.description.c_str());
+        }
+
+        ImGui::EndTable();
+    }
+
+    if (breakpointToRemove.has_value())
+        breakpoints.erase(*breakpointToRemove);
 }

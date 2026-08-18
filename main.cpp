@@ -9,8 +9,8 @@
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include "imgui/imgui_impl_sdl2.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "third_party/imgui/imgui_impl_sdl2.h"
+#include "third_party/imgui/imgui_impl_opengl3.h"
 
 #ifdef TRACY_ENABLE
 #define TRACY_OPENGL_AUTO_CALIBRATION

@@ -1,7 +1,7 @@
 #include "agb.hpp"
 
 #include <imgui.h>
-#include "imgui/imgui_impl_sdl2.h"
+#include "third_party/imgui/imgui_impl_sdl2.h"
 
 bool AGB::initialize(int x, int y, int width, int height) {
     windowPositionX = x;

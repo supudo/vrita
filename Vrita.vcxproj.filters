@@ -89,18 +89,18 @@
     <ClCompile Include="debuggers\tilemap_viewer.cpp">
       <Filter>debuggers</Filter>
     </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_sdl2.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="ImGuiColorTextEdit\TextDiff.cpp">
-      <Filter>ImGuiColorTextEdit</Filter>
+    <ClCompile Include="third_party\imgui\imgui_impl_opengl3.cpp">
+      <Filter>third_party\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp">
-      <Filter>ImGuiColorTextEdit</Filter>
+    <ClCompile Include="third_party\imgui\imgui_impl_sdl2.cpp">
+      <Filter>third_party\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\ImGuiColorTextEdit\TextDiff.cpp">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
+    </ClCompile>
+    <ClCompile Include="third_party\ImGuiColorTextEdit\TextEditor.cpp">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -206,30 +206,30 @@
     <ClInclude Include="emulators\dmg\palette_presets.hpp">
       <Filter>emulators\dmg</Filter>
     </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_opengl3.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_sdl2.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ImGuiColorTextEdit\dtl.h">
-      <Filter>ImGuiColorTextEdit</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiColorTextEdit\TextDiff.h">
-      <Filter>ImGuiColorTextEdit</Filter>
-    </ClInclude>
-    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h">
-      <Filter>ImGuiColorTextEdit</Filter>
-    </ClInclude>
     <ClInclude Include="utilities\fonts.hpp">
       <Filter>utilities</Filter>
     </ClInclude>
     <ClInclude Include="debuggers\debugger_assembly_defines.hpp">
       <Filter>debuggers</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui\imgui_impl_opengl3.h">
+      <Filter>third_party\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui\imgui_impl_opengl3_loader.h">
+      <Filter>third_party\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\imgui\imgui_impl_sdl2.h">
+      <Filter>third_party\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\ImGuiColorTextEdit\dtl.h">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\ImGuiColorTextEdit\TextDiff.h">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
+    </ClInclude>
+    <ClInclude Include="third_party\ImGuiColorTextEdit\TextEditor.h">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -263,11 +263,14 @@
     <Filter Include="debuggers">
       <UniqueIdentifier>{0f1425d6-4284-4aea-b12d-32e038d55fb6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{17d48d89-a9f8-473d-afff-0e93f748414d}</UniqueIdentifier>
+    <Filter Include="third_party">
+      <UniqueIdentifier>{61f27730-4457-4773-adf3-f8c6913667e7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ImGuiColorTextEdit">
-      <UniqueIdentifier>{c062a372-9e4e-4b0f-8c29-6de8b3fc2726}</UniqueIdentifier>
+    <Filter Include="third_party\imgui">
+      <UniqueIdentifier>{1c8aacb5-63a8-4c4b-b2e1-e0eae745231e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="third_party\ImGuiColorTextEdit">
+      <UniqueIdentifier>{0934c703-0c29-49dd-8263-3d7156e7db6b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -306,8 +309,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ImGuiColorTextEdit\LICENSE.txt">
-      <Filter>ImGuiColorTextEdit</Filter>
+    <Text Include="third_party\ImGuiColorTextEdit\LICENSE.txt">
+      <Filter>third_party\ImGuiColorTextEdit</Filter>
+    </Text>
+    <Text Include="third_party\imgui\LICENSE.txt">
+      <Filter>third_party\imgui</Filter>
     </Text>
   </ItemGroup>
 </Project>

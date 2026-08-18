@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "ImGuiColorTextEdit/TextEditor.h"
+#include "third_party/ImGuiColorTextEdit/TextEditor.h"
 #include "debugger_assembly_defines.hpp"
 
 // disassembly

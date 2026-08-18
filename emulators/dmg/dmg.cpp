@@ -7,7 +7,7 @@
 #include <chrono>
 
 #include <imgui.h>
-#include "imgui/imgui_impl_sdl2.h"
+#include "third_party/imgui/imgui_impl_sdl2.h"
 
 #include "utilities/iconfonts/IconsFontAwesome7.h"
 

@@ -205,10 +205,6 @@
     <ClCompile Include="eyecandy\dots.cpp" />
     <ClCompile Include="gui\filebrowser.cpp" />
     <ClCompile Include="gui\log.cpp" />
-    <ClCompile Include="ImGuiColorTextEdit\TextDiff.cpp" />
-    <ClCompile Include="ImGuiColorTextEdit\TextEditor.cpp" />
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="imgui\imgui_impl_sdl2.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -216,6 +212,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="third_party\ImGuiColorTextEdit\TextDiff.cpp" />
+    <ClCompile Include="third_party\ImGuiColorTextEdit\TextEditor.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_sdl2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="debuggers\debugger.hpp" />
@@ -247,13 +247,13 @@
     <ClInclude Include="eyecandy\dots.hpp" />
     <ClInclude Include="gui\filebrowser.hpp" />
     <ClInclude Include="gui\log.hpp" />
-    <ClInclude Include="ImGuiColorTextEdit\dtl.h" />
-    <ClInclude Include="ImGuiColorTextEdit\TextDiff.h" />
-    <ClInclude Include="ImGuiColorTextEdit\TextEditor.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
-    <ClInclude Include="imgui\imgui_impl_sdl2.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="third_party\ImGuiColorTextEdit\dtl.h" />
+    <ClInclude Include="third_party\ImGuiColorTextEdit\TextDiff.h" />
+    <ClInclude Include="third_party\ImGuiColorTextEdit\TextEditor.h" />
+    <ClInclude Include="third_party\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="third_party\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="third_party\imgui\imgui_impl_sdl2.h" />
     <ClInclude Include="utilities\fonts.hpp" />
     <ClInclude Include="utilities\iconfonts\IconsFontAwesome7.h" />
     <ClInclude Include="utilities\settings.hpp" />
@@ -284,7 +284,8 @@
     <ResourceCompile Include="resources\Vrita.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ImGuiColorTextEdit\LICENSE.txt" />
+    <Text Include="third_party\ImGuiColorTextEdit\LICENSE.txt" />
+    <Text Include="third_party\imgui\LICENSE.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

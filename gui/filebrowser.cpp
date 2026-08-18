@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <imgui.h>
-#include "imgui/imgui_impl_sdl2.h"
+#include "third_party/imgui/imgui_impl_sdl2.h"
 
 namespace fs = std::filesystem;
 

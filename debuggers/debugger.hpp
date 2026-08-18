@@ -14,7 +14,7 @@
 #include "debuggers_defines.hpp"
 #include "emulators/dmg/apu_structs.hpp"
 
-#include "ImGuiColorTextEdit/TextEditor.h"
+#include "third_party/ImGuiColorTextEdit/TextEditor.h"
 
 class Settings;
 struct DMGCpuRegisters;

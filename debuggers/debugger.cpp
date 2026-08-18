@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iomanip>
 #include <imgui.h>
-#include "imgui/imgui_impl_sdl2.h"
+#include "third_party/imgui/imgui_impl_sdl2.h"
 #include <imgui_internal.h>
 
 #include "utilities/settings.hpp"

@@ -6,7 +6,7 @@
 void Debugger::initRegisters() {
     registerNodes = {
         // Registers
-        { nullptr, "Registers", 0, 1, 8, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "Registers", 0, 1, 8, NDT_None, NVS_None, 0, false, true },
         { nullptr, "BC", 0, -1, 0, NDT_Hex16, NVS_RegBC, 0, false },
         { nullptr, "DE", 0, -1, 0, NDT_Hex16, NVS_RegDE, 0, false },
         { nullptr, "HL", 0, -1, 0, NDT_Hex16, NVS_RegHL, 0, false },
@@ -50,7 +50,7 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // APU
-        { nullptr, "APU", 0, 36, 26, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "APU", 0, 36, 26, NDT_None, NVS_None, 0, false, true },
 
         { nullptr, "NR50 ($FF24)", 0xFF24, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR51 ($FF25)", 0xFF25, 62, 2, NDT_Hex8, NVS_Memory, 0, false },
@@ -157,7 +157,7 @@ void Debugger::initRegisters() {
         { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 13); }, "Global checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // GameBoy
-        { nullptr, "GameBoy", 0, 126, 10, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "GameBoy", 0, 126, 10, NDT_None, NVS_None, 0, false, true },
 
         { nullptr, "Input", 0, 136, 8, NDT_None, NVS_None, 0, false },
         { nullptr, "IE ($FFFF)", 0xFFFF, 144, 5, NDT_Hex8, NVS_Memory, 0, false },

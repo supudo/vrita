@@ -74,10 +74,10 @@ void Debugger::initRegisters() {
         { nullptr, "NR43 ($FF22)", 0xFF22, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR44 ($FF23)", 0xFF23, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { [this](DebuggerRegisterTreeNode* n) { renderWavePattern(n); }, "Wave pattern", 0, 64, 16, NDT_Custom, NVS_None, 0, false },
-        { nullptr, "Channel 1 (SQ1)", 0, 80, 10, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 2 (SQ2)", 0, 90, 7, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 3 (WAV)", 0, 97, 5, NDT_Hex8, NVS_None, 0, false },
-        { nullptr, "Channel 4 (NOI)", 0, 102, 8, NDT_Hex8, NVS_None, 0, false },
+        { nullptr, "Channel 1 (SQ1)", 0, 80, 10, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 2 (SQ2)", 0, 90, 7, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 3 (WAV)", 0, 97, 5, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 4 (NOI)", 0, 102, 8, NDT_None, NVS_None, 0, false },
 
         // APU STAT children
         { nullptr, "Channels left", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },

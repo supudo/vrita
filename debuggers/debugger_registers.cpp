@@ -571,7 +571,11 @@ void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_
 
 void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) {
     uint8_t addressValue = funcMemoryRead(node->Address);
-    ImGui::Text("%d", ((addressValue & (1 << bit)) == 0) ? 0 : 1);
+    bool set = (addressValue & (1 << bit)) != 0;
+    if (isIE)
+        ImGui::Text("%s", set ? "Enabled" : "Disabled");
+    else
+        ImGui::Text("%s", set ? "Requested" : "Not requested");
 }
 
 void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type) {

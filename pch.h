@@ -1,16 +1,16 @@
 #pragma once
 
 // STL
-#include <vector>
-#include <string>
-#include <array>
 #include <algorithm>
-#include <functional>
-#include <memory>
-#include <cstdint>
+#include <array>
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 // GL loader (must precede any gl.h include, incl. SDL's)
 #include <GL/glew.h>

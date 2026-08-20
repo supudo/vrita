@@ -1,23 +1,24 @@
 #include "cartridge.hpp"
 
 void DMG_CARTRIDGE::loadROM(std::streamsize size) {
+    romImage.assign(mmu.memory.data(), mmu.memory.data() + size);
     ram.assign(0x8000, 0);
     uint8_t type = mmu.memory[addressCartridgeType]; // cartridge number
     logger.log("[DMG-CARTRIDGE] Cartridge type byte: 0x%02X", type);
     switch (type) {
         case 0x00:
-            mbc = std::make_unique<DMG_MBC0>(logger, mmu.memory.data(), size, ram);
+            mbc = std::make_unique<DMG_MBC0>(logger, romImage.data(), size, ram);
             logger.log("[DMG-CARTRIDGE] MBC: MBC0 (ROM only, 32KB)");
             break;
         case 0x01:
         case 0x02:
         case 0x03:
-            mbc = std::make_unique<DMG_MBC1>(logger, mmu.memory.data(), size, ram);
+            mbc = std::make_unique<DMG_MBC1>(logger, romImage.data(), size, ram);
             logger.log("[DMG-CARTRIDGE] MBC: MBC1");
             break;
         case 0x05:
         case 0x06:
-            mbc = std::make_unique<DMG_MBC2>(logger, mmu.memory.data(), size, ram);
+            mbc = std::make_unique<DMG_MBC2>(logger, romImage.data(), size, ram);
             logger.log("[DMG-CARTRIDGE] MBC: MBC2");
             break;
         case 0x0F:
@@ -25,7 +26,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
         case 0x11:
         case 0x12:
         case 0x13:
-            mbc = std::make_unique<DMG_MBC3>(logger, mmu.memory.data(), size, ram);
+            mbc = std::make_unique<DMG_MBC3>(logger, romImage.data(), size, ram);
             logger.log("[DMG-CARTRIDGE] MBC: MBC3");
             break;
         case 0x19:
@@ -34,7 +35,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
         case 0x1C:
         case 0x1D:
         case 0x1E:
-            mbc = std::make_unique<DMG_MBC5>(logger, mmu.memory.data(), size, ram);
+            mbc = std::make_unique<DMG_MBC5>(logger, romImage.data(), size, ram);
             logger.log("[DMG-CARTRIDGE] MBC: MBC5");
             break;
         default:

@@ -20,6 +20,9 @@ public:
     void loadROM(std::streamsize size);
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t value);
+    
+    const uint8_t* romImageDate() const { return romImage.data(); };
+    size_t romImageSize() const { return romImage.size(); };
 
 private:
     Logger& logger;
@@ -27,6 +30,7 @@ private:
 
     std::unique_ptr<DMG_MBC> mbc;
     std::vector<uint8_t> ram;
+    std::vector<uint8_t> romImage;
 
     std::string romTitle;
     std::string romManufacturerCode;

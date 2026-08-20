@@ -89,6 +89,7 @@ private:
     void initEditor();
     void disassembleWork();
 
+    bool disassemblyRequested = false;
     std::thread disassemblyThread;
     std::atomic<bool> disassemblyDone { false };
     bool disassemblyStarted = false;

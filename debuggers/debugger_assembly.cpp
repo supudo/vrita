@@ -17,9 +17,8 @@ void Debugger::initEditor() {
     editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
-        if (ImGui::MenuItem("Set Breakpoint")) {
+        if (ImGui::MenuItem("Set Breakpoint"))
             breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
-        }
         if (ImGui::MenuItem("Remove Breakpoint"))
             breakpoints.erase(addr);
     });
@@ -44,7 +43,7 @@ void Debugger::disassemblySource(DMGCpuRegisters& registers) {
         return;
     }
 
-    if (editorSourceSet || disassemblyStarted)
+    if (!disassemblyRequested || editorSourceSet || disassemblyStarted)
         return;
 
     if (!funcMemoryRead)
@@ -276,18 +275,24 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
             editorAssembly.AddMarker(static_cast<size_t>(bpLine), breakpointsDisabled ? IM_COL32(255, 0, 0, 100) : IM_COL32(255, 0, 0, 255), 0, "", "Breakpoint");
     }
 
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
-    ImGui::SameLine(54);
-    ImGui::Text("Address");
-    ImGui::SameLine(128);
-    ImGui::Text("Bytes");
-    ImGui::SameLine(216);
-    ImGui::Text("Code");
-    ImGui::PopStyleColor();
+    if (editorSourceSet) {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
+        ImGui::SameLine(54);
+        ImGui::Text("Address");
+        ImGui::SameLine(128);
+        ImGui::Text("Bytes");
+        ImGui::SameLine(216);
+        ImGui::Text("Code");
+        ImGui::PopStyleColor();
 
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
-    editorAssembly.Render("Assembly");
-    ImGui::PopStyleVar();
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+
+        editorAssembly.Render("Assembly");
+
+        ImGui::PopStyleVar();
+    }
+    else if (ImGui::Button("Disassemble ROM"))
+        disassemblyRequested = true;
 
     ImGui::EndChild();
 }

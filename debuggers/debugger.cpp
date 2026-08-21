@@ -55,6 +55,16 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcStepInstruction = stepInstruction;
 }
 
+void Debugger::setRomImage(const uint8_t* data, uint32_t size) {
+    romBuffer = data;
+    romBufferSize = size;
+}
+
+void Debugger::setCartridgeCallbacks(std::function<uint16_t()> currentRomBank, std::function<uint16_t()> totalRomBanks) {
+    funcCurrentRomBank = currentRomBank;
+    funcTotalRomBanks = totalRomBanks;
+}
+
 void Debugger::release() {
     if (disassemblyThread.joinable())
         disassemblyThread.join();

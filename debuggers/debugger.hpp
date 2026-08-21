@@ -1,13 +1,15 @@
 #ifndef VRITA_DEBUGGER_INCLUDES
 #define VRITA_DEBUGGER_INCLUDES
 
-#include <stdint.h>
-#include <cstdint>
 #include <array>
 #include <atomic>
-#include <thread>
+#include <cstdint>
+#include <stdint.h>
 #include <string>
+#include <thread>
+#include <unordered_map>
 #include <vector>
+
 #include <imgui.h>
 
 #include "utilities/logger.hpp"
@@ -44,6 +46,9 @@ public:
     void render(bool* windowOpened, DMGCpuRegisters& registers);
     void pushCPUFrameTime(float ms);
 
+    void setRomImage(const uint8_t* data, uint32_t size);
+    void setCartridgeCallbacks(std::function<uint16_t()> currentRomBank, std::function<uint16_t()> totalRomBanks);
+
 private:
     Logger& logger;
     Settings& settings;
@@ -71,6 +76,12 @@ private:
     std::function<const NoiseChannel& ()> funcAPUChannelNoise;
     std::function<uint8_t(uint8_t)> funcAPUChannelOutput;
 
+    std::function<uint16_t()> funcCurrentRomBank;
+    std::function<uint16_t()> funcTotalRomBanks;
+    const uint8_t* romBuffer = nullptr;
+    uint32_t romBufferSize = 0;
+    uint8_t readROMByte(uint16_t bank, uint16_t addr) const;
+
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;
 
@@ -88,6 +99,7 @@ private:
     bool breakpointsDisabled = false;
     void initEditor();
     void disassembleWork();
+    void disassembleWorkDiscovery();
 
     bool disassemblyRequested = false;
     std::thread disassemblyThread;
@@ -96,6 +108,10 @@ private:
     std::string pendingAssemblySource;
     std::array<int32_t, 0x10000> pendingAddressToLine{};
     std::vector<uint16_t> pendingLineToAddress;
+
+    std::unordered_map<uint32_t, int32_t> addressToLineByBank;
+    std::unordered_map<uint32_t, int32_t> pendingAddressToLineByBank;
+    int32_t resolveAddressLine(uint16_t address);
 
     std::array<int32_t, 0x10000> addressToLine {};
     std::vector<uint16_t> lineToAddress;

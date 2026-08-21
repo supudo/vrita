@@ -17,6 +17,8 @@ public:
     virtual ~DMG_MBC() = default;
     virtual uint8_t read(uint16_t addr) = 0;
     virtual void write(uint16_t addr, uint8_t value) = 0;
+    virtual uint16_t currentRomBank() const = 0;
+    uint16_t totalRomBanks() const { return static_cast<uint16_t>(romSize / 0x4000); }
 
 protected:
     Logger& logger;
@@ -32,6 +34,7 @@ public:
         return rom[addr];
     }
     void write(uint16_t, uint8_t) override { /* read-only */ }
+    uint16_t currentRomBank() const { return 1; }
 };
 
 class DMG_MBC1 : public DMG_MBC {
@@ -75,6 +78,7 @@ public:
             bankingMode = nm;
         }
     }
+    uint16_t currentRomBank() const { return romBank | (bankingMode ? (ramBank << 5) : 0); }
 };
 
 class DMG_MBC2 : public DMG_MBC {
@@ -95,6 +99,7 @@ public:
                 romBank = value & 0x0F;
         }
     }
+    uint16_t currentRomBank() const { return romBank; }
 };
 
 class DMG_MBC3 : public DMG_MBC {
@@ -130,6 +135,7 @@ public:
                 ram[ramBank * 0x2000 + (addr - 0xA000)] = value;
         }
     }
+    uint16_t currentRomBank() const { return romBank; }
 };
 
 class DMG_MBC5 : public DMG_MBC {
@@ -167,6 +173,7 @@ public:
             ramBank = nb;
         }
     }
+    uint16_t currentRomBank() const { return romBank; }
 };
 
 #endif

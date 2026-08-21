@@ -21,8 +21,11 @@ public:
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t value);
     
-    const uint8_t* romImageDate() const { return romImage.data(); };
-    size_t romImageSize() const { return romImage.size(); };
+    const uint8_t* romImageData() const { return romImage.data(); }
+    size_t romImageSize() const { return romImage.size(); }
+
+    uint16_t currentRomBank() const { return mbc ? mbc->currentRomBank() : 0; }
+    uint16_t totalRomBanks() const { return mbc ? mbc->totalRomBanks() : 0; }
 
 private:
     Logger& logger;

@@ -136,6 +136,15 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             [&] () -> const NoiseChannel& { return emulatorDMG->managerAPU->getChannelNoise(); },
             [&] (uint8_t channel) -> uint8_t { return emulatorDMG->managerAPU->channelOutput(channel); }
         );
+        debuggerDebugger->setRomImage(emulatorDMG->managerCartridge->romImageData(), (uint32_t)emulatorDMG->managerCartridge->romImageSize());
+        debuggerDebugger->setCartridgeCallbacks(
+            [&] () {
+                return emulatorDMG->managerCartridge->currentRomBank();
+            },
+            [&] () {
+                return emulatorDMG->managerCartridge->totalRomBanks();
+            }
+        );
         debuggerDebugger->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
@@ -170,6 +179,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);
         debuggerDebugger->setMemory("agb", 0);
+        debuggerDebugger->setRomImage(nullptr, 0);
     }
 
     if (debuggersMemoryEditorVisible)

@@ -4,6 +4,7 @@
 #include <cctype>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "third_party/ImGuiColorTextEdit/TextEditor.h"
@@ -61,6 +62,14 @@ constexpr std::string_view getRegisterName16(uint8_t index) {
     return registerNames16[index & 3];
 }
 
+constexpr std::string_view getRegisterName16Stack(uint8_t index) {
+    return registerNames16Stack[index & 3];
+}
+
+constexpr std::string_view getIndirectPointerName(uint8_t index) {
+    return indirectPointerNames[index & 3];
+}
+
 constexpr std::string_view getConditionName(uint8_t index) {
     return conditionNames[index & 3];
 }
@@ -83,6 +92,41 @@ inline std::string formatHex16Brackets(uint16_t value) {
     return buffer;
 }
 
+inline std::string_view getHardwareRegisterName(uint16_t address) {
+    static const std::unordered_map<uint16_t, std::string_view> names = {
+        {0xFF00, "rP1"},   {0xFF01, "rSB"},   {0xFF02, "rSC"},
+        {0xFF04, "rDIV"},  {0xFF05, "rTIMA"}, {0xFF06, "rTMA"},  {0xFF07, "rTAC"},
+        {0xFF0F, "rIF"},
+        {0xFF10, "rNR10"}, {0xFF11, "rNR11"}, {0xFF12, "rNR12"}, {0xFF13, "rNR13"}, {0xFF14, "rNR14"},
+        {0xFF16, "rNR21"}, {0xFF17, "rNR22"}, {0xFF18, "rNR23"}, {0xFF19, "rNR24"},
+        {0xFF1A, "rNR30"}, {0xFF1B, "rNR31"}, {0xFF1C, "rNR32"}, {0xFF1D, "rNR33"}, {0xFF1E, "rNR34"},
+        {0xFF20, "rNR41"}, {0xFF21, "rNR42"}, {0xFF22, "rNR43"}, {0xFF23, "rNR44"},
+        {0xFF24, "rNR50"}, {0xFF25, "rNR51"}, {0xFF26, "rNR52"},
+        {0xFF40, "rLCDC"}, {0xFF41, "rSTAT"}, {0xFF42, "rSCY"},  {0xFF43, "rSCX"},
+        {0xFF44, "rLY"},   {0xFF45, "rLYC"},  {0xFF46, "rDMA"},  {0xFF47, "rBGP"},
+        {0xFF48, "rOBP0"}, {0xFF49, "rOBP1"}, {0xFF4A, "rWY"},   {0xFF4B, "rWX"},
+        {0xFFFF, "rIE"},
+    };
+    auto it = names.find(address);
+    return it != names.end() ? it->second : std::string_view{};
+}
+
+inline std::string labelName(uint16_t bank, uint16_t address, LabelKind kind) {
+    const char* prefix = kind == LabelKind::EntryPoint ? "Entry" : kind == LabelKind::Function ? "Func" : "Label";
+    char buffer[24];
+    if (address < 0x4000)
+        snprintf(buffer, sizeof(buffer), "%s_%04X", prefix, address);
+    else
+        snprintf(buffer, sizeof(buffer), "%s_%02X_%04X", prefix, bank, address);
+    return buffer;
+}
+
+inline std::string ramLabelName(uint16_t address) {
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "RAM_%04X", address);
+    return buffer;
+}
+
 inline std::string instructionFormatOperand(const Operand& operand) {
     switch (operand.type) {
         case OperandType::None:
@@ -95,8 +139,10 @@ inline std::string instructionFormatOperand(const Operand& operand) {
             return formatHex8(static_cast<uint8_t>(operand.value));
         case OperandType::Immediate16:
             return formatHex16(operand.value);
-        case OperandType::Address16:
-            return formatHex16Brackets(operand.value);
+        case OperandType::Address16: {
+            const auto hwName = getHardwareRegisterName(operand.value);
+            return hwName.empty() ? formatHex16Brackets(operand.value) : "(" + std::string(hwName) + ")";
+        }
         case OperandType::Relative8:
             return formatHex16(operand.value);
         case OperandType::Condition:
@@ -107,8 +153,25 @@ inline std::string instructionFormatOperand(const Operand& operand) {
             const int8_t offset = static_cast<int8_t>(operand.value);
             return offset >= 0 ? "SP+" + formatHex8(offset) : "SP-" + formatHex8(-offset);
         }
+        case OperandType::Register16Stack:
+            return std::string(getRegisterName16Stack(static_cast<uint8_t>(operand.value)));
+        case OperandType::IndirectPointer:
+            return std::string(getIndirectPointerName(static_cast<uint8_t>(operand.value)));
     }
     return "";
+}
+
+inline std::string formatOperandWithLabels(const Operand& op, const DisassembledInstruction& instruction, uint16_t bank,
+                                           const std::unordered_map<uint32_t, LabelKind>& labelTargets,
+                                           const std::unordered_set<uint16_t>& ramReferences) {
+    if (op.type != OperandType::Condition && instruction.target.has_value() && op.value == *instruction.target) {
+        auto it = labelTargets.find(keyOf(bank, *instruction.target));
+        if (it != labelTargets.end())
+            return labelName(bank, *instruction.target, it->second);
+    }
+    if (op.type == OperandType::Address16 && ramReferences.count(op.value))
+        return "(" + ramLabelName(op.value) + ")";
+    return instructionFormatOperand(op);
 }
 
 inline std::string instructionFormat(const DisassembledInstruction& instruction) {
@@ -342,11 +405,82 @@ inline DisassembledInstruction disassembleInstruction(uint16_t address, uint8_t 
         instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(2) };
         instruction.operands[1] = { OperandType::SPRelative8, static_cast<uint16_t>(d8) };
     }
+    else if (opcode == 0x10) {
+        instruction.mnemonic = InstructionMnemonic::STOP;
+        instruction.flags = InstructionFlags::Terminates;
+    }
+    else if (opcode == 0x07)
+        instruction.mnemonic = InstructionMnemonic::RLCA;
+    else if (opcode == 0x0F) 
+        instruction.mnemonic = InstructionMnemonic::RRCA;
+    else if (opcode == 0x17) 
+        instruction.mnemonic = InstructionMnemonic::RLA;
+    else if (opcode == 0x1F) 
+        instruction.mnemonic = InstructionMnemonic::RRA;
+    else if (opcode == 0x27) 
+        instruction.mnemonic = InstructionMnemonic::DAA;
+    else if (opcode == 0x2F) 
+        instruction.mnemonic = InstructionMnemonic::CPL;
+    else if (opcode == 0x37) 
+        instruction.mnemonic = InstructionMnemonic::SCF;
+    else if (opcode == 0x3F) 
+        instruction.mnemonic = InstructionMnemonic::CCF;
+    else if (opcode == 0xF3) 
+        instruction.mnemonic = InstructionMnemonic::DI;
+    else if (opcode == 0xFB) 
+        instruction.mnemonic = InstructionMnemonic::EI;
+    else if (opcode == 0x03 || opcode == 0x13 || opcode == 0x23 || opcode == 0x33) {
+        instruction.mnemonic = InstructionMnemonic::INC;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
+    else if (opcode == 0x0B || opcode == 0x1B || opcode == 0x2B || opcode == 0x3B) {
+        instruction.mnemonic = InstructionMnemonic::DEC;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
+    else if ((opcode & 0xC7) == 0x04) {
+        instruction.mnemonic = InstructionMnemonic::INC;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>((opcode >> 3) & 7) };
+    }
+    else if ((opcode & 0xC7) == 0x05) {
+        instruction.mnemonic = InstructionMnemonic::DEC;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>((opcode >> 3) & 7) };
+    }
+    else if (opcode == 0x09 || opcode == 0x19 || opcode == 0x29 || opcode == 0x39) {
+        instruction.mnemonic = InstructionMnemonic::ADD;
+        instruction.operands[0] = { OperandType::Register16, static_cast<uint16_t>(2) }; // HL
+        instruction.operands[1] = { OperandType::Register16, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
+    else if (opcode >= 0x80 && opcode <= 0xBF) {
+        static constexpr InstructionMnemonic aluMnemonics[] = {
+            InstructionMnemonic::ADD, InstructionMnemonic::ADC, InstructionMnemonic::SUB, InstructionMnemonic::SBC,
+            InstructionMnemonic::AND, InstructionMnemonic::XOR, InstructionMnemonic::OR,  InstructionMnemonic::CP
+        };
+        instruction.mnemonic = aluMnemonics[(opcode >> 3) & 7];
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) }; // A
+        instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(opcode & 7) };
+    }
+    else if (opcode == 0xC1 || opcode == 0xD1 || opcode == 0xE1 || opcode == 0xF1) {
+        instruction.mnemonic = InstructionMnemonic::POP;
+        instruction.operands[0] = { OperandType::Register16Stack, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
+    else if (opcode == 0xC5 || opcode == 0xD5 || opcode == 0xE5 || opcode == 0xF5) {
+        instruction.mnemonic = InstructionMnemonic::PUSH;
+        instruction.operands[0] = { OperandType::Register16Stack, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
+    else if (opcode == 0x02 || opcode == 0x12 || opcode == 0x22 || opcode == 0x32) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::IndirectPointer, static_cast<uint16_t>((opcode >> 4) & 3) };
+        instruction.operands[1] = { OperandType::Register8, static_cast<uint16_t>(7) }; // A
+    }
+    else if (opcode == 0x0A || opcode == 0x1A || opcode == 0x2A || opcode == 0x3A) {
+        instruction.mnemonic = InstructionMnemonic::LD;
+        instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(7) }; // A
+        instruction.operands[1] = { OperandType::IndirectPointer, static_cast<uint16_t>((opcode >> 4) & 3) };
+    }
     else if (opcode == 0xCB) {
         const uint8_t group = (d8 >> 6) & 3;
         const uint8_t field = (d8 >> 3) & 7;
         const uint8_t reg = d8 & 7;
-
         if (group == 0) {
             instruction.mnemonic = rotateShiftMnemonics[field];
             instruction.operands[0] = { OperandType::Register8, static_cast<uint16_t>(reg) };

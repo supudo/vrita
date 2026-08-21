@@ -645,7 +645,10 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
             break;
         }
         case 6: { // ROM Bank (runtime MBC state)
-            ImGui::TextDisabled("N/A");
+            if (funcCurrentRomBank)
+                ImGui::Text("$%02X", funcCurrentRomBank());
+            else
+                ImGui::TextDisabled("N/A");
             break;
         }
         case 7: { // ROM Size

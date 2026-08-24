@@ -119,6 +119,10 @@ private:
     std::unordered_map<uint32_t, int32_t> pendingAddressToLineByBank;
     int32_t resolveAddressLine(uint16_t address);
 
+    int32_t resolveBankAddressLine(uint16_t bank, uint16_t address);
+    void scrollToBankAddress(uint16_t bank, uint16_t address);
+    bool parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address);
+
     std::array<int32_t, 0x10000> addressToLine {};
     std::vector<std::string> lineToBytes;
     std::vector<uint16_t> lineToAddress;

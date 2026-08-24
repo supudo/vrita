@@ -481,6 +481,24 @@ void Debugger::disassembleWork() {
     disassemblyDone.store(true);
 }
 
+int32_t Debugger::resolveBankAddressLine(uint16_t bank, uint16_t address) {
+    if (address < 0x4000 || address >= 0x8000)
+        return addressToLine[address];
+    auto it = addressToLineByBank.find((static_cast<uint32_t>(bank) << 16) | address);
+    return it != addressToLineByBank.end() ? it->second : -1;
+}
+
+void Debugger::scrollToBankAddress(uint16_t bank, uint16_t address) {
+    if (!editorSourceSet)
+        return;
+    const int32_t line = resolveBankAddressLine(bank, address);
+    if (line < 0)
+        return;
+    editorAssembly.SetCursor(TextEditor::DocPos(static_cast<size_t>(line), 0));
+    editorAssembly.SelectLine(static_cast<size_t>(line));
+    editorAssembly.ScrollToLine(static_cast<size_t>(line), TextEditor::Scroll::alignMiddle);
+}
+
 void Debugger::scrollToAddress(uint16_t address) {
     if (!editorSourceSet)
         return;
@@ -679,6 +697,15 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
 
                 editorAssembly.Render("Assembly");
 
+                if (editorSourceSet && ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+                    && ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiMod_Shift)
+                    && editorAssembly.IsMousePosOverGlyph(ImGui::GetMousePos())) {
+                    const std::string word = editorAssembly.GetWordAtMousePos(ImGui::GetMousePos());
+                    uint16_t bank = 0, addr = 0;
+                    if (parseLabelIdentifier(word, bank, addr))
+                        scrollToBankAddress(bank, addr);
+                }
+
                 ImGui::PopStyleVar();
             }
             else if (ImGui::Button("Disassemble ROM"))
@@ -767,4 +794,26 @@ void Debugger::renderRestBreakpoints() {
 
     if (breakpointToRemove.has_value())
         breakpoints.erase(*breakpointToRemove);
+}
+
+bool Debugger::parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address) {
+    static constexpr std::string_view prefixes[] = { "Func_", "Label_", "Entry_", "Data_" };
+    for (auto prefix: prefixes) {
+        if (word.compare(0, prefix.size(), prefix) != 0)
+            continue;
+        const std::string rest = word.substr(prefix.size());
+        unsigned bb = 0, addr = 0;
+        if (sscanf(rest.c_str(), "%2x_%4x", &bb, &addr) == 2) {
+            bank = static_cast<uint16_t>(bb);
+            address = static_cast<uint16_t>(addr);
+            return true;
+        }
+        if (sscanf(rest.c_str(), "%4x", &addr) == 1) {
+            bank = 0;
+            address = static_cast<uint16_t>(addr);
+            return true;
+        }
+        return false;
+    }
+    return false;
 }

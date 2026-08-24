@@ -170,7 +170,7 @@ inline std::string formatOperandWithLabels(const Operand& op, const Disassembled
             return labelName(bank, *instruction.target, it->second);
     }
     if (op.type == OperandType::Address16 && ramReferences.count(op.value))
-        return "(" + ramLabelName(op.value) + ")";
+        return "[" + ramLabelName(op.value) + "]";
     return instructionFormatOperand(op);
 }
 

@@ -92,12 +92,17 @@ private:
 
     bool logCPUCalls = false;
 
+    bool editorOptionShowLineNumbers = true;
+    bool editorOptionShowAddress = true;
+    bool editorOptionShowByteCode = true;
+
     TextEditor editorAssembly;
     TextEditor::Language editorLanguage;
     bool editorInitialized = false;
     bool editorSourceSet = false;
     bool breakpointsDisabled = false;
     void initEditor();
+    void updateLineDecorator();
     void disassembleWork();
     void disassembleWorkDiscovery();
 
@@ -108,12 +113,14 @@ private:
     std::string pendingAssemblySource;
     std::array<int32_t, 0x10000> pendingAddressToLine{};
     std::vector<uint16_t> pendingLineToAddress;
+    std::vector<std::string> pendingLineToBytes;
 
     std::unordered_map<uint32_t, int32_t> addressToLineByBank;
     std::unordered_map<uint32_t, int32_t> pendingAddressToLineByBank;
     int32_t resolveAddressLine(uint16_t address);
 
     std::array<int32_t, 0x10000> addressToLine {};
+    std::vector<std::string> lineToBytes;
     std::vector<uint16_t> lineToAddress;
     size_t followedLine = SIZE_MAX;
     void followPC(DMGCpuRegisters& registers);

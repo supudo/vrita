@@ -12,9 +12,18 @@
 #include "utilities/fonts.hpp"
 #include "emulators/dmg/cpu_registers.hpp"
 
+constexpr size_t CONST_TriangleMarkerGlyphs = 2;
+constexpr size_t CONST_AddressColumnsGlyphs = 10;
+constexpr size_t CONST_ByteCodeColumnsGlyphs = 10;
+
 void Debugger::initEditor() {
     editorAssembly.SetLanguage(CreateDMGLanguage());
     editorAssembly.SetReadOnlyEnabled(true);
+
+    editorOptionShowLineNumbers = settings.GetInt("Debuggers - Editor", "editor_option_show_line_numbers", true);
+    editorAssembly.SetShowLineNumbersEnabled(editorOptionShowLineNumbers);
+    editorOptionShowAddress = settings.GetInt("Debuggers - Editor", "editor_option_show_address", true);
+    editorOptionShowByteCode = settings.GetInt("Debuggers - Editor", "editor_option_show_byte_code", true);
 
     editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
@@ -25,16 +34,35 @@ void Debugger::initEditor() {
             breakpoints.erase(addr);
     });
 
-    editorAssembly.SetLineDecorator(2, [this] (TextEditor::Decorator& decorator) {
-        if (gameIsRunning || followedLine == SIZE_MAX || decorator.line != followedLine)
-            return;
+    updateLineDecorator();
+}
 
+void Debugger::updateLineDecorator() {
+    const size_t widthGlyphs = CONST_TriangleMarkerGlyphs + (editorOptionShowAddress ? CONST_AddressColumnsGlyphs : 0) + (editorOptionShowByteCode  ? CONST_ByteCodeColumnsGlyphs : 0);
+    editorAssembly.SetLineDecorator(widthGlyphs, [this] (TextEditor::Decorator& decorator) {
+        const bool hasData = decorator.line < lineToBytes.size()&&!lineToBytes[decorator.line].empty();
         const ImVec2 p0 = ImGui::GetCursorScreenPos();
-        const float pad = decorator.height * 0.1f;
-        const ImVec2 p1(p0.x + pad, p0.y + pad);
-        const ImVec2 p2(p0.x + pad, p0.y + decorator.height - pad);
-        const ImVec2 p3(p0.x + decorator.width - pad, p0.y + decorator.height * 0.5f);
-        ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, IM_COL32(220, 30, 30, 255));
+        float x = p0.x;
+        if (editorOptionShowAddress) {
+            if (hasData) {
+                char addr[8];
+                snprintf(addr, sizeof(addr), "$%04X", decorator.line < lineToAddress.size() ? lineToAddress[decorator.line] : 0);
+                ImGui::GetWindowDrawList()->AddText(ImVec2(x, p0.y), ImGui::GetColorU32(ImGuiCol_Text), addr);
+            }
+            x += CONST_AddressColumnsGlyphs * decorator.glyphSize.x;
+        }
+        if (editorOptionShowByteCode) {
+            if (hasData)
+                ImGui::GetWindowDrawList()->AddText(ImVec2(x, p0.y), ImGui::GetColorU32(ImGuiCol_Text), lineToBytes[decorator.line].c_str());
+            x += CONST_ByteCodeColumnsGlyphs * decorator.glyphSize.x;
+        }
+        if (!gameIsRunning && followedLine != SIZE_MAX && decorator.line == followedLine) {
+            const float pad = decorator.height * 0.1f;
+            const ImVec2 p1(x + pad, p0.y + pad);
+            const ImVec2 p2(x + pad, p0.y + decorator.height - pad);
+            const ImVec2 p3(x + CONST_TriangleMarkerGlyphs * decorator.glyphSize.x - pad, p0.y + decorator.height * 0.5f);
+            ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, IM_COL32(220, 30, 30, 255));
+        }
     });
 }
 
@@ -46,6 +74,7 @@ void Debugger::disassemblySource(DMGCpuRegisters& registers) {
         addressToLine = pendingAddressToLine;
         addressToLineByBank = std::move(pendingAddressToLineByBank);
         lineToAddress = std::move(pendingLineToAddress);
+        lineToBytes = std::move(pendingLineToBytes);
         editorAssembly.SetText(pendingAssemblySource);
         pendingAssemblySource.clear();
         pendingAssemblySource.shrink_to_fit();
@@ -91,12 +120,14 @@ void Debugger::disassembleWorkDiscovery() {
 
     std::string assemblySource;
     std::vector<uint16_t> localLineToAddress;
+    std::vector<std::string> localLineToBytes;
     std::unordered_map<uint32_t, int32_t> localAddressToLineByBank;
     uint32_t address = 0x0000;
     int line = 0;
     const int maxInstructions = 0x8000;
     assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
     localLineToAddress.reserve(maxInstructions);
+    localLineToBytes.reserve(maxInstructions);
 
     breakpoints.clear();
 
@@ -187,13 +218,6 @@ void Debugger::disassembleWorkDiscovery() {
     }
 
     auto emitInstructionLine = [&] (uint16_t bank, uint16_t addr, const DisassembledInstruction& instr) {
-        char prefix[16];
-        snprintf(prefix, sizeof(prefix), "$%04X     ", addr);
-        assemblySource += prefix;
-        assemblySource += formatBytes(instr);
-        for (uint8_t j = instr.length; j < 3; ++j)
-            assemblySource += "    ";
-        assemblySource += "  ";
         assemblySource += instructionToString(instr.mnemonic);
 
         bool first = true;
@@ -211,6 +235,7 @@ void Debugger::disassembleWorkDiscovery() {
         else
             localAddressToLineByBank[keyOf(bank, addr)] = line;
         localLineToAddress.push_back(addr);
+        localLineToBytes.push_back(formatBytes(instr));
         ++line;
     };
 
@@ -219,12 +244,15 @@ void Debugger::disassembleWorkDiscovery() {
         assemblySource += "\n";
         ++line;
         localLineToAddress.push_back(addr);
+        localLineToBytes.push_back("");
         assemblySource += "; ---- " + name + " ----\n";
         ++line;
         localLineToAddress.push_back(addr);
+        localLineToBytes.push_back("");
         assemblySource += name + ":\n";
         ++line;
         localLineToAddress.push_back(addr);
+        localLineToBytes.push_back("");
     };
 
     auto emitDataGap = [&] (uint16_t bank, uint16_t startAddr, uint16_t endAddrExclusive) {
@@ -236,22 +264,22 @@ void Debugger::disassembleWorkDiscovery() {
         assemblySource += "\n";
         ++line;
         localLineToAddress.push_back(startAddr);
+        localLineToBytes.push_back("");
         assemblySource += "; ---- " + std::string(name) + " (" + std::to_string(endAddrExclusive - startAddr) + " bytes) ----\n";
         ++line;
         localLineToAddress.push_back(startAddr);
+        localLineToBytes.push_back("");
         assemblySource += std::string(name) + ":\n";
         ++line;
         localLineToAddress.push_back(startAddr);
+        localLineToBytes.push_back("");
 
         for (uint16_t a = startAddr; a < endAddrExclusive; ) {
             const uint16_t chunkLen = std::min<uint16_t>(3, endAddrExclusive - a);
-            char prefix[16];
-            snprintf(prefix, sizeof(prefix), "$%04X     ", a);
-            assemblySource += prefix;
             std::string bytesText, dbText = "db ";
             for (uint16_t j = 0; j < chunkLen; ++j) {
                 char b[8];
-                snprintf(b, sizeof(b), "%02X ", readROMByte(bank, a + j));
+                snprintf(b, sizeof(b), "%02X", readROMByte(bank, a + j));
                 if (j)
                     bytesText += ' ';
                 bytesText += b;
@@ -260,15 +288,13 @@ void Debugger::disassembleWorkDiscovery() {
                 dbText += (j ? ", " : "");
                 dbText += d;
             }
-            assemblySource += bytesText;
-            for (uint16_t j = chunkLen; j < 3; ++j)
-                assemblySource += "    ";
-            assemblySource += "  " + dbText + "\n";
+            assemblySource += dbText + "\n";
             if (a < 0x4000)
                 (*localAddressToLine)[a] = line;
             else
                 localAddressToLineByBank[keyOf(bank, a)] = line;
             localLineToAddress.push_back(a);
+            localLineToBytes.push_back(bytesText);
             ++line;
             a = static_cast<uint16_t>(a + chunkLen);
         }
@@ -276,9 +302,6 @@ void Debugger::disassembleWorkDiscovery() {
 
     auto emitLogoBlock = [&] (uint16_t bank, uint16_t startAddr, uint16_t byteLen) {
         for (uint16_t a = startAddr; a < startAddr + byteLen; a += 8) {
-            char prefix[16];
-            snprintf(prefix, sizeof(prefix), "$%04X     ", a);
-            assemblySource += prefix;
             std::string dbText = "db ";
             for (uint16_t j = 0; j < 8; ++j) {
                 char d[8];
@@ -289,14 +312,12 @@ void Debugger::disassembleWorkDiscovery() {
             assemblySource += dbText + "\n";
             (*localAddressToLine)[a] = line;
             localLineToAddress.push_back(a);
+            localLineToBytes.push_back("");
             ++line;
         }
     };
 
     auto emitHeaderField = [&] (uint16_t bank, uint16_t addr, uint16_t byteLen, const char* comment) {
-        char prefix[16];
-        snprintf(prefix, sizeof(prefix), "$%04X     ", addr);
-        assemblySource += prefix;
         std::string dbText = "db ";
         for (uint16_t j = 0; j < byteLen; ++j) {
             char d[8];
@@ -308,6 +329,7 @@ void Debugger::disassembleWorkDiscovery() {
         assemblySource += std::string("  ; ") + comment + "\n";
         (*localAddressToLine)[addr] = line;
         localLineToAddress.push_back(addr);
+        localLineToBytes.push_back("");
         ++line;
     };
 
@@ -315,12 +337,15 @@ void Debugger::disassembleWorkDiscovery() {
         assemblySource += "\n";
         ++line;
         localLineToAddress.push_back(0x0104);
+        localLineToBytes.push_back("");
         assemblySource += "; ==== GameBoy (DMG) Cartridge Header($0104 - $014F) ====\n";
         ++line;
         localLineToAddress.push_back(0x0104);
+        localLineToBytes.push_back("");
         assemblySource += "          ; Nintendo Logo\n";
         ++line;
         localLineToAddress.push_back(0x0104);
+        localLineToBytes.push_back("");
         emitLogoBlock(bank, 0x0104, 48);
         for (const auto& field : cartridgeHeaderFields)
             emitHeaderField(bank, field.address, field.length, field.comment);
@@ -362,9 +387,11 @@ void Debugger::disassembleWorkDiscovery() {
     assemblySource += "\n";
     line += 6;
     localLineToAddress.insert(localLineToAddress.end(), 6, 0);
+    localLineToBytes.insert(localLineToBytes.end(), 6, "");
     assemblySource += "; ==== ROM Bank 00 (fixed, $0000 - $3FFF) ====\n";
     line += 1;
     localLineToAddress.push_back(0);
+    localLineToBytes.push_back("");
     emitBankSection(bootBank, 0x0000, 0x0104, false);
     emitCartridgeHeader(bootBank);
     emitBankSection(bootBank, 0x0150, 0x4000, false);
@@ -374,11 +401,13 @@ void Debugger::disassembleWorkDiscovery() {
         assemblySource += header;
         ++line;
         localLineToAddress.push_back(0x4000);
+        localLineToBytes.push_back("");
         const bool fallback = !reachedBanks.count(bank);
         if (fallback) {
             assemblySource += "; ---- unreached by static control flow, linear scan ----\n";
             ++line;
             localLineToAddress.push_back(0x4000);
+            localLineToBytes.push_back("");
         }
         emitBankSection(bank, 0x4000, 0x8000, fallback);
         thinkingPercentage.store(50.0f * static_cast<float>(bank) / static_cast<float>(totalBanks));
@@ -387,6 +416,7 @@ void Debugger::disassembleWorkDiscovery() {
     pendingAddressToLine = *localAddressToLine;
     pendingAddressToLineByBank = std::move(localAddressToLineByBank);
     pendingLineToAddress = std::move(localLineToAddress);
+    pendingLineToBytes = std::move(localLineToBytes);
     pendingAssemblySource = std::move(assemblySource);
 
     const auto elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - startTime).count();
@@ -403,11 +433,13 @@ void Debugger::disassembleWork() {
 
     std::string assemblySource;
     std::vector<uint16_t> localLineToAddress;
+    std::vector<std::string> localLineToBytes;
     uint32_t address = 0x0000;
     int line = 0;
     const int maxInstructions = 0x8000;
     assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
     localLineToAddress.reserve(maxInstructions);
+    localLineToBytes.reserve(maxInstructions);
 
     breakpoints.clear();
 
@@ -418,32 +450,21 @@ void Debugger::disassembleWork() {
 
         (*localAddressToLine)[instructionAddress] = line;
 
-        char prefix[16];
-        snprintf(prefix, sizeof(prefix), "$%04X     ", instructionAddress);
-        assemblySource += prefix;
-
-        assemblySource += formatBytes(instruction);
-
-        for (uint8_t j = instruction.length; j < 3; ++j)
-            assemblySource += "    ";
-        assemblySource += "  ";
-
         assemblySource += instructionToString(instruction.mnemonic);
 
         bool first = true;
-
         for (const auto& operand : instruction.operands) {
             if (operand.type == OperandType::None)
                 continue;
             assemblySource += first ? " " : ", ";
             assemblySource += instructionFormatOperand(operand);
-
             first = false;
         }
 
         assemblySource += "\n";
 
         localLineToAddress.push_back(instructionAddress);
+        localLineToBytes.push_back(formatBytes(instruction));
         line++;
         address += instruction.length;
         thinkingPercentage.store(100.0f * static_cast<float>(address) / 0x10000);
@@ -451,6 +472,7 @@ void Debugger::disassembleWork() {
 
     pendingAddressToLine = *localAddressToLine;
     pendingLineToAddress = std::move(localLineToAddress);
+    pendingLineToBytes = std::move(localLineToBytes);
     pendingAssemblySource = std::move(assemblySource);
 
     const auto elapsedMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - startTime).count();
@@ -616,24 +638,73 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
             editorAssembly.AddMarker(static_cast<size_t>(bpLine), breakpointsDisabled ? IM_COL32(255, 0, 0, 100) : IM_COL32(255, 0, 0, 255), 0, "", "Breakpoint");
     }
 
-    if (editorSourceSet) {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
-        ImGui::SameLine(54);
-        ImGui::Text("Address");
-        ImGui::SameLine(128);
-        ImGui::Text("Bytes");
-        ImGui::SameLine(216);
-        ImGui::Text("Code");
-        ImGui::PopStyleColor();
+    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+    if (ImGui::BeginTabBar("tabsEditor", tab_bar_flags)) {
+        if (ImGui::BeginTabItem("Editor")) {
+            if (editorSourceSet) {
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
+                ImGui::Dummy(ImVec2(0, 0));
 
-        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+                const float glyphWidth = editorAssembly.GetGlyphWidth();
+                const size_t lineDigits = std::to_string(editorAssembly.GetLineCount()).size();
+                const size_t decoratorGlyphs = CONST_TriangleMarkerGlyphs + (editorOptionShowAddress ? CONST_AddressColumnsGlyphs : 0) + (editorOptionShowByteCode ? CONST_ByteCodeColumnsGlyphs : 0);
 
-        editorAssembly.Render("Assembly");
+                const float lineNumberLeftOffset = editorOptionShowLineNumbers ? editorAssembly.GetLineNumberLeftMargin() * glyphWidth : 0.0f;
+                const float lineNumberRightOffset = editorOptionShowLineNumbers ? lineNumberLeftOffset + static_cast<float>(lineDigits) * glyphWidth : 0.0f;
+                const float decorationOffset = lineNumberRightOffset + editorAssembly.GetDecorationLeftMargin() * glyphWidth;
+                const float textLeftOffset = decorationOffset + (static_cast<float>(decoratorGlyphs) + editorAssembly.GetTextLeftMargin()) * glyphWidth;
 
-        ImGui::PopStyleVar();
+                float cursorX = lineNumberLeftOffset;
+
+                if (editorOptionShowLineNumbers) {
+                    ImGui::SameLine(cursorX + 24.0f);
+                    ImGui::Text("#");
+                }
+                cursorX = decorationOffset;
+                if (editorOptionShowAddress) {
+                    ImGui::SameLine(cursorX);
+                    ImGui::Text("Address");
+                    cursorX += CONST_AddressColumnsGlyphs * glyphWidth;
+                }
+                if (editorOptionShowByteCode) {
+                    ImGui::SameLine(cursorX);
+                    ImGui::Text("Bytes");
+                    cursorX += CONST_ByteCodeColumnsGlyphs * glyphWidth;
+                }
+                ImGui::SameLine(textLeftOffset);
+                ImGui::Text("Code");
+                ImGui::PopStyleColor();
+
+                ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.0f));
+
+                editorAssembly.Render("Assembly");
+
+                ImGui::PopStyleVar();
+            }
+            else if (ImGui::Button("Disassemble ROM"))
+                disassemblyRequested = true;
+            ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Options")) {
+            if (ImGui::Checkbox("Show Line Numbers", &editorOptionShowLineNumbers)) {
+                settings.Set("Debuggers - Editor", "editor_option_show_line_numbers", editorOptionShowLineNumbers);
+                editorAssembly.SetShowLineNumbersEnabled(editorOptionShowLineNumbers);
+            }
+
+            if (ImGui::Checkbox("Show Address", &editorOptionShowAddress)) {
+                settings.Set("Debuggers - Editor", "editor_option_show_address", editorOptionShowAddress);
+                updateLineDecorator();
+            }
+
+            if (ImGui::Checkbox("Show Byte Code", &editorOptionShowByteCode)) {
+                settings.Set("Debuggers - Editor", "editor_option_show_byte_code", editorOptionShowByteCode);
+                updateLineDecorator();
+            }
+
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
     }
-    else if (ImGui::Button("Disassemble ROM"))
-        disassemblyRequested = true;
 
     ImGui::EndChild();
 }

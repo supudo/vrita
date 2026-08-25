@@ -43,6 +43,16 @@ void Debugger::updateLineDecorator() {
         const bool hasData = decorator.line < lineToBytes.size()&&!lineToBytes[decorator.line].empty();
         const ImVec2 p0 = ImGui::GetCursorScreenPos();
         float x = p0.x;
+
+        if (!gameIsRunning && followedLine != SIZE_MAX && decorator.line == followedLine) {
+            const float pad = decorator.height * 0.1f;
+            const ImVec2 p1(x + pad, p0.y + pad);
+            const ImVec2 p2(x + pad, p0.y + decorator.height - pad);
+            const ImVec2 p3(x + CONST_TriangleMarkerGlyphs * decorator.glyphSize.x - pad, p0.y + decorator.height * 0.5f);
+            ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, IM_COL32(220, 30, 30, 255));
+        }
+        x += CONST_TriangleMarkerGlyphs * decorator.glyphSize.x;
+
         if (editorOptionShowAddress) {
             if (hasData) {
                 char addr[8];
@@ -55,13 +65,6 @@ void Debugger::updateLineDecorator() {
             if (hasData)
                 ImGui::GetWindowDrawList()->AddText(ImVec2(x, p0.y), ImGui::GetColorU32(ImGuiCol_Text), lineToBytes[decorator.line].c_str());
             x += CONST_ByteCodeColumnsGlyphs * decorator.glyphSize.x;
-        }
-        if (!gameIsRunning && followedLine != SIZE_MAX && decorator.line == followedLine) {
-            const float pad = decorator.height * 0.1f;
-            const ImVec2 p1(x + pad, p0.y + pad);
-            const ImVec2 p2(x + pad, p0.y + decorator.height - pad);
-            const ImVec2 p3(x + CONST_TriangleMarkerGlyphs * decorator.glyphSize.x - pad, p0.y + decorator.height * 0.5f);
-            ImGui::GetWindowDrawList()->AddTriangleFilled(p1, p2, p3, IM_COL32(220, 30, 30, 255));
         }
     });
 }
@@ -678,7 +681,7 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
                     ImGui::SameLine(cursorX + 24.0f);
                     ImGui::Text("#");
                 }
-                cursorX = decorationOffset;
+                cursorX = decorationOffset + CONST_TriangleMarkerGlyphs * glyphWidth;
                 if (editorOptionShowAddress) {
                     ImGui::SameLine(cursorX);
                     ImGui::Text("Address");

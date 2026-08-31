@@ -221,6 +221,7 @@ void Debugger::disassembleWorkDiscovery() {
     }
 
     auto emitInstructionLine = [&] (uint16_t bank, uint16_t addr, const DisassembledInstruction& instr) {
+        assemblySource += "    ";
         assemblySource += instructionToString(instr.mnemonic);
 
         bool first = true;
@@ -279,7 +280,7 @@ void Debugger::disassembleWorkDiscovery() {
 
         for (uint16_t a = startAddr; a < endAddrExclusive; ) {
             const uint16_t chunkLen = std::min<uint16_t>(3, endAddrExclusive - a);
-            std::string bytesText, dbText = "db ";
+            std::string bytesText, dbText = "    db ";
             for (uint16_t j = 0; j < chunkLen; ++j) {
                 char b[8];
                 snprintf(b, sizeof(b), "%02X", readROMByte(bank, a + j));
@@ -305,7 +306,7 @@ void Debugger::disassembleWorkDiscovery() {
 
     auto emitLogoBlock = [&] (uint16_t bank, uint16_t startAddr, uint16_t byteLen) {
         for (uint16_t a = startAddr; a < startAddr + byteLen; a += 8) {
-            std::string dbText = "db ";
+            std::string dbText = "    db ";
             for (uint16_t j = 0; j < 8; ++j) {
                 char d[8];
                 snprintf(d, sizeof(d), "$%02X", readROMByte(bank, a + j));
@@ -321,7 +322,7 @@ void Debugger::disassembleWorkDiscovery() {
     };
 
     auto emitHeaderField = [&] (uint16_t bank, uint16_t addr, uint16_t byteLen, const char* comment) {
-        std::string dbText = "db ";
+        std::string dbText = "    db ";
         for (uint16_t j = 0; j < byteLen; ++j) {
             char d[8];
             snprintf(d, sizeof(d), "$%02X", readROMByte(bank, addr + j));

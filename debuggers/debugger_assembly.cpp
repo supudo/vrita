@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <queue>
+#include <set>
 #include <thread>
 #include <unordered_set>
 
@@ -15,6 +16,7 @@
 constexpr size_t CONST_TriangleMarkerGlyphs = 2;
 constexpr size_t CONST_AddressColumnsGlyphs = 10;
 constexpr size_t CONST_ByteCodeColumnsGlyphs = 10;
+constexpr uint16_t CONST_MinDsRunLength = 4;
 
 void Debugger::initEditor() {
     editorAssembly.SetLanguage(CreateDMGLanguage());
@@ -139,6 +141,7 @@ void Debugger::disassembleWorkDiscovery() {
     std::unordered_map<uint32_t, LabelKind> labelTargets;
     std::unordered_set<uint32_t> reachedBanks;
     std::unordered_set<uint16_t> ramReferences;
+    std::unordered_map<uint16_t, std::set<uint16_t>> romDataReferencesByBank;
     std::queue<WorkItem> worklist;
 
     auto labelRank = [] (LabelKind k) { return k == LabelKind::EntryPoint ? 2 : k == LabelKind::Function ? 1 : 0; };
@@ -150,6 +153,20 @@ void Debugger::disassembleWorkDiscovery() {
             const bool isHRAM = operand.value >= 0xFF80 && operand.value <= 0xFFFE;
             if ((isWRAM || isHRAM) && getHardwareRegisterName(operand.value).empty())
                 ramReferences.insert(operand.value);
+        }
+    };
+    auto trackDataReferences = [&] (uint16_t bank, const DisassembledInstruction& instr) {
+        for (const auto& operand : instr.operands) {
+            if (operand.type != OperandType::Immediate16)
+                continue;
+            const uint16_t value = operand.value;
+            if (value >= 0x8000)
+                continue; // outside of ROM
+            if (instr.target.has_value() && value == *instr.target)
+                continue; // tracked as branch/call target
+            if (labelTargets.count(keyOf(bank, value)))
+                continue; // code label, not data ref
+            romDataReferencesByBank[value < 0x4000 ? 0 : bank].insert(value);
         }
     };
 
@@ -184,6 +201,7 @@ void Debugger::disassembleWorkDiscovery() {
         DisassembledInstruction instruction = disassembleInstruction(item.address, opcode, reader);
         decoded[key] = instruction;
         trackRamReferences(instruction);
+        trackDataReferences(bank, instruction);
         if (item.address >= 0x4000)
             reachedBanks.insert(item.bank);
 
@@ -216,6 +234,7 @@ void Debugger::disassembleWorkDiscovery() {
             DisassembledInstruction instruction = disassembleInstruction(addr, opcode, reader);
             decoded[keyOf(bank, addr)] = instruction;
             trackRamReferences(instruction);
+            trackDataReferences(bank, instruction);
             addr = static_cast<uint16_t>(addr + instruction.length);
         }
     }
@@ -279,14 +298,31 @@ void Debugger::disassembleWorkDiscovery() {
         localLineToBytes.push_back("");
 
         for (uint16_t a = startAddr; a < endAddrExclusive; ) {
-            const uint16_t chunkLen = std::min<uint16_t>(3, endAddrExclusive - a);
-            std::string bytesText, dbText = "    db ";
+            const uint8_t fillByte = readROMByte(bank, a);
+            uint16_t runEnd = a + 1;
+            while (runEnd < endAddrExclusive && readROMByte(bank, runEnd) == fillByte)
+                ++runEnd;
+            const uint16_t runLen = runEnd - a;
+
+            if (runLen >= CONST_MinDsRunLength) {
+                char ds[32];
+                snprintf(ds, sizeof(ds), "    ds %u, $%02X", runLen, fillByte);
+                assemblySource += std::string(ds) + "\n";
+                if (a < 0x4000)
+                    (*localAddressToLine)[a] = line;
+                else
+                    localAddressToLineByBank[keyOf(bank, a)] = line;
+                localLineToAddress.push_back(a);
+                localLineToBytes.push_back("");
+                ++line;
+                a = runEnd;
+                continue;
+            }
+
+            uint16_t chunkLen = 16 - (a & 0xF);
+            chunkLen = std::min<uint16_t>(chunkLen, endAddrExclusive - a);
+            std::string dbText = "    db ";
             for (uint16_t j = 0; j < chunkLen; ++j) {
-                char b[8];
-                snprintf(b, sizeof(b), "%02X", readROMByte(bank, a + j));
-                if (j)
-                    bytesText += ' ';
-                bytesText += b;
                 char d[8];
                 snprintf(d, sizeof(d), "$%02X", readROMByte(bank, a + j));
                 dbText += (j ? ", " : "");
@@ -298,7 +334,7 @@ void Debugger::disassembleWorkDiscovery() {
             else
                 localAddressToLineByBank[keyOf(bank, a)] = line;
             localLineToAddress.push_back(a);
-            localLineToBytes.push_back(bytesText);
+            localLineToBytes.push_back("");
             ++line;
             a = static_cast<uint16_t>(a + chunkLen);
         }
@@ -363,7 +399,20 @@ void Debugger::disassembleWorkDiscovery() {
                 uint16_t gapEnd = addr;
                 while (gapEnd < rangeEnd && decoded.find(keyOf(bank, gapEnd)) == decoded.end())
                     ++gapEnd;
-                emitDataGap(bank, addr, gapEnd);
+                uint16_t subStart = addr;
+                const uint16_t refBank = (addr < 0x4000) ? 0 : bank;
+                auto refIt = romDataReferencesByBank.find(refBank);
+                if (refIt != romDataReferencesByBank.end()) {
+                    for (uint16_t splitAt : refIt->second) {
+                        if (splitAt <= subStart)
+                            continue;
+                        if (splitAt >= gapEnd)
+                            break;
+                        emitDataGap(bank, subStart, splitAt);
+                        subStart = splitAt;
+                    }
+                }
+                emitDataGap(bank, subStart, gapEnd);
                 addr = gapEnd;
                 continue;
             }

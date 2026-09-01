@@ -29,7 +29,8 @@ private:
     std::string currentFolder;
 
     std::unordered_map<std::string, std::unordered_set<std::string>> allowedExtensions = {
-        { "dmg", { ".gb", ".gbc" } }, // Game Boy / Color
+        { "dmg", { ".gb" } }, // Game Boy
+        { "cgb", { ".gbc" } }, // Game Boy Color
         { "agb", { ".gba", ".agb" } },   // Game Boy Advance
     };
 

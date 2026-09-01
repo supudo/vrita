@@ -185,6 +185,7 @@
     <ClCompile Include="debuggers\tilemap_viewer.cpp" />
     <ClCompile Include="debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\agb\agb.cpp" />
+    <ClCompile Include="emulators\cgb\cgb.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
     <ClCompile Include="emulators\dmg\apu_mixer.cpp" />
     <ClCompile Include="emulators\dmg\apu_noise.cpp" />
@@ -230,6 +231,7 @@
     <ClInclude Include="debuggers\tilemap_viewer.hpp" />
     <ClInclude Include="debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\agb\agb.hpp" />
+    <ClInclude Include="emulators\cgb\cgb.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\apu_structs.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />

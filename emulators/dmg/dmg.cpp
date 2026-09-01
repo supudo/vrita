@@ -96,7 +96,7 @@ void DMG::stepAll() {
 std::string DMG::loadROM(const char* path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
-        logger.log("[DMG-CPU] WARNING: Failed to open ROM: %s", path);
+        logger.log("[DMG] WARNING: Failed to open ROM: %s", path);
         return "Failed to open ROM";
     }
     clear();
@@ -406,7 +406,6 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         double maxAccumulator = frameDuration * MAX_CATCHUP_FRAMES;
         frameAccumulator += dt;
         if (frameAccumulator > maxAccumulator) {
-            // backlog beyond the catch-up cap is discarded, not deferred: count as dropped frames
             droppedFrames += (uint32_t)((frameAccumulator - maxAccumulator) / frameDuration);
             frameAccumulator = maxAccumulator;
         }

@@ -76,6 +76,8 @@ void ShowMainMenu() {
         if (ImGui::BeginMenu("Emulators")) {
             if (ImGui::MenuItem("GameBoy (DMG)", NULL, managerEmulators->EMULATORS_SHOW_DMG))
                 managerEmulators->EMULATORS_SHOW_DMG = !managerEmulators->EMULATORS_SHOW_DMG;
+            if (ImGui::MenuItem("GameBoy Color (CGB)", NULL, managerEmulators->EMULATORS_SHOW_CGB))
+                managerEmulators->EMULATORS_SHOW_CGB = !managerEmulators->EMULATORS_SHOW_CGB;
             if (ImGui::MenuItem("GameBoy Advance (AGB)", NULL, managerEmulators->EMULATORS_SHOW_AGB))
                 managerEmulators->EMULATORS_SHOW_AGB = !managerEmulators->EMULATORS_SHOW_AGB;
             ImGui::EndMenu();

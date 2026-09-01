@@ -95,9 +95,11 @@ private:
     bool editorOptionShowLineNumbers = true;
     bool editorOptionShowAddress = true;
     bool editorOptionShowByteCode = true;
+    bool editorOptionSyntaxHighlight = true;
+    bool editorOptionShowMiniMap = false;
 
     TextEditor editorAssembly;
-    TextEditor::Language editorLanguage;
+    TextEditor::Language* editorLanguage;
     bool editorInitialized = false;
     bool editorSourceSet = false;
     bool breakpointsDisabled = false;

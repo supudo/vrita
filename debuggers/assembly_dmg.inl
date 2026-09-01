@@ -935,7 +935,7 @@ inline TextEditor::Iterator CustomTokenizer(TextEditor::Iterator start, TextEdit
 }
 
 // the language definition
-inline const TextEditor::Language* CreateDMGLanguage() {
+inline TextEditor::Language* CreateDMGLanguage() {
     static TextEditor::Language language;
     static bool initialized = false;
 

@@ -19,13 +19,16 @@ constexpr size_t CONST_ByteCodeColumnsGlyphs = 10;
 constexpr uint16_t CONST_MinDsRunLength = 4;
 
 void Debugger::initEditor() {
-    editorAssembly.SetLanguage(CreateDMGLanguage());
+    editorLanguage = CreateDMGLanguage();
+    editorAssembly.SetLanguage(editorLanguage);
     editorAssembly.SetReadOnlyEnabled(true);
 
     editorOptionShowLineNumbers = settings.GetInt("Debuggers - Editor", "editor_option_show_line_numbers", true);
     editorAssembly.SetShowLineNumbersEnabled(editorOptionShowLineNumbers);
     editorOptionShowAddress = settings.GetInt("Debuggers - Editor", "editor_option_show_address", true);
     editorOptionShowByteCode = settings.GetInt("Debuggers - Editor", "editor_option_show_byte_code", true);
+    editorOptionSyntaxHighlight = settings.GetInt("Debuggers - Editor", "editor_option_syntax_highlight", true);
+    editorOptionShowMiniMap = settings.GetInt("Debuggers - Editor", "editor_option_show_minimap", false);
 
     editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
@@ -779,6 +782,16 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
             if (ImGui::Checkbox("Show Byte Code", &editorOptionShowByteCode)) {
                 settings.Set("Debuggers - Editor", "editor_option_show_byte_code", editorOptionShowByteCode);
                 updateLineDecorator();
+            }
+
+            if (ImGui::Checkbox("Syntax Highlight", &editorOptionSyntaxHighlight)) {
+                settings.Set("Debuggers - Editor", "editor_option_syntax_highlight", editorOptionSyntaxHighlight);
+                editorAssembly.SetLanguage(editorOptionSyntaxHighlight ? editorLanguage : nullptr);
+            }
+
+            if (ImGui::Checkbox("Mini map", &editorOptionShowMiniMap)) {
+                settings.Set("Debuggers - Editor", "editor_option_show_minimap", editorOptionShowMiniMap);
+                editorAssembly.SetShowMiniMapEnabled(editorOptionShowMiniMap);
             }
 
             ImGui::EndTabItem();

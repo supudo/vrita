@@ -385,7 +385,7 @@ void Debugger::disassembleWorkDiscovery() {
         ++line;
         localLineToAddress.push_back(0x0104);
         localLineToBytes.push_back("");
-        assemblySource += "          ; Nintendo Logo\n";
+        assemblySource += "    ; Nintendo Logo\n";
         ++line;
         localLineToAddress.push_back(0x0104);
         localLineToBytes.push_back("");

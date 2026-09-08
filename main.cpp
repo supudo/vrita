@@ -339,6 +339,10 @@ int main(int argc, char** argv) {
 
     ImVec4 clear_color = ImVec4(145.0f / 255.0f, 145.0f / 255.0f, 145.0f / 255.0f, 1.00f);
 
+#ifdef TRACY_ENABLE
+    logger->log("[VRITA] Tracy profiling enabled.");
+#endif
+
     std::vector<std::string> droppedFiles;
     bool showDropCountError = false;
     while (!vritaRunning) {

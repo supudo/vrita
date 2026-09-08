@@ -24,10 +24,13 @@
 #include <imgui.h>
 
 // Internals
+#include "debuggers/debugger.hpp"
+#include "emulators/emulators.hpp"
 #include "utilities/logger.hpp"
 #include "utilities/settings.hpp"
 #include "utilities/datetimes.hpp"
 #include "utilities/files.hpp"
+#include "third_party/ImGuiColorTextEdit/TextEditor.h"
 
 #ifdef TRACY_ENABLE
 // Profiling

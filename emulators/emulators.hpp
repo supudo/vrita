@@ -4,7 +4,6 @@
 #include <SDL2/SDL.h>
 
 #include <functional>
-#include <string>
 
 #include "utilities/logger.hpp"
 #include "debuggers/memory_editor.hpp"

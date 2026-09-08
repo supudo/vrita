@@ -19,7 +19,7 @@ class DMG_PPU {
 public:
     DMG_PPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts) : logger(logger), mmu(mmu), interrupts(interrupts){}
 
-    void step(bool ROMFileLoaded, uint32_t cycles);
+    void step(uint32_t cycles);
     void setPalette(int palleteId);
     void clearResources();
     void setFramebuffer(uint32_t* fb);

@@ -168,11 +168,13 @@ void DMG::stepMMU(uint32_t cycles) {
 }
 
 void DMG::stepPPU(uint32_t cycles) {
-    managerPPU->step(ROMFileLoaded, cycles);
+    if (ROMFileLoaded)
+        managerPPU->step(cycles);
 }
 
 void DMG::stepAPU(uint32_t cycles) {
-    managerAPU->step(ROMFileLoaded, cycles);
+    if (ROMFileLoaded)
+        managerAPU->step(cycles);
 }
 
 void DMG::toggleGameState() {

@@ -13,8 +13,7 @@ void DMG_PPU::clearResources() {
     mmu.memory[addressSTAT] = (mmu.memory[addressSTAT] & 0xFC) | 2; // STAT
 }
 
-void DMG_PPU::step(bool ROMFileLoaded, uint32_t cycles) {
-    if (!ROMFileLoaded) return;
+void DMG_PPU::step(uint32_t cycles) {
 #ifdef TRACY_ENABLE
     ZoneScopedN("PPU::step");
 #endif

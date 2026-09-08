@@ -17,7 +17,7 @@ public:
     DMG_APU(Logger& logger, DMG_MMU& mmu) : logger(logger), mmu(mmu) {}
 
     void initAudioDevice(SDL_AudioDeviceID device);
-    void step(bool ROMFileLoaded, uint32_t cycles);
+    void step(uint32_t cycles);
     void clearResources();
     void powerOff();
 

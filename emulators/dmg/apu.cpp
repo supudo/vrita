@@ -47,9 +47,7 @@ void DMG_APU::powerOff() {
     registers.NR51 = 0;
 }
 
-void DMG_APU::step(bool ROMFileLoaded, uint32_t cycles) {
-    if (!ROMFileLoaded)
-        return;
+void DMG_APU::step(uint32_t cycles) {
 #ifdef TRACY_ENABLE
     ZoneScopedN("APU::step");
 #endif

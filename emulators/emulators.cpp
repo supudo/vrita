@@ -1,7 +1,5 @@
 #include "emulators.hpp"
 
-#include <memory>
-
 #include <SDL2/SDL.h>
 
 #include "dmg/dmg.hpp"
@@ -196,7 +194,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
                 return emulatorDMG->logCPUCalls(val);
             },
             [&] () {
-                emulatorDMG->managerCPU->step(emulatorDMG->ROMFileLoaded);
+                emulatorDMG->managerCPU->step();
             }
         );
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);

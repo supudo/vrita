@@ -1,5 +1,7 @@
 #include "cgb.hpp"
 
+#include <iostream>
+
 #include <imgui.h>
 #include "third_party/imgui/imgui_impl_sdl2.h"
 #include "emulators/dmg/palette_presets.hpp"

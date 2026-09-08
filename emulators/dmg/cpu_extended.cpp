@@ -1,8 +1,6 @@
 ﻿#include "cpu.hpp"
 
-void DMG_CPU::executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode) {
-    if (!ROMFileLoaded) return;
-
+void DMG_CPU::executeInstruction16bit(uint8_t opcode) {
     switch (opcode) {
         case 0x00: // RLC B
             rotateLeft("0x00 - RLC B", &Registers.B, false);

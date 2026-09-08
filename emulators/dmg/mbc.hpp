@@ -7,7 +7,7 @@ GameBoy (DMG)
 #ifndef VRITA_DMG_MBC_INCLUDES
 #define VRITA_DMG_MBC_INCLUDES
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include "utilities/logger.hpp"
 

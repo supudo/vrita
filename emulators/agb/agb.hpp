@@ -12,7 +12,6 @@ GameBoy Advance (AGB)
 #include <GL/glew.h>
 #endif
 #include <functional>
-#include <iostream>
 #include <stdint.h>
 #include <imgui.h>
 

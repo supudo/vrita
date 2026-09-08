@@ -1,7 +1,5 @@
 #include "apu.hpp"
 
-#include <algorithm>
-
 // ------------------------------------------------------------
 // Get channel output
 //

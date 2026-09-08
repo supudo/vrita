@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <fstream>
-#include <vector>
 #include <cstdint>
 #include <chrono>
 
@@ -160,7 +159,8 @@ void DMG::stepCPU() {
         managerMMU->tick(4);
         return;
     }
-    managerCPU->step(ROMFileLoaded);
+    if (ROMFileLoaded)
+        managerCPU->step();
 }
 
 void DMG::stepMMU(uint32_t cycles) {

@@ -13,8 +13,7 @@ void DMG_CPU::clearResources() {
     Registers.PC = 0x0100;
 }
 
-void DMG_CPU::step(bool ROMFileLoaded) {
-    if (!ROMFileLoaded) return;
+void DMG_CPU::step() {
 #ifdef TRACY_ENABLE
     ZoneScopedN("CPU::Step");
 #endif
@@ -28,9 +27,9 @@ void DMG_CPU::step(bool ROMFileLoaded) {
     mmu.triggerHaltBug = false;
 
     if (opcode == 0xCB)
-        executeInstruction16bit(ROMFileLoaded, mmu.read8(Registers.PC++));
+        executeInstruction16bit(mmu.read8(Registers.PC++));
     else
-        executeInstruction8bit(ROMFileLoaded, opcode);
+        executeInstruction8bit(opcode);
 }
 
 #pragma region instructions

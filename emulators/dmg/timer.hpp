@@ -7,7 +7,7 @@ GameBoy (DMG)
 #ifndef VRITA_DMG_TIMER_INCLUDES
 #define VRITA_DMG_TIMER_INCLUDES
 
-#include <cstdint>
+#include <stdint.h>
 #include <SDL2/SDL.h>
 
 class Logger;

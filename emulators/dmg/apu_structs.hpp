@@ -8,7 +8,7 @@ GameBoy (DMG)
 #define VRITA_DMG_APU_STRUCTS_INCLUDES
 
 #include <array>
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 
 static constexpr uint8_t dutyTable[4][8] = {

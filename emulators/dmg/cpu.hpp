@@ -12,8 +12,6 @@ GameBoy (DMG)
 
 #include <SDL2/SDL.h>
 #include <stdint.h>
-#include <iostream>
-#include <string>
 
 #include "cartridge.hpp"
 #include "cpu_registers.hpp"
@@ -23,7 +21,7 @@ GameBoy (DMG)
 class DMG_CPU {
 public:
     DMG_CPU(Logger& logger, DMG_MMU& mmu, DMG_INTERRUPT& interrupts) : logger(logger), mmu(mmu), interrupts(interrupts) {}
-    void step(bool ROMFileLoaded);
+    void step();
     void clearResources();
 
     DMGCpuRegisters Registers;
@@ -49,8 +47,8 @@ private:
     DMG_MMU& mmu;
     DMG_INTERRUPT& interrupts;
 
-    void executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode);
-    void executeInstruction16bit(bool ROMFileLoaded, uint8_t opcode);
+    void executeInstruction8bit(uint8_t opcode);
+    void executeInstruction16bit(uint8_t opcode);
 
     // read-modify-write (HL): read, apply operation, write back
     template<typename Fn>

@@ -1,8 +1,6 @@
 ﻿#include "cpu.hpp"
 
-void DMG_CPU::executeInstruction8bit(bool ROMFileLoaded, uint8_t opcode) {
-    if (!ROMFileLoaded) return;
-
+void DMG_CPU::executeInstruction8bit(uint8_t opcode) {
     switch (opcode) {
         case 0x00: // NOP
             logCall(true, "0x00 NOP");

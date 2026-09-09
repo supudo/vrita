@@ -12,6 +12,14 @@
 
 // disassembly
 
+static constexpr std::string_view ASM_prefixes[] = { "Func_", "Label_", "Entry_", "Data_" };
+
+constexpr bool startsWithAsmPrefix(std::string_view str) {
+    return std::ranges::any_of(ASM_prefixes, [str] (std::string_view prefix) {
+        return str.starts_with(prefix);
+    });
+}
+
 inline uint8_t instructionLengths(uint8_t opcode) {
     static constexpr uint8_t lengths[256] = {
         // 0x00-0x0F

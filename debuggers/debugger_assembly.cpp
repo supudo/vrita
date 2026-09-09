@@ -23,28 +23,41 @@ void Debugger::initEditor() {
     editorOptionSyntaxHighlight = settings.GetInt("Debuggers - Editor", "editor_option_syntax_highlight", true);
     editorOptionShowMiniMap = settings.GetInt("Debuggers - Editor", "editor_option_show_minimap", false);
 
+    editorAssembly.SetTextContextMenuCallback([this] (TextEditor::PopupData& data) {
+        const int32_t line = static_cast<int32_t>(data.pos.line);
+        const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
+        showContextMenu(line, addr);
+    });
+
     editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
-        if (ImGui::MenuItem("Set Breakpoint"))
-            breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
-        if (ImGui::MenuItem("Remove Breakpoint"))
-            breakpoints.erase(addr);
+        showContextMenu(line, addr);
     });
 
     editorAssembly.SetTextHoverCallback([&] (TextEditor::PopupData data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
-        ImGui::TextDisabled("Line #%i, address $%02X", line, addr);
-
-        ImGui::Separator();
-
         std::string lineContent = editorAssembly.GetLineText(data.pos.line);
-        ImGui::Text("%s", lineContent.c_str());
+        lineContent.erase(std::remove_if(lineContent.begin(), lineContent.end(), ::isspace), lineContent.end());
+        if (!startsWithAsmPrefix(lineContent)) {
+            ImGui::CloseCurrentPopup();
+            return;
+        }
+        ImGui::TextDisabled("Line #%i, address $%02X", line, addr);
         ImGui::Separator();
+        ImGui::Text("%s", lineContent.c_str());
     });
 
     updateLineDecorator();
+}
+
+void Debugger::showContextMenu(const int32_t line, const uint32_t addr) {
+    if (ImGui::MenuItem("Set Breakpoint"))
+        breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
+    ImGui::Dummy(ImVec2(1, 10));
+    if (ImGui::MenuItem("Remove Breakpoint"))
+        breakpoints.erase(addr);
 }
 
 void Debugger::updateLineDecorator() {
@@ -350,8 +363,7 @@ void Debugger::renderRestBreakpoints() {
 }
 
 bool Debugger::parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address) {
-    static constexpr std::string_view prefixes[] = { "Func_", "Label_", "Entry_", "Data_" };
-    for (auto prefix : prefixes) {
+    for (auto prefix : ASM_prefixes) {
         if (word.compare(0, prefix.size(), prefix) != 0)
             continue;
         const std::string rest = word.substr(prefix.size());

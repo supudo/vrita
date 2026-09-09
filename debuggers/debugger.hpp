@@ -177,6 +177,8 @@ private:
     int cpuLoadHistoryOffset = 0;
 
     void renderCPULoad();
+
+    void showContextMenu(const int32_t line, const uint32_t addr);
 };
 
 #include "assembly_dmg.inl"

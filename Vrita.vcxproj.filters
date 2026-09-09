@@ -105,6 +105,11 @@
     <ClCompile Include="emulators\cgb\cgb.cpp">
       <Filter>emulators\cgb</Filter>
     </ClCompile>
+    <ClCompile Include="emulators\dmg\cpu_instructions.cpp" />
+    <ClCompile Include="emulators\dmg\cpu_instructions_extended.cpp" />
+    <ClCompile Include="debuggers\debugger_assembly_disassembly.cpp">
+      <Filter>debuggers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="emulators\emulators.hpp">

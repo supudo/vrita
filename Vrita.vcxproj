@@ -182,6 +182,7 @@
   <ItemGroup>
     <ClCompile Include="debuggers\debugger.cpp" />
     <ClCompile Include="debuggers\debugger_assembly.cpp" />
+    <ClCompile Include="debuggers\debugger_assembly_disassembly.cpp" />
     <ClCompile Include="debuggers\debugger_registers.cpp" />
     <ClCompile Include="debuggers\memory_editor.cpp" />
     <ClCompile Include="debuggers\palette_viewer.cpp" />

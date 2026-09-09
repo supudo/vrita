@@ -179,4 +179,6 @@ private:
     void renderCPULoad();
 };
 
+#include "assembly_dmg.inl"
+
 #endif

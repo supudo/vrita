@@ -187,7 +187,7 @@ inline std::string instructionFormat(const DisassembledInstruction& instruction)
     return result;
 }
 
-std::string formatBytes(const DisassembledInstruction& instruction) {
+inline std::string formatBytes(const DisassembledInstruction& instruction) {
     std::string result;
     for (uint8_t i = 0; i < instruction.length; ++i) {
         if (i > 0)

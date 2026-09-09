@@ -53,11 +53,30 @@ void Debugger::initEditor() {
 }
 
 void Debugger::showContextMenu(const int32_t line, const uint32_t addr) {
-    if (ImGui::MenuItem("Set Breakpoint"))
-        breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
+    bool hasBreakpoint = breakpoints.contains(addr);
+    if (ImGui::MenuItem("Toggle Breakpoint")) {
+        if (hasBreakpoint)
+            breakpoints.erase(addr);
+        else
+            breakpoints[addr] = DebuggerBreakpoint{ addr, line, true, false, editorAssembly.GetLineText(static_cast<size_t>(line)) };
+    }
     ImGui::Dummy(ImVec2(1, 10));
-    if (ImGui::MenuItem("Remove Breakpoint"))
-        breakpoints.erase(addr);
+    bool breakpointEnabled = false;
+    if (hasBreakpoint)
+        breakpointEnabled = breakpoints[addr].enabled;
+    if (ImGui::MenuItem(breakpointEnabled ? "Disable Breakpoint" : "Enable Breakpoint", nullptr, nullptr, hasBreakpoint))
+        breakpoints[addr].enabled = !breakpoints[addr].enabled;
+    if (ImGui::MenuItem("Breakpoint properties...")) {
+        // TODO
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Run to line")) {
+        // TODO
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Show in memory")) {
+        // TODO
+    }
 }
 
 void Debugger::updateLineDecorator() {

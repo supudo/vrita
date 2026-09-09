@@ -74,6 +74,16 @@ void DMG_MMU::resetRegisters() {
     memory[0xFFFF] = 0x00; // IE
 
     oamWriteSourcePC.fill(0);
+
+    if (cgbMode) {
+        memory[0xFF4D] = 0x7E; // KEY1
+        memory[0xFF4F] = 0xFE; // VBK
+        memory[0xFF55] = 0xFF; // HDMA5
+        memory[0xFF70] = 0xF9; // SVBK
+    }
+    registerKEY1 = 0x7E;
+    registerBCPS = 0;
+    registerOCPS = 0;
 }
 
 void DMG_MMU::clearMemory() {
@@ -81,6 +91,12 @@ void DMG_MMU::clearMemory() {
     memory.assign(memorySize, 0);
     resetRegisters();
     oamWriteSourcePC.fill(0);
+
+    currentVRAMBank = 0;
+    currentWRAMBank = 1;
+    vramBank1.assign(0x2000, 0);
+    for (auto& bank : wramBanks)
+        bank.assign(0x1000, 0);
 }
 
 void DMG_MMU::clearResources() {
@@ -91,6 +107,9 @@ void DMG_MMU::clearResources() {
     dmaActive = false;
     dmaProgress = 0;
     dmaTCycles = 0;
+    doubleSpeed = false;
+    hdmaActive = false;
+    hdmaProgress = 0;
     clearMemory();
 }
 
@@ -112,12 +131,36 @@ uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
         return managerAPU->readRegister(address);
     if (dmaActive && address >= addressOAMStart && address <= 0xFE9F)
         return 0xFF;
+    if (cgbMode) {
+        if (address >= 0x8000 && address < 0xA000 && currentVRAMBank == 1)
+            return vramBank1[address - 0x8000];
+        if (address >= 0xD000 && address < 0xE000 && currentWRAMBank >= 2)
+            return wramBanks[currentWRAMBank - 2][address - 0xD000];
+        if (address == addressKEY1)
+            return (uint8_t)((doubleSpeed << 7) | (registerKEY1 & 0x01) | 0x7E);
+        if (address == addressVBK)
+            return currentVRAMBank | 0xFE;
+        if (address == addressSVBK)
+            return currentWRAMBank | 0xF8;
+        if (address == addressBCPS)
+            return registerBCPS | 0x40;
+        if (address == addressBCPD)
+            return bgPaletteRAM[registerBCPS & 0x3F];
+        if (address == addressOCPS)
+            return registerOCPS | 0x40;
+        if (address == addressOCPD)
+            return objPaletteRAM[registerOCPS & 0x3F];
+        if (address == addressRP)
+            return 0xFF; // no IR hardware
+    }
     return memory[address];
 }
 
 uint8_t DMG_MMU::rawRead(uint16_t address) {
     if (address < 0x8000 || (address > 0xA000 && address < 0xC000))
         return managerCartridge->read(address);
+    if (cgbMode && address >= 0xD000 && address < 0xE000 && currentWRAMBank >= 2)
+        return wramBanks[currentWRAMBank - 2][address - 0xD000];
     return memory[address];
 }
 
@@ -156,6 +199,55 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
         dmaTCycles = -8;
         return;
     }
+    if (cgbMode) {
+        if (address >= 0x8000 && address < 0xA000 && currentVRAMBank == 1) {
+            vramBank1[address - 0x8000] = value;
+            return;
+        }
+        if (address >= 0xD000 && address < 0xE000 && currentWRAMBank >= 2) {
+            wramBanks[currentWRAMBank - 2][address - 0xD000] = value;
+            return;
+        }
+        if (address == addressKEY1) {
+            registerKEY1 = (registerKEY1 & 0x80) | (value & 0x01);
+            return;
+        }
+        if (address == addressVBK) {
+            currentVRAMBank = value & 0x01;
+            return;
+        }
+        if (address == addressSVBK) {
+            uint8_t bank = value & 0x07;
+            currentWRAMBank = (bank == 0) ? 1 : bank;
+            return;
+        }
+        if (address == addressBCPS) {
+            registerBCPS = value & 0xBF;
+            return;
+        }
+        if (address == addressBCPD) {
+            bgPaletteRAM[registerBCPS & 0x3F] = value;
+            if (registerBCPS & 0x80)
+                registerBCPS = (registerBCPS & 0x80) | ((registerBCPS + 1) & 0x3F);
+            return;
+        }
+        if (address == addressOCPS) {
+            registerOCPS = value & 0xBF;
+            return;
+        }
+        if (address == addressOCPD) {
+            objPaletteRAM[registerOCPS & 0x3F] = value;
+            if (registerOCPS & 0x80)
+                registerOCPS = (registerOCPS & 0x80) | ((registerOCPS + 1) & 0x3F);
+            return;
+        }
+        if (address == addressHDMA5) {
+            startHDMATransfer(value);
+            return;
+        }
+        if (address == addressRP)
+            return; // no IR hardware, ignore
+    }
     memory[address] = value;
     oamWriteSourcePC[address] = managerCPU->currentInstructionPC;
 }
@@ -175,4 +267,52 @@ void DMG_MMU::tick(uint32_t cycles) {
                 dmaActive = false;
         }
     }
+}
+
+void DMG_MMU::switchSpeedIfArmed() {
+    if (!(registerKEY1 & 0x01))
+        return;
+    doubleSpeed = !doubleSpeed;
+    registerKEY1 &= ~0x01;
+    managerTimer->write(0xFF04, 0); // reset DIV on speed switch
+}
+
+uint8_t DMG_MMU::vramReadBanked(uint16_t addr) const {
+    if (currentVRAMBank == 1 && addr >= 0x8000 && addr < 0xA000)
+        return vramBank1[addr - 0x8000];
+    return memory[addr];
+}
+
+void DMG_MMU::startHDMATransfer(uint8_t hdma5Value) {
+    uint16_t src = ((memory[addressHDMA1] << 8) | memory[addressHDMA2]) & 0xFFF0;
+    uint16_t dst = 0x8000 + (((memory[addressHDMA3] & 0x1F) << 8) | (memory[addressHDMA4] & 0xF0));
+    hdmaSource = src;
+    hdmaDestination = dst;
+    hdmaLength = ((hdma5Value & 0x7F) + 1) * 0x10;
+    hdmaProgress = 0;
+    hdmaHBlankMode = (hdma5Value & 0x80) != 0;
+    hdmaActive = true;
+    if (!hdmaHBlankMode)
+        runHDMAChunk(hdmaLength);
+}
+
+void DMG_MMU::runHDMAChunk(uint16_t count) {
+    for (uint16_t i = 0; i < count && hdmaProgress < hdmaLength; ++i) {
+        uint8_t byte = rawRead(hdmaSource + hdmaProgress);
+        uint16_t dstAddr = hdmaDestination + hdmaProgress;
+        if (currentVRAMBank == 1)
+            vramBank1[dstAddr - 0x8000] = byte;
+        else
+            memory[dstAddr] = byte;
+        hdmaProgress++;
+    }
+    if (hdmaProgress >= hdmaLength) {
+        hdmaActive = false;
+        memory[addressHDMA5] = 0xFF; // transfer complete
+    }
+}
+
+void DMG_MMU::onHBlank() {
+    if (hdmaActive && hdmaHBlankMode)
+        runHDMAChunk(0x10); // 16 bytes per HBLank
 }

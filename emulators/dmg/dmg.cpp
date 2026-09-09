@@ -28,6 +28,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     windowHeight = height;
 
     managerMMU = std::make_shared<DMG_MMU>();
+    managerMMU->setCGBMode(isCGBMode());
     managerMMU->clearResources();
 
     managerInterrupts = std::make_shared<DMG_INTERRUPT>(*managerMMU);
@@ -57,6 +58,8 @@ bool DMG::initialize(int x, int y, int width, int height) {
 
 void DMG::setCGBMode(bool isCGB) {
     emulatorIsCGB = isCGB;
+    if (managerMMU)
+        managerMMU->setCGBMode(isCGB);
 }
 
 bool DMG::isCGBMode() const {

@@ -1,8 +1,6 @@
 /*
 
-GameBoy (DMG) - shared palette color presets.
-Single source of truth for both the PPU renderer and the Palette Viewer debugger,
-so they can never drift apart. Shade index 0 = lightest .. 3 = darkest. Packed 0xAARRGGBB.
+GameBoy (DMG) - shared palette color presets. Both the PPU and the Palette Viewer debugger.
 
 */
 

@@ -1,16 +1,17 @@
 # Vrita (WIP)
 
-C/C++ Emulator - GameBoy (DMG), etc.
+C/C++ Emulator - GameBoy (DMG), GameBoy Color (CGB).
 
 #### Using/Including
 
 - [ImGui](https://github.com/ocornut/imgui)
-- [SDL3](https://www.libsdl.org/) (SDL3 GPU Bindings)
+- [ImGuiColorTextEdit](https://github.com/goossens/ImGuiColorTextEdit)
+- [SDL2](https://www.libsdl.org/)
 
 #### Thanks to
 - [Cinoop](https://cturt.github.io/cinoop.html)
 - [NoobBoy](https://github.com/Mika412/NoobBoy)
-- all the others GameBoy/Advance emulators!
+- all the others GameBoy emulators!
 
 ## Tests
 
@@ -33,6 +34,6 @@ C/C++ Emulator - GameBoy (DMG), etc.
 Each library uses comes with its own license. See LICENSE.md.
 **Use on your own risk.**
 
-<a href="https://twitter.com/intent/follow?screen_name=supudo">
+<a href="https://twitter.com/supudo">
   <img src="https://img.shields.io/twitter/follow/supudo?style=social&logo=twitter" alt="follow on Twitter">
 </a>

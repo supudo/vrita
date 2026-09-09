@@ -62,7 +62,7 @@ bool guiLogVisible = false;
 bool guiStyleOptionsVisible = false;
 bool guiMetricsVisible = false;
 
-void ShowMainMenu() {
+static void showMainMenu() {
     if (ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("Show Log"))
@@ -113,12 +113,12 @@ void ShowMainMenu() {
     }
 }
 
-void showFileBrowser(const char* type) {
+static void showFileBrowser(const char* type) {
     guiFileBrowserVisible = !guiFileBrowserVisible;
     emulatorType = type;
 }
 
-void renderGUIComponents() {
+static void renderGUIComponents() {
     if (guiFileBrowserVisible)
         guiFileBrowser->render(&guiFileBrowserVisible, emulatorType);
     if (guiLogVisible)
@@ -129,7 +129,7 @@ void renderGUIComponents() {
         ImGui::ShowMetricsWindow(&guiMetricsVisible);
 }
 
-void loadROM(const char* romFilePath) {
+static void loadROM(const char* romFilePath) {
     guiFileBrowserVisible = false;
     std::string errorMessage = managerEmulators->loadROM(romFilePath);
     if (errorMessage != "") {
@@ -148,7 +148,7 @@ void loadROM(const char* romFilePath) {
     }
 }
 
-void initComponents() {
+static void initComponents() {
     guiMetricsVisible = appSettings.GetBool("Visibility", "gui_metrics_visible", false);
     guiLogVisible = appSettings.GetBool("Visibility", "gui_log_visible", false);
 
@@ -165,7 +165,7 @@ void initComponents() {
     guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
 }
 
-void saveAppSettings() {
+static void saveAppSettings() {
     appSettings.Set("Visibility", "gui_metrics_visible", guiMetricsVisible);
     appSettings.Set("Visibility", "gui_log_visible", guiLogVisible);
 
@@ -182,7 +182,7 @@ void saveAppSettings() {
     appSettings.Save();
 }
 
-void loadFonts() {
+static void loadFonts() {
     ImGuiIO& io = ImGui::GetIO();
     float baseFontSize = 13.0f;
     
@@ -215,7 +215,7 @@ void loadFonts() {
     io.Fonts->AddFontFromFileTTF("./resources/fonts/fa-solid-900.ttf", iconFontSizeSmall, &iconsConfigSmall, icons_ranges);
 }
 
-bool initBackend() {
+static bool initBackend() {
     bool initialized = true;
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         printf("[VRITA] Error: SDL_Init(): %s\n", SDL_GetError());
@@ -412,7 +412,7 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
-        ShowMainMenu();
+        showMainMenu();
 
         renderGUIComponents();
 

@@ -27,7 +27,7 @@ public:
     bool checkForInterrupts();
     bool isInterruptEnabled(uint8_t flag); // if IE - 0xFFFF is set
     bool isInterruptFlagSet(uint8_t flag); // if IF - 0xFF0F is set
-    void triggerInterrupt(Interrupts interrupt, uint8_t jump_pc);
+    void triggerInterrupt(Interrupts interrupt, uint16_t jump_pc);
 
     inline void setIME(bool state) { IME = int(state) << 0; }
     inline bool getIME() { return IME & 1U; }

@@ -3,7 +3,6 @@
 #include <SDL2/SDL.h>
 
 #include "dmg/dmg.hpp"
-#include "cgb/cgb.hpp"
 #include "agb/agb.hpp"
 
 #include "utilities/settings.hpp"
@@ -15,14 +14,8 @@ void Emulators::init(Settings& settings) {
     int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
     int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);
     int dmgWindowSizeHeight = settings.GetInt("Emulators - DMG", "height", 300);
+    emulatorDMG->setCGBMode(false);
     emulatorDMG->initialize(dmgWindowPositionX, dmgWindowPositionY, dmgWindowSizeWidth, dmgWindowSizeHeight);
-
-    emulatorCGB = std::make_shared<CGB>(logger, settings);
-    int cgbWindowPositionX = settings.GetInt("Emulators - CGB", "position_x", 44);
-    int cgbWindowPositionY = settings.GetInt("Emulators - CGB", "position_y", 44);
-    int cgbWindowSizeWidth = settings.GetInt("Emulators - CGB", "width", 300);
-    int cgbWindowSizeHeight = settings.GetInt("Emulators - CGB", "height", 300);
-    emulatorCGB->initialize(cgbWindowPositionX, cgbWindowPositionY, cgbWindowSizeWidth, cgbWindowSizeHeight);
 
     emulatorAGB = std::make_shared<AGB>(logger);
     int agbWindowPositionX = settings.GetInt("Emulators - AGB", "position_x", 44);
@@ -65,10 +58,6 @@ bool Emulators::createTexture() {
         logger.log("[EMULATORS] Error: Cannot create DMG texture");
         return false;
     }
-    if (!emulatorCGB->createTexture()) {
-        logger.log("[EMULATORS] Error: Cannot create CGB texture");
-        return false;
-    }
     if (!emulatorAGB->createTexture()) {
         logger.log("[EMULATORS] Error: Cannot create AGB texture");
         return false;
@@ -77,40 +66,37 @@ bool Emulators::createTexture() {
 }
 
 void Emulators::generateTestPattern(float time) {
-    if (EMULATORS_SHOW_DMG)
+    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
         emulatorDMG->generateTestPattern(time);
-    if (EMULATORS_SHOW_CGB)
-        emulatorCGB->generateTestPattern(time);
     if (EMULATORS_SHOW_AGB)
         emulatorAGB->generateTestPattern(time);
 }
 
 void Emulators::uploadFramebufferToTexture() {
-    if (EMULATORS_SHOW_DMG)
+    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
         emulatorDMG->uploadFramebufferToTexture();
-    if (EMULATORS_SHOW_CGB)
-        emulatorCGB->uploadFramebufferToTexture();
     if (EMULATORS_SHOW_AGB)
         emulatorAGB->uploadFramebufferToTexture();
 }
 
 void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    if (EMULATORS_SHOW_DMG) {
+    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB) {
         EMULATORS_SHOW_AGB = false;
-        emulatorCGB->clear();
         emulatorAGB->clear();
-        emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
-    }
-    if (EMULATORS_SHOW_CGB) {
-        EMULATORS_SHOW_AGB = false;
-        emulatorDMG->clear();
-        emulatorAGB->clear();
-        emulatorCGB->run(&EMULATORS_SHOW_CGB, showFileBrowser, onFocused);
+        emulatorDMG->setCGBMode(EMULATORS_SHOW_CGB);
+        if (EMULATORS_SHOW_DMG) {
+            EMULATORS_SHOW_CGB = false;
+            emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
+        }
+        if (EMULATORS_SHOW_CGB) {
+            EMULATORS_SHOW_DMG = false;
+            emulatorDMG->run(&EMULATORS_SHOW_CGB, showFileBrowser, onFocused);
+        }
     }
     if (EMULATORS_SHOW_AGB) {
         EMULATORS_SHOW_DMG = false;
+        EMULATORS_SHOW_CGB = false;
         emulatorDMG->clear();
-        emulatorCGB->clear();
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
     }
 
@@ -199,11 +185,6 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         );
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);
     }
-    else if (EMULATORS_SHOW_CGB && emulatorCGB->ROMFileLoaded) {
-        debuggerMemoryEditor->setMemory("cgb", nullptr, 0);
-        debuggerDebugger->setMemory("cgb", 0);
-        debuggerDebugger->setRomImage(nullptr, 0);
-    }
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0);
         debuggerDebugger->setMemory("agb", 0);
@@ -220,9 +201,8 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerSpriteViewer->render(&debuggerSpriteViewerVisible);
     if (debuggerPaletteViewerVisible)
         debuggerPaletteViewer->render(&debuggerPaletteViewerVisible);
-    if (debuggerDebuggerVisible && emulatorDMG && emulatorDMG->managerCPU && emulatorDMG && emulatorDMG->managerInterrupts) {
+    if (debuggerDebuggerVisible && emulatorDMG && emulatorDMG->managerCPU && emulatorDMG && emulatorDMG->managerInterrupts)
         debuggerDebugger->render(&debuggerDebuggerVisible, emulatorDMG->managerCPU->Registers);
-    }
 }
 
 void Emulators::release(Settings& settings) {
@@ -236,13 +216,6 @@ void Emulators::release(Settings& settings) {
     ImVec2 dmg_size = emulatorDMG->getWindowSize();
     settings.Set("Emulators - DMG", "width", (int)dmg_size.x);
     settings.Set("Emulators - DMG", "height", (int)dmg_size.y);
-
-    ImVec2 cgb_position = emulatorCGB->getWindowPosition();
-    settings.Set("Emulators - CGB", "position_x", (int)cgb_position.x);
-    settings.Set("Emulators - CGB", "position_y", (int)cgb_position.y);
-    ImVec2 cgb_size = emulatorDMG->getWindowSize();
-    settings.Set("Emulators - CGB", "width", (int)cgb_size.x);
-    settings.Set("Emulators - CGB", "height", (int)cgb_size.y);
 
     ImVec2 agb_position = emulatorAGB->getWindowPosition();
     settings.Set("Emulators - AGB", "position_x", (int)agb_position.x);
@@ -261,7 +234,6 @@ void Emulators::release(Settings& settings) {
     settings.Save();
 
     emulatorDMG->release();
-    emulatorCGB->release();
     emulatorAGB->release();
     debuggerMemoryEditor->release();
     debuggerTileViewer->release();
@@ -273,10 +245,8 @@ void Emulators::release(Settings& settings) {
 
 std::string Emulators::loadROM(const char* romFilePath) {
     std::string result = "";
-    if (EMULATORS_SHOW_DMG)
+    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
         result = emulatorDMG->loadROM(romFilePath);
-    if (EMULATORS_SHOW_CGB)
-        result = emulatorCGB->loadROM(romFilePath);
     if (EMULATORS_SHOW_AGB)
         result = emulatorAGB->loadROM(romFilePath);
     return result;

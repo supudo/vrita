@@ -102,9 +102,6 @@
     <ClCompile Include="third_party\ImGuiColorTextEdit\TextEditor.cpp">
       <Filter>third_party\ImGuiColorTextEdit</Filter>
     </ClCompile>
-    <ClCompile Include="emulators\cgb\cgb.cpp">
-      <Filter>emulators\cgb</Filter>
-    </ClCompile>
     <ClCompile Include="debuggers\debugger_assembly_disassembly.cpp">
       <Filter>debuggers</Filter>
     </ClCompile>
@@ -243,8 +240,8 @@
     <ClInclude Include="third_party\ImGuiColorTextEdit\TextEditor.h">
       <Filter>third_party\ImGuiColorTextEdit</Filter>
     </ClInclude>
-    <ClInclude Include="emulators\cgb\cgb.hpp">
-      <Filter>emulators\cgb</Filter>
+    <ClInclude Include="emulators\dmg\cartridge_defines.hpp">
+      <Filter>emulators\dmg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -286,9 +283,6 @@
     </Filter>
     <Filter Include="third_party\ImGuiColorTextEdit">
       <UniqueIdentifier>{0934c703-0c29-49dd-8263-3d7156e7db6b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="emulators\cgb">
-      <UniqueIdentifier>{7a1f9146-8547-40af-9893-e8286e1869ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

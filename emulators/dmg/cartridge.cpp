@@ -1,25 +1,49 @@
 #include "cartridge.hpp"
 
-void DMG_CARTRIDGE::loadROM(std::streamsize size) {
+void DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
     romImage.assign(mmu.memory.data(), mmu.memory.data() + size);
-    ram.assign(0x8000, 0);
     uint8_t type = mmu.memory[addressCartridgeType]; // cartridge number
-    logger.log("[DMG-CARTRIDGE] Cartridge type byte: 0x%02X", type);
+    logger.log("[%s-CARTRIDGE] Cartridge type byte: 0x%02X", isCGB ? "CGB" : "DMG", type);
+
+    romBanksCount = (int)(size / 0x4000);
+    ramBanksCount = getRamBanksCount(isCGB, mmu.memory[0x149]);
+
+    romHeader.cgbFlag = mmu.memory[0x143];
+    if (isCGBOnly() && !isCGB)
+        logger.log("[%s-CARTRIDGE] ROM requires CGB, forced DMG.", isCGB ? "CGB" : "DMG");
+    if (!supportsCGB() && isCGB)
+        logger.log("[%s-CARTRIDGE] DMG ROM running on CGB.", isCGB ? "CGB" : "DMG");
+
+    romHeader.sgbFlag = mmu.memory[0x146];
+    romHeader.cartridgeType = mmu.memory[0x147];
+    romHeader.romSize = mmu.memory[0x148];
+
+    romHeader.ramSize = mmu.memory[0x149];
+    ram.resize(getRamSize(romHeader.ramSize));
+
+    romHeader.destinationCode = mmu.memory[0x14A];
+    romHeader.oldLicenseeCode = mmu.memory[0x14B];
+    romHeader.version = mmu.memory[0x14C];
+    romHeader.title = readHeaderString(romImage, 0x134, 15);
+    romHeader.manufacturerCode = readHeaderString(romImage, 0x13F, 4);
+
+    printCartridgeInfo(isCGB);
+
     switch (type) {
         case 0x00:
             mbc = std::make_unique<DMG_MBC0>(logger, romImage.data(), size, ram);
-            logger.log("[DMG-CARTRIDGE] MBC: MBC0 (ROM only, 32KB)");
+            logger.log("[%s-CARTRIDGE] MBC: MBC0 (ROM only, 32KB)", isCGB ? "CGB" : "DMG");
             break;
         case 0x01:
         case 0x02:
         case 0x03:
             mbc = std::make_unique<DMG_MBC1>(logger, romImage.data(), size, ram);
-            logger.log("[DMG-CARTRIDGE] MBC: MBC1");
+            logger.log("[%s-CARTRIDGE] MBC: MBC1", isCGB ? "CGB" : "DMG");
             break;
         case 0x05:
         case 0x06:
             mbc = std::make_unique<DMG_MBC2>(logger, romImage.data(), size, ram);
-            logger.log("[DMG-CARTRIDGE] MBC: MBC2");
+            logger.log("[%s-CARTRIDGE] MBC: MBC2", isCGB ? "CGB" : "DMG");
             break;
         case 0x0F:
         case 0x10:
@@ -27,7 +51,7 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
         case 0x12:
         case 0x13:
             mbc = std::make_unique<DMG_MBC3>(logger, romImage.data(), size, ram);
-            logger.log("[DMG-CARTRIDGE] MBC: MBC3");
+            logger.log("[%s-CARTRIDGE] MBC: MBC3", isCGB ? "CGB" : "DMG");
             break;
         case 0x19:
         case 0x1A:
@@ -36,24 +60,42 @@ void DMG_CARTRIDGE::loadROM(std::streamsize size) {
         case 0x1D:
         case 0x1E:
             mbc = std::make_unique<DMG_MBC5>(logger, romImage.data(), size, ram);
-            logger.log("[DMG-CARTRIDGE] MBC: MBC5");
+            logger.log("[%s-CARTRIDGE] MBC: MBC5", isCGB ? "CGB" : "DMG");
             break;
         default:
-            logger.log("[DMG-CARTRIDGE] Unsupported cartridge type 0x%02X", type);
+            logger.log("[%s-CARTRIDGE] Unsupported cartridge type 0x%02X", isCGB ? "CGB" : "DMG", type);
     }
-    romBanksCount = (int)(size / 0x4000);
-    ramBanksCount = getRamBanksCount(mmu.memory[0x149]);
-    
-    // title
-    const char* titlePtr = reinterpret_cast<const char*>(mmu.memory.data() + 0x134);
-    romTitle = std::string(titlePtr, strnlen(titlePtr, 16));
+}
 
-    // manufacturer code
-    const char* manufacturerCodePtr = reinterpret_cast<const char*>(mmu.memory.data() + 0x13F);
-    romManufacturerCode = std::string(manufacturerCodePtr, strnlen(manufacturerCodePtr, 4));
+bool DMG_CARTRIDGE::supportsCGB() const {
+    return (romHeader.cgbFlag & CONST_CGBFlagSupported) != 0;
+}
 
-    mbcType = mmu.memory[0x147]; // the address of the mbc type - 0x147
-    printCartridgeInfo();
+bool DMG_CARTRIDGE::isCGBOnly() const {
+    return romHeader.cgbFlag == CONST_CGBFlagOnly;
+}
+
+std::string DMG_CARTRIDGE::readHeaderString(const std::vector<uint8_t>& rom, size_t offset, size_t length) {
+    std::string result;
+    for (size_t i = 0; i < length; ++i) {
+        uint8_t c = rom[offset + i];
+        if (c == 0)
+            break;
+        result.push_back(static_cast<char>(c));
+    }
+    return result;
+}
+
+size_t DMG_CARTRIDGE::getRamSize(uint8_t ramSizeCode) {
+    switch (ramSizeCode) {
+        case 0x00: return 0;
+        case 0x01: return 0x0800;
+        case 0x02: return 0x2000;
+        case 0x03: return 0x8000;
+        case 0x04: return 0x20000;
+        case 0x05: return 0x10000;
+        default: return 0;
+    }
 }
 
 void DMG_CARTRIDGE::clearResources() {
@@ -72,7 +114,7 @@ void DMG_CARTRIDGE::write(uint16_t addr, uint8_t value) {
     mbc->write(addr, value);
 }
 
-int DMG_CARTRIDGE::getRamBanksCount(uint8_t type) {
+int DMG_CARTRIDGE::getRamBanksCount(bool isCGB, uint8_t type) {
     switch (type) {
         case 0x00: return 0;
         case 0x01: return 0;
@@ -81,15 +123,15 @@ int DMG_CARTRIDGE::getRamBanksCount(uint8_t type) {
         case 0x04: return 16;
         case 0x05: return 8;
         default:
-            logger.log("[DMG-CARTRIDGE] Unknown RAM type 0x%02X, assuming 0 banks", type);
+            logger.log("[%s-CARTRIDGE] Unknown RAM type 0x%02X, assuming 0 banks", isCGB ? "CGB" : "DMG", type);
             return 0;
     }
 }
 
-void DMG_CARTRIDGE::printCartridgeInfo() {
-    logger.log("[DMG-CARTRIDGE] Rom Title: %s", romTitle.c_str());
-    logger.log("[DMG-CARTRIDGE] Manufacturer Code: %s", romManufacturerCode.c_str());
-    logger.log("[DMG-CARTRIDGE] MBC: %i", +mbcType);
-    logger.log("[DMG-CARTRIDGE] ROM Banks: %i", romBanksCount);
-    logger.log("[DMG-CARTRIDGE] RAM Banks: %i", ramBanksCount);
+void DMG_CARTRIDGE::printCartridgeInfo(bool isCGB) {
+    logger.log("[%s-CARTRIDGE] Rom Title: %s", isCGB ? "CGB" : "DMG", romHeader.title.c_str());
+    logger.log("[%s-CARTRIDGE] Manufacturer Code: %s", isCGB ? "CGB" : "DMG", romHeader.manufacturerCode.c_str());
+    logger.log("[%s-CARTRIDGE] MBC: %i", isCGB ? "CGB" : "DMG", +romHeader.cartridgeType);
+    logger.log("[%s-CARTRIDGE] ROM Banks: %i", isCGB ? "CGB" : "DMG", romBanksCount);
+    logger.log("[%s-CARTRIDGE] RAM Banks: %i", isCGB ? "CGB" : "DMG", ramBanksCount);
 }

@@ -129,7 +129,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;IMGUI_DEFINE_MATH_OPERATORS;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;IMGUI_IMPL_OPENGL_LOADER_CUSTOM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;IMGUI_DEFINE_MATH_OPERATORS;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLEQ;IMGUI_IMPL_OPENGL_LOADER_CUSTOM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>.\;D:\vcpkg\installed\x64-windows-static\include;D:\vcpkg\installed\x64-windows\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -157,7 +157,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;IMGUI_DEFINE_MATH_OPERATORS;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLEQ;IMGUI_IMPL_OPENGL_LOADER_CUSTOM="utilities\gl_includes.hpp";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;IMGUI_DEFINE_MATH_OPERATORS;_CRT_SECURE_NO_WARNINGS;IMGUI_IMPL_OPENGL_LOADER_CUSTOM="utilities\gl_includes.hpp";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>.\;D:\vcpkg\installed\x64-windows-static\include;D:\vcpkg\installed\x64-windows\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -190,7 +190,6 @@
     <ClCompile Include="debuggers\tilemap_viewer.cpp" />
     <ClCompile Include="debuggers\tile_viewer.cpp" />
     <ClCompile Include="emulators\agb\agb.cpp" />
-    <ClCompile Include="emulators\cgb\cgb.cpp" />
     <ClCompile Include="emulators\dmg\apu.cpp" />
     <ClCompile Include="emulators\dmg\apu_mixer.cpp" />
     <ClCompile Include="emulators\dmg\apu_noise.cpp" />
@@ -238,10 +237,10 @@
     <ClInclude Include="debuggers\tilemap_viewer.hpp" />
     <ClInclude Include="debuggers\tile_viewer.hpp" />
     <ClInclude Include="emulators\agb\agb.hpp" />
-    <ClInclude Include="emulators\cgb\cgb.hpp" />
     <ClInclude Include="emulators\dmg\apu.hpp" />
     <ClInclude Include="emulators\dmg\apu_structs.hpp" />
     <ClInclude Include="emulators\dmg\cartridge.hpp" />
+    <ClInclude Include="emulators\dmg\cartridge_defines.hpp" />
     <ClInclude Include="emulators\dmg\cpu.hpp" />
     <ClInclude Include="emulators\dmg\cpu_registers.hpp" />
     <ClInclude Include="emulators\dmg\dmg.hpp" />

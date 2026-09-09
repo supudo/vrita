@@ -33,14 +33,16 @@ class DMG {
 public:
     DMG(Logger& logger, Settings& settings) : logger(logger), settings(settings) {}
 
+    void setCGBMode(bool isCGB);
+    bool isCGBMode() const;
     bool initialize(int x, int y, int width, int height);
-    ImVec2 getWindowPosition();
-    ImVec2 getWindowSize();
+    ImVec2 getWindowPosition() const;
+    ImVec2 getWindowSize() const;
 
     // rendering
     bool createTexture();
     void generateTestPattern(float time);
-    void uploadFramebufferToTexture();
+    void uploadFramebufferToTexture() const;
     void run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
     void release();
     void clear();
@@ -60,15 +62,15 @@ public:
     bool ROMFileLoaded = false;
     void stopGame();
     void startGame();
-    bool isGameRunning();
-    void logCPUCalls(bool isOn);
+    bool isGameRunning() const;
+    void logCPUCalls(bool isOn) const;
 
     void setVolume(uint8_t volume);
     uint8_t getVolume() const;
     void setMuted(bool muted);
     bool isMuted() const;
 
-    void handleKey(uint32_t type, uint32_t key);
+    void handleKey(uint32_t type, uint32_t key) const;
 
     int paletteChoicesSelected = 0;
     double lastFrameStepMs = 0.0;
@@ -76,7 +78,10 @@ public:
 private:
     Logger& logger;
     Settings& settings;
+    bool emulatorIsCGB = false;
     SDL_AudioDeviceID audioDevice = 0;
+
+    const char* getGBType() const;
 
     bool initAudio();
     void stepAll();
@@ -100,10 +105,10 @@ private:
     bool gameIsPaused = false;
     void toggleGameState();
 
-    void stepCPU();
-    void stepMMU(uint32_t cycles);
-    void stepPPU(uint32_t cycles);
-    void stepAPU(uint32_t cycles);
+    void stepCPU() const;
+    void stepMMU(uint32_t cycles) const;
+    void stepPPU(uint32_t cycles) const;
+    void stepAPU(uint32_t cycles) const;
 
     // rendering
     int windowPositionX = 40;

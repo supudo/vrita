@@ -60,6 +60,8 @@ void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulato
 			if (entity.isFile) {
 				if (emulatorType == "dmg")
 					settings.Set("DMG - Recent Files", entity.path, entity.title);
+				if (emulatorType == "cgb")
+					settings.Set("CGB - Recent Files", entity.path, entity.title);
 				if (emulatorType == "agb")
 					settings.Set("AGB - Recent Files", entity.path, entity.title);
 				settings.Save();

@@ -152,6 +152,10 @@ uint8_t DMG_MMU::read8(uint16_t address, bool no_tick) {
             return objPaletteRAM[registerOCPS & 0x3F];
         if (address == addressRP)
             return 0xFF; // no IR hardware
+        if (address == addressPCM12)
+            return managerAPU->channelOutput(0) | (managerAPU->channelOutput(1) << 4);
+        if (address == addressPCM34)
+            return managerAPU->channelOutput(2) | (managerAPU->channelOutput(3) << 4);
     }
     return memory[address];
 }
@@ -247,6 +251,8 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
         }
         if (address == addressRP)
             return; // no IR hardware, ignore
+        if (address == addressPCM12 || address == addressPCM34)
+            return; // read-only,
     }
     memory[address] = value;
     oamWriteSourcePC[address] = managerCPU->currentInstructionPC;

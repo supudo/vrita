@@ -113,6 +113,8 @@ private:
     static constexpr uint16_t addressOCPS = 0xFF6A;
     static constexpr uint16_t addressOCPD = 0xFF6B;
     static constexpr uint16_t addressSVBK = 0xFF70;
+    static constexpr uint16_t addressPCM12 = 0xFF76;
+    static constexpr uint16_t addressPCM34 = 0xFF77;
 };
 
 #endif

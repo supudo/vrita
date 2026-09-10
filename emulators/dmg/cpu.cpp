@@ -1,14 +1,26 @@
 #include "cpu.hpp"
 
 void DMG_CPU::clearResources() {
-    Registers.A = 0x01;
-    Registers.F = 0xB0;
-    Registers.B = 0x00;
-    Registers.C = 0x13;
-    Registers.D = 0x00;
-    Registers.E = 0xD8;
-    Registers.H = 0x01;
-    Registers.L = 0x4D;
+    if (mmu.isCGBMode()) {
+        Registers.A = 0x11;
+        Registers.F = 0x80;
+        Registers.B = 0x00;
+        Registers.C = 0x00;
+        Registers.D = 0xFF;
+        Registers.E = 0x56;
+        Registers.H = 0x00;
+        Registers.L = 0x0D;
+    }
+    else {
+        Registers.A = 0x01;
+        Registers.F = 0xB0;
+        Registers.B = 0x00;
+        Registers.C = 0x13;
+        Registers.D = 0x00;
+        Registers.E = 0xD8;
+        Registers.H = 0x01;
+        Registers.L = 0x4D;
+    }
     Registers.SP = 0xFFFE;
     Registers.PC = 0x0100;
 }

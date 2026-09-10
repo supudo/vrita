@@ -42,6 +42,7 @@ public:
     bool doubleSpeed = false;
     void switchSpeedIfArmed();
     uint8_t vramReadBanked(uint16_t addr) const;
+    inline uint8_t vramReadBank(uint16_t addr, uint8_t bank) const { return bank ? vramBank1[addr - 0x8000] : memory[addr]; }
     void onHBlank();
     inline const std::array<uint8_t, 64>& getBGPaletteRAM() const { return bgPaletteRAM; }
     inline const std::array<uint8_t, 64>& getOBJPaletteRAM() const { return objPaletteRAM; }

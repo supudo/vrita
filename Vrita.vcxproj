@@ -250,6 +250,7 @@
     <ClInclude Include="emulators\dmg\mmu.hpp" />
     <ClInclude Include="emulators\dmg\palette_presets.hpp" />
     <ClInclude Include="emulators\dmg\ppu.hpp" />
+    <ClInclude Include="emulators\dmg\ppu_includes.hpp" />
     <ClInclude Include="emulators\dmg\timer.hpp" />
     <ClInclude Include="emulators\emulators.hpp" />
     <ClInclude Include="eyecandy\dots.hpp" />

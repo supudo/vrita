@@ -243,6 +243,9 @@
     <ClInclude Include="emulators\dmg\cartridge_defines.hpp">
       <Filter>emulators\dmg</Filter>
     </ClInclude>
+    <ClInclude Include="emulators\dmg\ppu_includes.hpp">
+      <Filter>emulators\dmg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="emulators">

@@ -35,6 +35,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerTimer = std::make_shared<DMG_TIMER>(logger, *managerInterrupts);
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU = std::make_shared<DMG_PPU>(logger, *managerMMU, *managerInterrupts);
+    managerPPU->setCGBMode(isCGBMode());
     managerPPU->setFramebuffer(gFramebuffer);
     managerAPU = std::make_shared<DMG_APU>(logger, *managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
@@ -60,6 +61,8 @@ void DMG::setCGBMode(bool isCGB) {
     emulatorIsCGB = isCGB;
     if (managerMMU)
         managerMMU->setCGBMode(isCGB);
+    if (managerPPU)
+        managerPPU->setCGBMode(isCGB);
 }
 
 bool DMG::isCGBMode() const {

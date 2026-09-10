@@ -11,6 +11,8 @@ GameBoy (DMG)
 #include "cpu_registers.hpp"
 #include "palette_presets.hpp"
 
+#include "ppu_includes.hpp"
+
 class Logger;
 class DMG_MMU;
 class DMG_INTERRUPT;
@@ -24,6 +26,8 @@ public:
     void clearResources();
     void setFramebuffer(uint32_t* fb);
 
+    void setCGBMode(bool state) { cgbMode = state; }
+
 private:
     Logger& logger;
     DMG_MMU& mmu;
@@ -32,6 +36,12 @@ private:
     uint32_t dotCycles = 0;
     uint32_t* framebuffer = nullptr;
     uint8_t windowLine = 0;
+
+    // CGB related
+    bool cgbMode = false;
+    uint8_t lastPPUMode = 0xFF;
+    uint8_t scanlineBGColorId[160] {};
+    bool scanlineBGPriority[160] {};
 
     void renderScanline(uint8_t ly);
     void renderBackground(uint8_t ly);
@@ -60,6 +70,9 @@ private:
     uint16_t addressTiles1 = 0x9C00;
 
     uint16_t addressVRAMStart = 0x8000;
+
+    TilePixel tileColorIdCGB(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const;
+    uint32_t applyCGBPalette(const std::array<uint8_t, 64>& paletteRAM, uint8_t paletteNum, uint8_t colorId) const;
 };
 
 #endif

@@ -298,8 +298,10 @@ void DMG_MMU::startHDMATransfer(uint8_t hdma5Value) {
     hdmaProgress = 0;
     hdmaHBlankMode = (hdma5Value & 0x80) != 0;
     hdmaActive = true;
-    if (!hdmaHBlankMode)
+    if (!hdmaHBlankMode) {
         runHDMAChunk(hdmaLength);
+        tick((hdmaLength / 0x10) * 32); // CPU halt stall
+    }
 }
 
 void DMG_MMU::runHDMAChunk(uint16_t count) {

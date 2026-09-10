@@ -81,15 +81,15 @@ void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
     if (oldLow & ~newLow & 0x0F)
         managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 
-    if (wasPressed != isPressed)
-        switch (button) {
-            case JOYPAD_START: logger.log("[JOYPAD] START %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_SELECT: logger.log("[JOYPAD] SELECT %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_A: logger.log("[JOYPAD] A %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_B: logger.log("[JOYPAD] B %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_LEFT: logger.log("[JOYPAD] LEFT %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_RIGHT: logger.log("[JOYPAD] RIGHT %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_UP: logger.log("[JOYPAD] UP %s.", (keyDown ? "pressed" : "released")); break;
-            case JOYPAD_DOWN: logger.log("[JOYPAD] DOWN %s.", (keyDown ? "pressed" : "released")); break;
-        }
+    //if (wasPressed != isPressed)
+    //    switch (button) {
+    //        case JOYPAD_START: logger.log("[JOYPAD] START %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_SELECT: logger.log("[JOYPAD] SELECT %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_A: logger.log("[JOYPAD] A %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_B: logger.log("[JOYPAD] B %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_LEFT: logger.log("[JOYPAD] LEFT %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_RIGHT: logger.log("[JOYPAD] RIGHT %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_UP: logger.log("[JOYPAD] UP %s.", (keyDown ? "pressed" : "released")); break;
+    //        case JOYPAD_DOWN: logger.log("[JOYPAD] DOWN %s.", (keyDown ? "pressed" : "released")); break;
+    //    }
 }

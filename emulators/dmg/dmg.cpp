@@ -103,8 +103,9 @@ void DMG::stepAll() {
         if (!managerInterrupts->checkForInterrupts())
             stepCPU();
         uint32_t elapsed = (uint32_t)(managerMMU->totalCycles - before);
-        stepPPU(elapsed);
-        stepAPU(elapsed);
+        uint32_t realTimeElapsed = managerMMU->doubleSpeed ? elapsed / 2 : elapsed;
+        stepPPU(realTimeElapsed);
+        stepAPU(realTimeElapsed);
     }
 }
 
@@ -439,7 +440,8 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
                 ZoneScopedN("DMG::EmulateFrame");
 #endif
                 uint64_t frameStart = managerMMU->totalCycles;
-                while ((managerMMU->totalCycles - frameStart) < managerTimer->CYCLES_PER_FRAME)
+                uint32_t cyclesPerFrame = managerMMU->doubleSpeed ? managerTimer->CYCLES_PER_FRAME * 2 : managerTimer->CYCLES_PER_FRAME;
+                while ((managerMMU->totalCycles - frameStart) < cyclesPerFrame)
                     stepAll();
             }
             frameAccumulator -= frameDuration;

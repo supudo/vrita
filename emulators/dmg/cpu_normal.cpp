@@ -68,6 +68,7 @@ void DMG_CPU::executeInstruction8bit(uint8_t opcode) {
             break;
         case 0x10: // STOP
             logCall(true, "0x10 STOP");
+            mmu.switchSpeedIfArmed();
             break;
         case 0x11: // LD DE, nn
             logCall(true, "0x11 LD DE, nn");

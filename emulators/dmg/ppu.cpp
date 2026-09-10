@@ -1,4 +1,7 @@
 #include "ppu.hpp"
+
+#include <algorithm>
+
 #include "interrupt.hpp"
 #include "utilities/logger.hpp"
 
@@ -196,6 +199,9 @@ void DMG_PPU::renderSprites(uint8_t ly) {
     struct Sprite { uint8_t y, x, tile, flags; int oamIndex; };
     Sprite visible[10];
     int count = 0;
+
+    if (!cgbMode)
+        std::stable_sort(visible, visible + count, [] (const Sprite& a, const Sprite& b) { return a.x < b.x; }); // X ascending for DMG
 
     for (int i = 0; i < 40 && count < 10; i++) {
         uint8_t sy = mmu.memory[addressTilesOBJ + i * 4];

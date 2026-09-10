@@ -62,6 +62,22 @@ void DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
             mbc = std::make_unique<DMG_MBC5>(logger, romImage.data(), size, ram);
             logger.log("[%s-CARTRIDGE] MBC: MBC5", isCGB ? "CGB" : "DMG");
             break;
+        case 0x20:
+            mbc = std::make_unique<DMG_MBC6>(logger, romImage.data(), size, ram);
+            logger.log("[%s-CARTRIDGE] MBC: MBC6", isCGB ? "CGB" : "DMG");
+            break;
+        case 0x22:
+            mbc = std::make_unique<DMG_MBC7>(logger, romImage.data(), size, ram);
+            logger.log("[%s-CARTRIDGE] MBC: MBC7", isCGB ? "CGB" : "DMG");
+            break;
+        case 0xFE:
+            mbc = std::make_unique<DMG_HuC3>(logger, romImage.data(), size, ram);
+            logger.log("[%s-CARTRIDGE] MBC: HuC3", isCGB ? "CGB" : "DMG");
+            break;
+        case 0xFF:
+            mbc = std::make_unique<DMG_HuC1>(logger, romImage.data(), size, ram);
+            logger.log("[%s-CARTRIDGE] MBC: HuC1", isCGB ? "CGB" : "DMG");
+            break;
         default:
             logger.log("[%s-CARTRIDGE] Unsupported cartridge type 0x%02X", isCGB ? "CGB" : "DMG", type);
     }

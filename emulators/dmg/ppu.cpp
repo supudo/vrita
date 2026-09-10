@@ -200,15 +200,15 @@ void DMG_PPU::renderSprites(uint8_t ly) {
     Sprite visible[10];
     int count = 0;
 
-    if (!cgbMode)
-        std::stable_sort(visible, visible + count, [] (const Sprite& a, const Sprite& b) { return a.x < b.x; }); // X ascending for DMG
-
     for (int i = 0; i < 40 && count < 10; i++) {
         uint8_t sy = mmu.memory[addressTilesOBJ + i * 4];
         uint8_t sx = mmu.memory[addressTilesOBJ + i * 4 + 1];
         if (ly + 16 >= sy && ly + 16 < sy + sprH)
             visible[count++] = { sy, sx, mmu.memory[addressTilesOBJ + i * 4 + 2], mmu.memory[addressTilesOBJ + i * 4 + 3], i };
     }
+
+    if (!cgbMode)
+        std::stable_sort(visible, visible + count, [] (const Sprite& a, const Sprite& b) { return a.x < b.x; }); // X ascending for DMG
 
     bool masterPriority = (lcdc & 0x01) != 0;
 

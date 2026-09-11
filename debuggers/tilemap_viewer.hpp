@@ -18,9 +18,12 @@ public:
     TilemapViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
-    void setMemory(const char* emulatorType, uint8_t* data);
+    void setMemory(const char* emuType, uint8_t* data, bool isCGB);
     void release();
     void render(bool* windowOpened);
+
+    void setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank);
+    void setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
 
 private:
     Logger& logger;
@@ -58,6 +61,11 @@ private:
     void renderTileMapInfo();
     void textRightAligned(const char* text);
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
+
+    bool isCGBLoaded = false;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
+    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
+    PaletteColor resolveCGBColor(uint8_t paletteNum, uint8_t colorId) const;
 };
 
 #endif

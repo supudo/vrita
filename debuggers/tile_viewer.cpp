@@ -53,7 +53,6 @@ void TileViewer::setMemory(const char* emulatorType, uint8_t* data, bool isCGB) 
         initializeData(et);
 }
 
-
 void TileViewer::setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank) {
     funcVramReadBank = vramReadBank;
 }
@@ -398,11 +397,11 @@ void TileViewer::renderTilePreview() {
     const TileItem& bottomItem = previewSelected ? selectedTileItemBottom : hoveredTileItemBottom;
 
     if (hasBottom) {
-        ImGui::Text("   Top tile: %02X : %i (Address 00:%04X)", item.TileItemID, item.TileItemID, item.TileAddress);
-        ImGui::Text("Bottom tile: %02X : %i (Address 00:%04X)", bottomItem.TileItemID, bottomItem.TileItemID, bottomItem.TileAddress);
+        ImGui::Text("   Top tile: %02X : %i (Address %02X:%04X)", item.TileItemID, item.TileItemID, item.TileItemID / DMG_TilesCount, item.TileAddress);
+        ImGui::Text("Bottom tile: %02X : %i (Address %02X:%04X)", bottomItem.TileItemID, bottomItem.TileItemID, bottomItem.TileItemID / DMG_TilesCount, bottomItem.TileAddress);
     }
     else
-        ImGui::Text("Tile: %02X : %i (Address 00:%04X)", item.TileItemID, item.TileItemID, item.TileAddress);
+        ImGui::Text("Tile: %02X : %i (Address %02X:%04X)", item.TileItemID, item.TileItemID, item.TileItemID / DMG_TilesCount, item.TileAddress);
 
     ImGui::Separator();
 

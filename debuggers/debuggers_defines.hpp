@@ -29,6 +29,11 @@ struct TilemapItem {
     ImGuiID TilemapItemID;
     uint16_t TileAddress;
     const TileItem* Tile;
+    uint8_t PaletteNum = 0;
+    uint8_t Bank = 0;
+    bool XFlip = false;
+    bool YFlip = false;
+    bool BGPriority = false;
     TilemapItem() : TilemapItemID(0), TileAddress(0x0000), Tile(nullptr) {}
     TilemapItem(ImGuiID tilemapItemID, uint16_t tileAddress, const TileItem* tile) {
         TilemapItemID = tilemapItemID;

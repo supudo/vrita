@@ -132,7 +132,17 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
-        debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerTilemapViewer->setVRAMBankCallback(
+            [&] (uint16_t addr, uint8_t bank) {
+                return emulatorDMG->managerMMU->vramReadBank(addr, bank);
+            }
+        );
+        debuggerTilemapViewer->setPaletteRamCallback(
+            [&] (bool isOBJ) -> const uint8_t* {
+                return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
+            }
+        );
+        debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
         debuggerSpriteViewer->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
@@ -194,6 +204,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     }
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0, false);
+        debuggerTileViewer->setMemory("agb", nullptr, false);
+        debuggerTilemapViewer->setMemory("agb", nullptr, false);
+        debuggerSpriteViewer->setMemory("agb", nullptr);
         debuggerDebugger->setMemory("agb", 0);
         debuggerDebugger->setRomImage(nullptr, 0);
     }

@@ -30,33 +30,64 @@ void TilemapViewer::release() {
     settings.Save();
 }
 
-void TilemapViewer::setMemory(const char* emulatorType, uint8_t* data) {
+void TilemapViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
     memoryData = data;
-    uint8_t et = -1;
-    if (strcmp(emulatorType, "dmg") == 0)
+    uint8_t et = 0;
+    if (strcmp(emuType, "dmg") == 0)
         et = 1;
-    else if (strcmp(emulatorType, "agb") == 0)
+    else if (strcmp(emuType, "agb") == 0)
         et = 2;
-    else
-        et = 0;
-    bool changed = et != this->emulatorType;
-    this->emulatorType = et;
+    bool changed = et != emulatorType || isCGB != isCGBLoaded;
+    emulatorType = et;
+    isCGBLoaded = isCGB;
     if (changed)
         initializeData(et);
 }
 
+void TilemapViewer::setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank) {
+    funcVramReadBank = vramReadBank;
+}
+
+void TilemapViewer::setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+    funcGetPaletteRAM = getPaletteRAM;
+}
+
 void TilemapViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
-        tiles.clear();
-        tiles.reserve(DMG_TilesCount);
-        const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
-        for (uint32_t i = 0; i < DMG_TilesCount; i++) {
-            const uint8_t* vramAddress = vramTiles + i * 16;
-            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
-            TileItem tile(i, address);
-            decodeTile(vramAddress, tile);
-            tiles.push_back(tile);
+        if (isCGBLoaded) {
+            tiles.clear();
+            tiles.reserve(CGB_TilesCount);
+            for (int i = 0; i < CGB_TilesCount; i++) {
+                int bank = i / DMG_TilesCount;
+                int tileIndexInBank = i % DMG_TilesCount;
+                uint16_t address = DMG_Address_TileStart + tileIndexInBank * 16;
+                uint8_t tileBytes[16];
+                for (int b = 0; b < 16; b++)
+                    tileBytes[b] = funcVramReadBank(address + b, (uint8_t)bank);
+                TileItem tile(i, address);
+                decodeTile(tileBytes, tile);
+                tiles.push_back(tile);
+            }
         }
+        else {
+            tiles.clear();
+            tiles.reserve(DMG_TilesCount);
+            const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
+            for (uint32_t i = 0; i < DMG_TilesCount; i++) {
+                const uint8_t* vramAddress = vramTiles + i * 16;
+                uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+                TileItem tile(i, address);
+                decodeTile(vramAddress, tile);
+                tiles.push_back(tile);
+            }
+        }
+
+        uint8_t lcdc = memoryData[DMG_Address_LCDC];
+        bool signedAddr = !(lcdc & 0x10);
+        if (tileDataAddress == 1)
+            signedAddr = true;
+        else if (tileDataAddress == 2)
+            signedAddr = false;
 
         mapTiles1.clear();
         mapTiles1.reserve(DMG_TilemapCount);
@@ -64,8 +95,21 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
         for (uint32_t i = 0; i < DMG_TilemapCount; i++) {
             const uint8_t* vramAddress = vramTilemap1 + i;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
-            uint8_t tileIndex = *vramAddress;
-            TilemapItem mapTile(i, address, &tiles[tileIndex]);
+            uint8_t tileIndex = isCGBLoaded ? funcVramReadBank(address, 0) : *vramAddress;
+            int resolvedIndex = signedAddr ? (256 + (int8_t)tileIndex) : tileIndex;
+            TilemapItem mapTile(i, address, nullptr);
+            if (isCGBLoaded) {
+                uint8_t attr = funcVramReadBank(address, 1);
+                mapTile.PaletteNum = attr & 0x07;
+                mapTile.Bank = (attr & 0x08) ? 1 : 0;
+                mapTile.XFlip = (attr & 0x20) != 0;
+                mapTile.YFlip = (attr & 0x40) != 0;
+                mapTile.BGPriority = (attr & 0x80) != 0;
+                mapTile.Tile = &tiles[mapTile.Bank * DMG_TilesCount + resolvedIndex];
+            }
+            else {
+                mapTile.Tile = &tiles[resolvedIndex];
+            }
             mapTiles1.push_back(mapTile);
         }
 
@@ -75,8 +119,21 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
         for (uint32_t i = 0; i < DMG_TilemapCount; i++) {
             const uint8_t* vramAddress = vramTilemap2 + i;
             uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
-            uint8_t tileIndex = *vramAddress;
-            TilemapItem mapTile(i, address, &tiles[tileIndex]);
+            uint8_t tileIndex = isCGBLoaded ? funcVramReadBank(address, 0) : *vramAddress;
+            int resolvedIndex = signedAddr ? (256 + (int8_t)tileIndex) : tileIndex;
+            TilemapItem mapTile(i, address, nullptr);
+            if (isCGBLoaded) {
+                uint8_t attr = funcVramReadBank(address, 1);
+                mapTile.PaletteNum = attr & 0x07;
+                mapTile.Bank = (attr & 0x08) ? 1 : 0;
+                mapTile.XFlip = (attr & 0x20) != 0;
+                mapTile.YFlip = (attr & 0x40) != 0;
+                mapTile.BGPriority = (attr & 0x80) != 0;
+                mapTile.Tile = &tiles[mapTile.Bank * DMG_TilesCount + resolvedIndex];
+            }
+            else {
+                mapTile.Tile = &tiles[resolvedIndex];
+            }
             mapTiles2.push_back(mapTile);
         }
     }
@@ -168,7 +225,10 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
         if (tile) {
             for (int y = 0; y < 8; y++) {
                 for (int x = 0; x < 8; x++) {
-                    PaletteColor color = paletteViewer.getColorPalette(tile->Pixels[x][y]);
+                    uint8_t px = mapTiles[t].XFlip ? 7 - x : x;
+                    uint8_t py = mapTiles[t].YFlip ? 7 - y : y;
+                    uint8_t colorId = tile->Pixels[px][py];
+                    PaletteColor color = isCGBLoaded ? resolveCGBColor(mapTiles[t].PaletteNum, colorId) : paletteViewer.getColorPalette(tile->Pixels[x][y]);
                     ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
                     ImVec2 p0(pos.x + x * zoomPerPixel, pos.y + y * zoomPerPixel);
                     ImVec2 p1(p0.x + zoomPerPixel, p0.y + zoomPerPixel);
@@ -278,7 +338,7 @@ void TilemapViewer::renderTileMapInfo() {
         if (hoveredTilemapItem.Tile) {
             int r = hoveredTilemapItem.TilemapItemID / 32;
             int c = hoveredTilemapItem.TilemapItemID % 32;
-            ImGui::Text("%i ($%02X) @ VRAM 00:%04X | row: %i | column: %i", hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.TileAddress, r, c);
+            ImGui::Text("%i ($%02X) @ VRAM %02X:%04X | row: %i | column: %i", hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.TilemapItemID, hoveredTilemapItem.Bank, hoveredTilemapItem.TileAddress, r, c);
         }
         else
             ImGui::Text("");
@@ -290,9 +350,55 @@ void TilemapViewer::renderTileMapInfo() {
         ImGui::TableSetColumnIndex(1);
         ImGui::AlignTextToFramePadding();
         if (hoveredTilemapItem.Tile)
-            ImGui::Text("%i ($%02X) @ VRAM 00:%04X", hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileAddress);
+            ImGui::Text("%i ($%02X) @ VRAM %02X:%04X", hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Tile->TileItemID, hoveredTilemapItem.Bank, hoveredTilemapItem.Tile->TileAddress);
         else
             ImGui::Text("");
+
+        if (isCGBLoaded) {
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableSetColumnIndex(0);
+            ImGui::AlignTextToFramePadding();
+            textRightAligned("BG palette");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::AlignTextToFramePadding();
+            if (hoveredTilemapItem.Tile)
+                ImGui::Text("%i", hoveredTilemapItem.PaletteNum);
+            else
+                ImGui::Text("");
+
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableSetColumnIndex(0);
+            ImGui::AlignTextToFramePadding();
+            textRightAligned("VRAM bank");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::AlignTextToFramePadding();
+            if (hoveredTilemapItem.Tile)
+                ImGui::Text("%i", hoveredTilemapItem.Bank);
+            else
+                ImGui::Text("");
+
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableSetColumnIndex(0);
+            ImGui::AlignTextToFramePadding();
+            textRightAligned("Flip");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::AlignTextToFramePadding();
+            if (hoveredTilemapItem.Tile)
+                ImGui::Text("%s / %s", hoveredTilemapItem.XFlip ? "X" : "-", hoveredTilemapItem.YFlip ? "Y" : "-");
+            else
+                ImGui::Text("");
+
+            ImGui::TableNextRow(ImGuiTableRowFlags_None, rowHeight);
+            ImGui::TableSetColumnIndex(0);
+            ImGui::AlignTextToFramePadding();
+            textRightAligned("BG priority");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::AlignTextToFramePadding();
+            if (hoveredTilemapItem.Tile)
+                ImGui::Text("%s", hoveredTilemapItem.BGPriority ? "Yes" : "No");
+            else
+                ImGui::Text("");
+        }
 
         ImGui::EndTable();
     }
@@ -308,4 +414,19 @@ void TilemapViewer::textRightAligned(const char* text) {
     if (avail > textWidth)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail - textWidth);
     ImGui::Text("%s", text);
+}
+
+PaletteColor TilemapViewer::resolveCGBColor(uint8_t paletteNum, uint8_t colorId) const {
+    if (!funcGetPaletteRAM)
+        return { 1.0f, 0.0f, 1.0f }; // some color
+    const uint8_t* pal = funcGetPaletteRAM(false);
+    uint16_t idx = paletteNum * 8 + colorId * 2;
+    uint16_t rgb555 = pal[idx] | (pal[idx + 1] << 8);
+    uint8_t r5 = rgb555 & 0x1F;
+    uint8_t g5 = (rgb555 >> 5) & 0x1F;
+    uint8_t b5 = (rgb555 >> 10) & 0x1F;
+    uint8_t r8 = (r5 << 3) | (r5 >> 2);
+    uint8_t g8 = (g5 << 3) | (g5 >> 2);
+    uint8_t b8 = (b5 << 3) | (b5 >> 2);
+    return { r8 / 255.0f, g8 / 255.0f, b8 / 255.0f };
 }

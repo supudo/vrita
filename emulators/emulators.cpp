@@ -143,6 +143,16 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
+        debuggerSpriteViewer->setVRAMBankCallback(
+            [&] (uint16_t addr, uint8_t bank) {
+            return emulatorDMG->managerMMU->vramReadBank(addr, bank);
+        }
+        );
+        debuggerSpriteViewer->setPaletteRamCallback(
+            [&] (bool isOBJ) -> const uint8_t* {
+            return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
+        }
+        );
         debuggerSpriteViewer->setCallbacks(
             [&] (uint32_t addr) {
                 return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
@@ -154,7 +164,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
                 return emulatorDMG->managerMMU->getOAMWriteSource(addr);
             }
         );
-        debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
         debuggerDebugger->setAPUCallbacks(
             [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel1(); },
             [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel2(); },
@@ -206,7 +216,7 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         debuggerMemoryEditor->setMemory("agb", nullptr, 0, false);
         debuggerTileViewer->setMemory("agb", nullptr, false);
         debuggerTilemapViewer->setMemory("agb", nullptr, false);
-        debuggerSpriteViewer->setMemory("agb", nullptr);
+        debuggerSpriteViewer->setMemory("agb", nullptr, false);
         debuggerDebugger->setMemory("agb", 0);
         debuggerDebugger->setRomImage(nullptr, 0);
     }

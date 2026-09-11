@@ -29,19 +29,28 @@ void SpriteViewer::release() {
     settings.Save();
 }
 
-void SpriteViewer::setMemory(const char* emulatorType, uint8_t* data) {
+void SpriteViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
     memoryData = data;
     uint8_t et = -1;
-    if (strcmp(emulatorType, "dmg") == 0)
+    if (strcmp(emuType, "dmg") == 0)
         et = 1;
-    else if (strcmp(emulatorType, "agb") == 0)
+    else if (strcmp(emuType, "agb") == 0)
         et = 2;
     else
         et = 0;
-    bool changed = et != this->emulatorType;
-    this->emulatorType = et;
+    bool changed = et != emulatorType || isCGB != isCGBLoaded;
+    emulatorType = et;
+    isCGBLoaded = isCGB;
     if (changed)
         initializeData(et);
+}
+
+void SpriteViewer::setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank) {
+    funcVramReadBank = vramReadBank;
+}
+
+void SpriteViewer::setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+    funcGetPaletteRAM = getPaletteRAM;
 }
 
 void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource) {
@@ -54,14 +63,30 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
     if (emulatorType == 1) {
         isSprite8x16 = funcMemoryRead(DMG_Address_LCDC) & 0x04;
 
-        tiles.resize(DMG_TilesCount);
-        const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
-        for (uint32_t i = 0; i < DMG_TilesCount; i++) {
-            const uint8_t* vramAddress = vramTiles + i * 16;
-            uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
-            TileItem tile(i, address);
-            decodeTile(vramAddress, tile);
-            tiles[i] = tile;
+        if (isCGBLoaded) {
+            tiles.resize(CGB_TilesCount);
+            for (int i = 0; i < CGB_TilesCount; i++) {
+                int bank = i / DMG_TilesCount;
+                int tileIndexInBank = i % DMG_TilesCount;
+                uint16_t address = DMG_Address_TileStart + tileIndexInBank * 16;
+                uint8_t tileBytes[16];
+                for (int b = 0; b < 16; b++)
+                    tileBytes[b] = funcVramReadBank(address + b, (uint8_t)bank);
+                TileItem tile(i, address);
+                decodeTile(tileBytes, tile);
+                tiles[i] = tile;
+            }
+        }
+        else {
+            tiles.resize(DMG_TilesCount);
+            const uint8_t* vramTiles = memoryData + DMG_Address_TileStart;
+            for (uint32_t i = 0; i < DMG_TilesCount; i++) {
+                const uint8_t* vramAddress = vramTiles + i * 16;
+                uint16_t address = static_cast<uint16_t>(vramAddress - memoryData);
+                TileItem tile(i, address);
+                decodeTile(vramAddress, tile);
+                tiles[i] = tile;
+            }
         }
 
         const uint8_t* oam = memoryData + DMG_Address_SpritesStart;
@@ -70,8 +95,10 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
             const uint8_t* entry = oam + i * 4;
             uint16_t address = static_cast<uint16_t>(entry - memoryData);
             const uint8_t tileIndex = entry[2];
+            const uint8_t flags = entry[3];
             const uint8_t firstTile = isSprite8x16 ? (tileIndex & 0xFE) : tileIndex;
-            SpriteItem spriteTile(i, entry[1], entry[0], tileIndex, entry[3], static_cast<uint8_t>(i), address, &tiles[firstTile], isSprite8x16 ? &tiles[firstTile + 1] : nullptr);
+            int bankOffset = (isCGBLoaded && (flags & 0x08)) ? DMG_TilesCount : 0;
+            SpriteItem spriteTile(i, entry[1], entry[0], tileIndex, flags, static_cast<uint8_t>(i), address, &tiles[firstTile + bankOffset], isSprite8x16 ? &tiles[firstTile + 1 + bankOffset] : nullptr);
             spriteItems[i] = spriteTile;
         }
     }
@@ -245,7 +272,7 @@ void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 
             uint8_t pixel = tile.Pixels[srcX][srcY];
             if (pixel == 0)
                 continue;
-            PaletteColor color = paletteViewer.getColorPalette(pixel);
+            PaletteColor color = isCGBLoaded ? resolveCGBColor(Flags & 0x07, pixel) : paletteViewer.getColorPalette(pixel);
             ImU32 col = IM_COL32((int)(color.r * 255.0f), (int)(color.g * 255.0f), (int)(color.b * 255.0f), 255);
             ImVec2 p0(pos.x + x * pixelSize, pos.y + y * pixelSize);
             ImVec2 p1(p0.x + pixelSize, p0.y + pixelSize);
@@ -328,7 +355,7 @@ void SpriteViewer::renderInfo() {
         ImGui::TableSetColumnIndex(1);
         if (hoveredSprite.TileTop) {
             if (emulatorType == 1)
-                ImGui::Text("%d ($%02X) @ VRAM 00:%04X", hoveredSprite.TileTop->TileItemID, static_cast<uint8_t>(hoveredSprite.TileTop->TileItemID), hoveredSprite.TileTop->TileAddress);
+                ImGui::Text("%d ($%02X) @ VRAM %02X:%04X", hoveredSprite.TileTop->TileItemID, static_cast<uint8_t>(hoveredSprite.TileTop->TileItemID), hoveredSprite.TileTop->TileItemID / DMG_TilesCount, hoveredSprite.TileTop->TileAddress);
         }
         else
             ImGui::Text("...");
@@ -341,9 +368,14 @@ void SpriteViewer::renderInfo() {
         if (hoveredSprite.TileTop) {
             bool flipX = hoveredSprite.Flags & 0x20;
             bool flipY = hoveredSprite.Flags & 0x40;
-            bool isOBP1 = hoveredSprite.Flags & 0x01;
+            bool isOBP1 = hoveredSprite.Flags & 0x10;
+            uint8_t palette = hoveredSprite.Flags & 0x07;
             bool isPriority = hoveredSprite.Flags & 0x80;
-            ImGui::Text("Flip X: %s | Flip Y: %s | Palette: %s | Priority: %s", flipX ? "true" : "false", flipY ? "true" : "false", isOBP1 ? "OBP1" : "OBP0", isPriority ? "true" : "false");
+            bool bank = hoveredSprite.Flags & 0x08;
+            if (isCGBLoaded)
+                ImGui::Text("Flip X: %s | Flip Y: %s | Bank: %i | Palette: %i | Priority: %s", flipX ? "true" : "false", flipY ? "true" : "false", bank ? 1 : 0, palette, isPriority ? "true" : "false");
+            else
+                ImGui::Text("Flip X: %s | Flip Y: %s | Palette: %s | Priority: %s", flipX ? "true" : "false", flipY ? "true" : "false", isOBP1 ? "OBP1" : "OBP0", isPriority ? "true" : "false");
         }
 
         // TODO
@@ -395,4 +427,19 @@ void SpriteViewer::textRightAligned(const char* text) {
     if (avail > textWidth)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + avail - textWidth);
     ImGui::Text("%s", text);
+}
+
+PaletteColor SpriteViewer::resolveCGBColor(uint8_t paletteNum, uint8_t colorId) const {
+    if (!funcGetPaletteRAM)
+        return { 1.0f, 0.0f, 1.0f }; // some color
+    const uint8_t* pal = funcGetPaletteRAM(true);
+    uint16_t idx = paletteNum * 8 + colorId * 2;
+    uint16_t rgb555 = pal[idx] | (pal[idx + 1] << 8);
+    uint8_t r5 = rgb555 & 0x1F;
+    uint8_t g5 = (rgb555 >> 5) & 0x1F;
+    uint8_t b5 = (rgb555 >> 10) & 0x1F;
+    uint8_t r8 = (r5 << 3) | (r5 >> 2);
+    uint8_t g8 = (g5 << 3) | (g5 >> 2);
+    uint8_t b8 = (b5 << 3) | (b5 >> 2);
+    return { r8 / 255.0f, g8 / 255.0f, b8 / 255.0f };
 }

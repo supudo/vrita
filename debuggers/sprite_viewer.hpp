@@ -18,10 +18,13 @@ public:
     SpriteViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
-    void setMemory(const char* emulatorType, uint8_t* data);
+    void setMemory(const char* emuType, uint8_t* data, bool isCGB);
     void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource);
     void release();
     void render(bool* windowOpened);
+
+    void setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank);
+    void setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
 
 private:
     Logger& logger;
@@ -64,6 +67,11 @@ private:
     void textRightAligned(const char* text);
 
     float lastInfoHeight = 0.0f;
+
+    bool isCGBLoaded = false;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
+    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
+    PaletteColor resolveCGBColor(uint8_t paletteNum, uint8_t colorId) const;
 };
 
 #endif

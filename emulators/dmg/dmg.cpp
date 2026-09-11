@@ -77,7 +77,7 @@ bool DMG::initAudio() {
     audioSpec.samples = 2048;
     audioDevice = SDL_OpenAudioDevice(nullptr, 0, &audioSpec, nullptr, 0);
     if (!audioDevice) {
-        logger.log("[%s] Cannot create audio device!", isCGBMode() ? "CGB" : "DMG");
+        logger.log("[DMG] Cannot create audio device!");
         return false;
     }
     managerAPU->initAudioDevice(audioDevice);
@@ -95,7 +95,7 @@ ImVec2 DMG::getWindowSize() const {
 
 void DMG::stepAll() {
 #ifdef TRACY_ENABLE
-    ZoneScopedN("%s::stepAll", isCGBMode() ? "CGB" : "DMG");
+    ZoneScopedN("%s::stepAll");
 #endif
     if (ROMFileLoaded) {
         uint64_t before = managerMMU->totalCycles;
@@ -111,7 +111,7 @@ void DMG::stepAll() {
 std::string DMG::loadROM(const char* path) {
     std::ifstream file(path, std::ios::binary | std::ios::ate);
     if (!file.is_open()) {
-        logger.log("[%s] WARNING: Failed to open ROM: %s", isCGBMode() ? "CGB" : "DMG", path);
+        logger.log("[DMG] WARNING: Failed to open ROM: %s", path);
         return "Failed to open ROM";
     }
     clear();
@@ -120,23 +120,23 @@ std::string DMG::loadROM(const char* path) {
         gFramebuffer[i] = DMG_PackForFramebuffer(DMG_PALETTE_DEFAULT[0]);
     std::streamsize size = file.tellg();
     std::streamsize memNeeded = std::max(size, (std::streamsize)0x10000);
-    logger.log("[%s] Loading ROM: %s", isCGBMode() ? "CGB" : "DMG", path);
-    logger.log("[%s] ROM size: %lld bytes (0x%llX), buffer: %lld bytes", isCGBMode() ? "CGB" : "DMG", (long long)size, (long long)size, (long long)memNeeded);
+    logger.log("[DMG] Loading ROM: %s", path);
+    logger.log("[DMG] ROM size: %lld bytes (0x%llX), buffer: %lld bytes", (long long)size, (long long)size, (long long)memNeeded);
     managerMMU->memory.resize((size_t)memNeeded, 0);
     managerMMU->memorySize = (uint32_t)managerMMU->memory.size();
-    logger.log("[%s] Memory buffer resized to %zu bytes", isCGBMode() ? "CGB" : "DMG", managerMMU->memory.size());
+    logger.log("[DMG] Memory buffer resized to %zu bytes", managerMMU->memory.size());
     file.seekg(0, std::ios::beg);
     if (!file.read(reinterpret_cast<char*>(managerMMU->memory.data()), size)) {
-        logger.log("[%s] WARNING: Failed to read ROM data!", isCGBMode() ? "CGB" : "DMG");
+        logger.log("[DMG] WARNING: Failed to read ROM data!");
         file.close();
         return "Failed to read ROM data";
     }
     file.close();
-    logger.log("[%s] ROM read into memory. Type byte @ 0x147: 0x%02X", isCGBMode() ? "CGB" : "DMG", managerMMU->memory[0x147]);
+    logger.log("[DMG] ROM read into memory. Type byte @ 0x147: 0x%02X", managerMMU->memory[0x147]);
     CartridgeGBType gbType = managerCartridge->loadROM(isCGBMode(), size);
     setCGBMode(gbType == CartridgeGBType::GB_CGB);
     managerMMU->resetRegisters();
-    logger.log("[%s] Hardware registers restored. ROM loaded.", isCGBMode() ? "CGB" : "DMG");
+    logger.log("[DMG] Hardware registers restored. ROM loaded.");
     ROMFileLoaded = true;
     gameIsPaused = false;
     renderingFrames = 0;
@@ -264,7 +264,7 @@ bool DMG::createTexture() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, DMG::WIDTH, DMG::HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
     if (!gTexture) {
-        logger.log("[%s] Failed to create DMG texture", isCGBMode() ? "CGB" : "DMG");
+        logger.log("[DMG] Failed to create DMG texture");
         return false;
     }
     return true;

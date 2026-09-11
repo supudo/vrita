@@ -55,6 +55,9 @@ private:
     void initializeData(uint8_t emulatorType);
     void decodeTile(const uint8_t* tileData, TileItem& tile);
     void renderTiles();
+    void renderTiles1Tab(const char* tabLabel, const char* childId, int bankOffset, float tileStepX, float tileStepY, int tilesPerRow, bool stacked);
+    void renderTiles2Tab(const char* tabLabel, const char* childId, int bankOffset, float tileStepX, float tileStepY, int tilesPerRow, bool stacked);
+    void renderOBJTab(const char* tabLabel, const char* childId, int bankFilter, float tileStepX, float tileStepY, int tilesPerRow, bool stacked);
     void renderTilePreview();
     void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
@@ -63,7 +66,6 @@ private:
     bool isCGBLoaded = false;
     std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
     std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
-    int cgbBank = 0;
     int cgbPaletteIndex = 0;
     bool cgbUseObjPalette = false;
     PaletteColor resolveCGBColor(uint8_t colorId) const;

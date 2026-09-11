@@ -217,145 +217,159 @@ void TileViewer::renderTiles() {
     int unitHeightTiles = stacked ? 2 : 1;
     float tileStepX = tileSizeZoom + gridGap;
     float tileStepY = tileSizeZoom * unitHeightTiles + gridGap;
-    int tilesPerRow = std::max(1, (int)(ImGui::GetContentRegionAvail().x / tileStepX));
-
-    int cgbBankOffset = 0;
-    if (isCGBLoaded) {
-        ImGui::RadioButton("Bank 0", &cgbBank, 0); ImGui::SameLine();
-        ImGui::RadioButton("Bank 1", &cgbBank, 1);
-        cgbBankOffset = cgbBank * DMG_TilesCount;
-    }
+    const int tilesPerRow = 16;
 
     if (ImGui::BeginTabBar("Tiles", ImGuiTabBarFlags_None)) {
-        if (ImGui::BeginTabItem("Tiles 1 (0x8000)", nullptr, ImGuiTabItemFlags_None)) {
-            ImGui::BeginChild("TilesScroll1", ImVec2(0, 0), ImGuiChildFlags_None);
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 start = ImGui::GetCursorScreenPos();
-            int totalTiles = isCGBLoaded ? DMG_TilesCount : tiles.Size;
-            int unitCount1 = stacked ? (totalTiles + 1) / 2 : totalTiles; // 192 stacked
-            for (int u = 0; u < unitCount1; u++) {
-                int topIndex = stacked ? u * 2 : u;
-                int bottomIndex = topIndex + 1;
-                bool hasBottom = stacked && (bottomIndex < totalTiles);
-                int tx = u % tilesPerRow;
-                int ty = u / tilesPerRow;
-                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
-                drawTileUnit(draw_list, tiles[topIndex + cgbBankOffset], hasBottom ? tiles[bottomIndex + cgbBankOffset] : tiles[topIndex + cgbBankOffset], hasBottom, pos, zoomPerPixel);
-            }
-            int numRows1 = (unitCount1 + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows1 * tileStepY));
-            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount1);
-            if (slot >= 0) {
-                int topIndex = stacked ? slot * 2 : slot;
-                int bottomIndex = topIndex + 1;
-                bool hasBottom = stacked && (bottomIndex < totalTiles);
-                hoveredTileItem = tiles[topIndex + cgbBankOffset];
-                hoveredHasBottom = hasBottom;
-                if (hasBottom)
-                    hoveredTileItemBottom = tiles[bottomIndex + cgbBankOffset];
-                if (ImGui::IsItemClicked()) {
-                    previewSelected = !previewSelected;
-                    if (previewSelected) {
-                        selectedTileItem = tiles[topIndex + cgbBankOffset];
-                        selectedHasBottom = hasBottom;
-                        if (hasBottom)
-                            selectedTileItemBottom = tiles[bottomIndex + cgbBankOffset];
-                    }
-                }
-            }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
+        renderTiles1Tab("Tiles 1 (0x8000)", "TilesScroll1", 0, tileStepX, tileStepY, tilesPerRow, stacked);
+        if (isCGBLoaded)
+            renderTiles1Tab("Tiles 1 (0x8000) - Bank 1", "TilesScroll1Bank1", DMG_TilesCount, tileStepX, tileStepY, tilesPerRow, stacked);
 
-        if (ImGui::BeginTabItem("Tiles 2 (0x8800 signed)", nullptr, ImGuiTabItemFlags_None)) {
-            ImGui::BeginChild("TilesScroll2", ImVec2(0, 0), ImGuiChildFlags_None);
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 start = ImGui::GetCursorScreenPos();
-            int unitCount2 = stacked ? 128 : 256;
-            for (int u = 0; u < unitCount2; u++) {
-                int i0 = stacked ? u * 2 : u;
-                int topIndex = 256 + (int8_t)i0;
-                int bottomIndex = 256 + (int8_t)(i0 + 1);
-                bool hasBottom = stacked;
-                int tx = u % tilesPerRow;
-                int ty = u / tilesPerRow;
-                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
-                drawTileUnit(draw_list, tiles[topIndex + cgbBankOffset], hasBottom ? tiles[bottomIndex + cgbBankOffset] : tiles[topIndex + cgbBankOffset], hasBottom, pos, zoomPerPixel);
-            }
-            int numRows2 = (unitCount2 + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows2 * tileStepY));
-            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount2);
-            if (slot >= 0) {
-                int i0 = stacked ? slot * 2 : slot;
-                int topIndex = 256 + (int8_t)i0;
-                int bottomIndex = 256 + (int8_t)(i0 + 1);
-                hoveredTileItem = tiles[topIndex + cgbBankOffset];
-                hoveredHasBottom = stacked;
-                if (stacked)
-                    hoveredTileItemBottom = tiles[bottomIndex + cgbBankOffset];
-                if (ImGui::IsItemClicked()) {
-                    previewSelected = !previewSelected;
-                    if (previewSelected) {
-                        selectedTileItem = tiles[topIndex + cgbBankOffset];
-                        selectedHasBottom = stacked;
-                        if (stacked)
-                            selectedTileItemBottom = tiles[bottomIndex + cgbBankOffset];
-                    }
-                }
-            }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
+        renderTiles2Tab("Tiles 2 (0x8800 signed)", "TilesScroll2", 0, tileStepX, tileStepY, tilesPerRow, stacked);
+        if (isCGBLoaded)
+            renderTiles2Tab("Tiles 2 (0x8800 signed) - Bank 1", "TilesScroll2Bank1", DMG_TilesCount, tileStepX, tileStepY, tilesPerRow, stacked);
 
-        if (ImGui::BeginTabItem("OBJ Tiles", nullptr, ImGuiTabItemFlags_None)) {
-            ImGui::BeginChild("TilesScroll3", ImVec2(0, 0), ImGuiChildFlags_None);
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-            ImVec2 start = ImGui::GetCursorScreenPos();
-            int count = 0;
-            uint8_t objTileIndices[40];
-            int objBankOffsets[40];
-            for (int oam = 0; oam < 160; oam += 4) {
-                uint8_t tileIndex = memoryData[DMG_Address_TileOBJ + oam + 2];
-                uint8_t oamFlags = memoryData[DMG_Address_TileOBJ + oam + 3];
-                int objBankOffset = (isCGBLoaded && (oamFlags & 0x08)) ? DMG_TilesCount : 0;
-                objTileIndices[count] = tileIndex;
-                objBankOffsets[count] = objBankOffset;
-                int topIndex = (stacked ? (tileIndex & 0xFE) : tileIndex) + objBankOffset;
-                int bottomIndex = (tileIndex | 0x01) + objBankOffset;
-                int tx = count % tilesPerRow;
-                int ty = count / tilesPerRow;
-                ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
-                drawTileUnit(draw_list, tiles[topIndex], stacked ? tiles[bottomIndex] : tiles[topIndex], stacked, pos, zoomPerPixel);
-                count++;
-            }
-            int numRows3 = (40 + tilesPerRow - 1) / tilesPerRow;
-            ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows3 * tileStepY));
-            int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, 40);
-            if (slot >= 0) {
-                uint8_t raw = objTileIndices[slot];
-                int objBankOffset = objBankOffsets[slot];
-                int topIndex = (stacked ? (raw & 0xFE) : raw) + objBankOffset;
-                int bottomIndex = (raw | 0x01) + objBankOffset;
-                hoveredTileItem = tiles[topIndex];
-                hoveredHasBottom = stacked;
-                if (stacked)
-                    hoveredTileItemBottom = tiles[bottomIndex];
-                if (ImGui::IsItemClicked()) {
-                    previewSelected = !previewSelected;
-                    if (previewSelected) {
-                        selectedTileItem = tiles[topIndex];
-                        selectedHasBottom = stacked;
-                        if (stacked)
-                            selectedTileItemBottom = tiles[bottomIndex];
-                    }
-                }
-            }
-            ImGui::EndChild();
-            ImGui::EndTabItem();
-        }
+        renderOBJTab("OBJ Tiles", "TilesScroll3", -1, tileStepX, tileStepY, tilesPerRow, stacked);
+        if (isCGBLoaded)
+            renderOBJTab("OBJ Tiles - Bank 1", "TilesScroll3Bank1", 1, tileStepX, tileStepY, tilesPerRow, stacked);
 
         ImGui::EndTabBar();
     }
+}
+
+void TileViewer::renderTiles1Tab(const char* tabLabel, const char* childId, int bankOffset, float tileStepX, float tileStepY, int tilesPerRow, bool stacked) {
+    if (!ImGui::BeginTabItem(tabLabel, nullptr, ImGuiTabItemFlags_None))
+        return;
+    ImGui::BeginChild(childId, ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 start = ImGui::GetCursorScreenPos();
+    int totalTiles = isCGBLoaded ? DMG_TilesCount : tiles.Size;
+    int unitCount1 = stacked ? (totalTiles + 1) / 2 : totalTiles; // 192 stacked
+    for (int u = 0; u < unitCount1; u++) {
+        int topIndex = stacked ? u * 2 : u;
+        int bottomIndex = topIndex + 1;
+        bool hasBottom = stacked && (bottomIndex < totalTiles);
+        int tx = u % tilesPerRow;
+        int ty = u / tilesPerRow;
+        ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+        drawTileUnit(draw_list, tiles[topIndex + bankOffset], hasBottom ? tiles[bottomIndex + bankOffset] : tiles[topIndex + bankOffset], hasBottom, pos, zoomPerPixel);
+    }
+    int numRows1 = (unitCount1 + tilesPerRow - 1) / tilesPerRow;
+    ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows1 * tileStepY));
+    int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount1);
+    if (slot >= 0) {
+        int topIndex = stacked ? slot * 2 : slot;
+        int bottomIndex = topIndex + 1;
+        bool hasBottom = stacked && (bottomIndex < totalTiles);
+        hoveredTileItem = tiles[topIndex + bankOffset];
+        hoveredHasBottom = hasBottom;
+        if (hasBottom)
+            hoveredTileItemBottom = tiles[bottomIndex + bankOffset];
+        if (ImGui::IsItemClicked()) {
+            previewSelected = !previewSelected;
+            if (previewSelected) {
+                selectedTileItem = tiles[topIndex + bankOffset];
+                selectedHasBottom = hasBottom;
+                if (hasBottom)
+                    selectedTileItemBottom = tiles[bottomIndex + bankOffset];
+            }
+        }
+    }
+    ImGui::EndChild();
+    ImGui::EndTabItem();
+}
+
+void TileViewer::renderTiles2Tab(const char* tabLabel, const char* childId, int bankOffset, float tileStepX, float tileStepY, int tilesPerRow, bool stacked) {
+    if (!ImGui::BeginTabItem(tabLabel, nullptr, ImGuiTabItemFlags_None))
+        return;
+    ImGui::BeginChild(childId, ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 start = ImGui::GetCursorScreenPos();
+    int unitCount2 = stacked ? 128 : 256;
+    for (int u = 0; u < unitCount2; u++) {
+        int i0 = stacked ? u * 2 : u;
+        int topIndex = 256 + (int8_t)i0;
+        int bottomIndex = 256 + (int8_t)(i0 + 1);
+        bool hasBottom = stacked;
+        int tx = u % tilesPerRow;
+        int ty = u / tilesPerRow;
+        ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+        drawTileUnit(draw_list, tiles[topIndex + bankOffset], hasBottom ? tiles[bottomIndex + bankOffset] : tiles[topIndex + bankOffset], hasBottom, pos, zoomPerPixel);
+    }
+    int numRows2 = (unitCount2 + tilesPerRow - 1) / tilesPerRow;
+    ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows2 * tileStepY));
+    int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, unitCount2);
+    if (slot >= 0) {
+        int i0 = stacked ? slot * 2 : slot;
+        int topIndex = 256 + (int8_t)i0;
+        int bottomIndex = 256 + (int8_t)(i0 + 1);
+        hoveredTileItem = tiles[topIndex + bankOffset];
+        hoveredHasBottom = stacked;
+        if (stacked)
+            hoveredTileItemBottom = tiles[bottomIndex + bankOffset];
+        if (ImGui::IsItemClicked()) {
+            previewSelected = !previewSelected;
+            if (previewSelected) {
+                selectedTileItem = tiles[topIndex + bankOffset];
+                selectedHasBottom = stacked;
+                if (stacked)
+                    selectedTileItemBottom = tiles[bottomIndex + bankOffset];
+            }
+        }
+    }
+    ImGui::EndChild();
+    ImGui::EndTabItem();
+}
+
+void TileViewer::renderOBJTab(const char* tabLabel, const char* childId, int bankFilter, float tileStepX, float tileStepY, int tilesPerRow, bool stacked) {
+    if (!ImGui::BeginTabItem(tabLabel, nullptr, ImGuiTabItemFlags_None))
+        return;
+    ImGui::BeginChild(childId, ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 start = ImGui::GetCursorScreenPos();
+    int count = 0;
+    uint8_t objTileIndices[40];
+    int objBankOffsets[40];
+    for (int oam = 0; oam < 160; oam += 4) {
+        uint8_t tileIndex = memoryData[DMG_Address_TileOBJ + oam + 2];
+        uint8_t oamFlags = memoryData[DMG_Address_TileOBJ + oam + 3];
+        int spriteBank = (isCGBLoaded && (oamFlags & 0x08)) ? 1 : 0;
+        if (bankFilter >= 0 && spriteBank != bankFilter)
+            continue;
+        int objBankOffset = spriteBank * DMG_TilesCount;
+        objTileIndices[count] = tileIndex;
+        objBankOffsets[count] = objBankOffset;
+        int topIndex = (stacked ? (tileIndex & 0xFE) : tileIndex) + objBankOffset;
+        int bottomIndex = (tileIndex | 0x01) + objBankOffset;
+        int tx = count % tilesPerRow;
+        int ty = count / tilesPerRow;
+        ImVec2 pos(start.x + tx * tileStepX, start.y + ty * tileStepY);
+        drawTileUnit(draw_list, tiles[topIndex], stacked ? tiles[bottomIndex] : tiles[topIndex], stacked, pos, zoomPerPixel);
+        count++;
+    }
+    int numRows3 = (count + tilesPerRow - 1) / tilesPerRow;
+    ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows3 * tileStepY));
+    int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, count);
+    if (slot >= 0) {
+        uint8_t raw = objTileIndices[slot];
+        int objBankOffset = objBankOffsets[slot];
+        int topIndex = (stacked ? (raw & 0xFE) : raw) + objBankOffset;
+        int bottomIndex = (raw | 0x01) + objBankOffset;
+        hoveredTileItem = tiles[topIndex];
+        hoveredHasBottom = stacked;
+        if (stacked)
+            hoveredTileItemBottom = tiles[bottomIndex];
+        if (ImGui::IsItemClicked()) {
+            previewSelected = !previewSelected;
+            if (previewSelected) {
+                selectedTileItem = tiles[topIndex];
+                selectedHasBottom = stacked;
+                if (stacked)
+                    selectedTileItemBottom = tiles[bottomIndex];
+            }
+        }
+    }
+    ImGui::EndChild();
+    ImGui::EndTabItem();
 }
 
 void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) {

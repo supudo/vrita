@@ -32,6 +32,7 @@ private:
     Settings& settings;
 
     bool autoRefresh = true;
+    float zoomPerPixel = 1.0f;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -47,7 +48,7 @@ private:
 
     PaletteColor unpackPaletteColor(uint32_t packed);
 
-    void renderCenteredCellContent(const char* lbl);
+    void renderCenteredCellContent(const char* lbl, float rowHeight = 80.0f);
     void renderColorButtons(const char* label, uint8_t paletteValue);
     bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f);
 

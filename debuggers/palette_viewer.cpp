@@ -18,6 +18,7 @@ bool PaletteViewer::init() {
     windowWidth = settings.GetInt("Debuggers - Palette Viewer", "width", 488);
     windowHeight = settings.GetInt("Debuggers - Palette Viewer", "height", 357);
     paletteChoicesSelected = settings.GetInt("Debuggers - Palette Viewer", "dmg_chosen_palette", 0);
+    zoomPerPixel = settings.GetFloat("Debuggers - Palette Viewer", "zoom_per_pixel", 1.0f);
     return true;
 }
 
@@ -27,6 +28,7 @@ void PaletteViewer::release() {
     settings.Set("Debuggers - Palette Viewer", "width", (int)lastWindowSize.x);
     settings.Set("Debuggers - Palette Viewer", "height", (int)lastWindowSize.y);
     settings.Set("Debuggers - Palette Viewer", "dmg_chosen_palette", paletteChoicesSelected);
+    settings.Set("Debuggers - Palette Viewer", "zoom_per_pixel", zoomPerPixel);
     settings.Save();
 }
 
@@ -63,6 +65,14 @@ void PaletteViewer::render(bool* windowOpened) {
         return;
     }
 
+    ImGui::Text("Zoom");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::SliderFloat("##paletteZoom", &zoomPerPixel, 0.25f, 2.0f)) {
+        settings.Set("Debuggers - Palette Viewer", "zoom_per_pixel", zoomPerPixel);
+        settings.Save();
+    }
+
     if (!isCGBLoaded) {
         ImGui::Text("Choose palette transformer:");
         ImGui::SameLine();
@@ -82,27 +92,26 @@ void PaletteViewer::render(bool* windowOpened) {
 
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit;
     if (isCGBLoaded) {
-        if (ImGui::BeginTable("##colorPalettesTableCGB", 2, tableFlags)) {
-            ImGui::TableSetupColumn("Palette", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 100.0f);
-            ImGui::TableSetupColumn("Colors");
+        if (ImGui::BeginTable("##colorPalettesTableCGB", 3, tableFlags)) {
+            ImGui::TableSetupColumn("Palette", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 60.0f);
+            ImGui::TableSetupColumn("BG");
+            ImGui::TableSetupColumn("OBJ");
             ImGui::TableHeadersRow();
 
-            char label[16];
+            char bgLabel[16];
+            char objLabel[16];
+            char rowLabel[8];
             for (uint8_t i = 0; i < 8; i++) {
-                std::snprintf(label, sizeof(label), "BG %i", i);
+                std::snprintf(bgLabel, sizeof(bgLabel), "##bg%i", i);
+                std::snprintf(objLabel, sizeof(objLabel), "##obj%i", i);
+                std::snprintf(rowLabel, sizeof(rowLabel), "%i", i);
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                renderCenteredCellContent(label);
+                renderCenteredCellContent(rowLabel, 80.0f * zoomPerPixel);
                 ImGui::TableSetColumnIndex(1);
-                renderCGBPaletteButtons(label, i, false);
-            }
-            for (uint8_t i = 0; i < 8; i++) {
-                std::snprintf(label, sizeof(label), "OBJ %i", i);
-                ImGui::TableNextRow();
-                ImGui::TableSetColumnIndex(0);
-                renderCenteredCellContent(label);
-                ImGui::TableSetColumnIndex(1);
-                renderCGBPaletteButtons(label, i, true);
+                renderCGBPaletteButtons(bgLabel, i, false);
+                ImGui::TableSetColumnIndex(2);
+                renderCGBPaletteButtons(objLabel, i, true);
             }
 
             ImGui::EndTable();
@@ -115,19 +124,19 @@ void PaletteViewer::render(bool* windowOpened) {
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        renderCenteredCellContent("BGP");
+        renderCenteredCellContent("BGP", 80.0f * zoomPerPixel);
         ImGui::TableSetColumnIndex(1);
         renderColorButtons("##paletteBGP", paletteBGP);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        renderCenteredCellContent("OBP 0");
+        renderCenteredCellContent("OBP 0", 80.0f * zoomPerPixel);
         ImGui::TableSetColumnIndex(1);
         renderColorButtons("##paletteOBP0", paletteOBP0);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
-        renderCenteredCellContent("OBP 1");
+        renderCenteredCellContent("OBP 1", 80.0f * zoomPerPixel);
         ImGui::TableSetColumnIndex(1);
         renderColorButtons("##paletteOBP1", paletteOBP1);
 
@@ -137,11 +146,11 @@ void PaletteViewer::render(bool* windowOpened) {
     ImGui::End();
 }
 
-void PaletteViewer::renderCenteredCellContent(const char* lbl) {
+void PaletteViewer::renderCenteredCellContent(const char* lbl, float rowHeight) {
     ImVec2 textSize = ImGui::CalcTextSize(lbl);
     float cellWidth = ImGui::GetContentRegionAvail().x;
     float x = (cellWidth - textSize.x) * 0.5f;
-    float y = (80.0f - textSize.y) * 0.5f;
+    float y = (rowHeight - textSize.y) * 0.5f;
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + x);
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + y);
     ImGui::Text("%s", lbl);
@@ -182,13 +191,14 @@ void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) 
     PaletteColor bgp_color2 = getColorPalette(colorValue2);
     PaletteColor bgp_color3 = getColorPalette(colorValue3);
 
-    renderButtonWithBorder("##0", ImVec2(80, 80), bgp_color0);
+    float size = 80.0f * zoomPerPixel;
+    renderButtonWithBorder("##0", ImVec2(size, size), bgp_color0);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##1", ImVec2(80, 80), bgp_color1);
+    renderButtonWithBorder("##1", ImVec2(size, size), bgp_color1);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##2", ImVec2(80, 80), bgp_color2);
+    renderButtonWithBorder("##2", ImVec2(size, size), bgp_color2);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##3", ImVec2(80, 80), bgp_color3);
+    renderButtonWithBorder("##3", ImVec2(size, size), bgp_color3);
     ImGui::PopID();
 }
 
@@ -200,13 +210,14 @@ void PaletteViewer::renderCGBPaletteButtons(const char* label, uint8_t paletteNu
     PaletteColor color2 = resolveCGBColor(paletteNum, isOBJ, 2);
     PaletteColor color3 = resolveCGBColor(paletteNum, isOBJ, 3);
 
-    renderButtonWithBorder("##0", ImVec2(80, 80), color0);
+    float size = 80.0f * zoomPerPixel;
+    renderButtonWithBorder("##0", ImVec2(size, size), color0);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##1", ImVec2(80, 80), color1);
+    renderButtonWithBorder("##1", ImVec2(size, size), color1);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##2", ImVec2(80, 80), color2);
+    renderButtonWithBorder("##2", ImVec2(size, size), color2);
     ImGui::SameLine(0.0f, 10.0f);
-    renderButtonWithBorder("##3", ImVec2(80, 80), color3);
+    renderButtonWithBorder("##3", ImVec2(size, size), color3);
     ImGui::PopID();
 }
 

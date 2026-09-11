@@ -34,9 +34,9 @@ void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                                 std::function<uint16_t(const char*)> getRegsiter,
                                 std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
                                 std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
-    memoryRead = read8;
-    memoryWrite = write8;
-    registerReadFunction = getRegsiter;
+    funcMemoryRead = read8;
+    funcMemoryWrite = write8;
+    funcRegisterReadFunction = getRegsiter;
     funcVramBankRead = vramReadBank;
     funcVramBankWrite = vramWriteBank;
 }
@@ -113,9 +113,9 @@ void MemoryEditor::render(bool* windowOpened) {
         return;
     }
 
-    if (emulatorType == 1 && followRegister > 0 && registerReadFunction) {
+    if (emulatorType == 1 && followRegister > 0 && funcRegisterReadFunction) {
         static const char* registerNames[] = { "", "BC", "DE", "HL", "SP", "PC" };
-        followAddress = (int)registerReadFunction(registerNames[followRegister]);
+        followAddress = (int)funcRegisterReadFunction(registerNames[followRegister]);
     }
     else
         followAddress = -1;
@@ -364,7 +364,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                                 if (region.vramBankOverride >= 0 && funcVramBankWrite)
                                     funcVramBankWrite(addr + col, (uint8_t)region.vramBankOverride, value);
                                 else {
-                                    memoryWrite(addr + col, value);
+                                    funcMemoryWrite(addr + col, value);
                                     memoryData[addr + col] = value;
                                 }
                             }
@@ -413,7 +413,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                             if (region.vramBankOverride >= 0 && funcVramBankWrite)
                                 funcVramBankWrite(current_addr, (uint8_t)region.vramBankOverride, newValue);
                             else {
-                                memoryWrite(current_addr, newValue);
+                                funcMemoryWrite(current_addr, newValue);
                                 memoryData[current_addr] = newValue;
                             }
                         }

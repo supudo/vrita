@@ -40,6 +40,12 @@ private:
     ImVec2 lastWindowPosition = ImVec2(44, 44);
     ImVec2 lastWindowSize = ImVec2(300, 300);
 
+    std::function<uint8_t(uint32_t)> funcMemoryRead;
+    std::function<void(uint32_t, uint8_t)> funcMemoryWrite;
+    std::function<uint16_t(const char*)> funcRegisterReadFunction;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramBankRead;
+    std::function<void(uint16_t, uint8_t, uint8_t)> funcVramBankWrite;
+
     int viewPerspective = 0;
     const MemoryRegion* selectedMemoryRegion = nullptr;
 
@@ -59,13 +65,10 @@ private:
 
     int followRegister = 0;
     int followAddress = -1;
-    std::function<uint16_t(const char*)> registerReadFunction;
 
     void renderMemoryRegion(MemoryRegion region);
     const MemoryRegion* getRegion(uint32_t addr) const;
 
-    std::function<uint8_t(uint32_t)> memoryRead;
-    std::function<void(uint32_t, uint8_t)> memoryWrite;
 
     void getPreviewData(int address, char* out_buf, char format);
 
@@ -75,8 +78,6 @@ private:
     void renderViewPerspectiveTreeRegion(const MemoryRegion& region);
 
     bool isCGBLoaded = false;
-    std::function<uint8_t(uint16_t, uint8_t)> funcVramBankRead;
-    std::function<void(uint16_t, uint8_t, uint8_t)> funcVramBankWrite;
     const MemoryTree* activeTree = nullptr;
 };
 

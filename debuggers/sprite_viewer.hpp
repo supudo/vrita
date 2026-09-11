@@ -35,6 +35,8 @@ private:
     std::function<uint8_t(uint16_t)> funcMemoryRead;
     std::function<void(uint16_t, uint8_t)> funcMemoryWrite;
     std::function<uint16_t(uint16_t)> funcOAMSource;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
+    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
 
     int windowPositionX = 40;
     int windowPositionY = 40;
@@ -70,8 +72,6 @@ private:
     float lastInfoHeight = 0.0f;
 
     bool isCGBLoaded = false;
-    std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
-    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
     PaletteColor resolveCGBColor(uint8_t paletteNum, uint8_t colorId) const;
 };
 

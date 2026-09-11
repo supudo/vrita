@@ -29,6 +29,18 @@ void SpriteViewer::release() {
     settings.Save();
 }
 
+void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                                std::function<void(uint16_t, uint8_t)> write8,
+                                std::function<uint16_t(uint16_t)> oamSource,
+                                std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                                std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+    funcMemoryRead = read8;
+    funcMemoryWrite = write8;
+    funcOAMSource = oamSource;
+    funcVramReadBank = vramReadBank;
+    funcGetPaletteRAM = getPaletteRAM;
+}
+
 void SpriteViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
     memoryData = data;
     uint8_t et = -1;
@@ -43,20 +55,6 @@ void SpriteViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
     isCGBLoaded = isCGB;
     if (changed)
         initializeData(et);
-}
-
-void SpriteViewer::setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank) {
-    funcVramReadBank = vramReadBank;
-}
-
-void SpriteViewer::setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
-    funcGetPaletteRAM = getPaletteRAM;
-}
-
-void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource) {
-    funcMemoryRead = read8;
-    funcMemoryWrite = write8;
-    funcOAMSource = oamSource;
 }
 
 void SpriteViewer::initializeData(uint8_t emulatorType) {

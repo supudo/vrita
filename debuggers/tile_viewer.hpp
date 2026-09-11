@@ -17,12 +17,10 @@ public:
     TileViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
+    void setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
     void setMemory(const char* emulatorType, uint8_t* data, bool isCGB);
     void release();
     void render(bool* windowOpened);
-
-    void setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank);
-    void setPaletteRamCallback(std::function<const uint8_t*(bool isOBJ)> getPaletteRAM);
 
 private:
     Logger& logger;

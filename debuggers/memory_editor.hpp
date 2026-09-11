@@ -23,10 +23,11 @@ public:
     void render(bool* windowOpened);
     
     void setMemory(const char* emulatorType, uint8_t* data, uint32_t size, bool isCGB);
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8);
-    void setRegsiterCallback(std::function<uint16_t(const char*)> getRegsiter);
-
-    void setVRAMBankCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                      std::function<void(uint16_t, uint8_t)> write8,
+                      std::function<uint16_t(const char*)> getRegsiter,
+                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                      std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
 
 private:
     Logger& logger;

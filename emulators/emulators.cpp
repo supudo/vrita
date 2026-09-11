@@ -92,79 +92,47 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->managerCPU && emulatorDMG->ROMFileLoaded) {
         if (emulatorDMG->isGameRunning())
             debuggerDebugger->pushCPUFrameTime(static_cast<float>(emulatorDMG->lastFrameStepMs));
+
         debuggerMemoryEditor->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->memorySize, emulatorDMG->managerMMU->isCGBMode());
         debuggerMemoryEditor->setCallbacks(
-            [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
-            },
-            [&] (uint32_t addr, uint8_t value) {
-                emulatorDMG->managerMMU->write8(static_cast<uint16_t>(addr), value, true);
-            }
-        );
-        debuggerMemoryEditor->setRegsiterCallback(
+            [&] (uint32_t addr) { return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true); },
+            [&] (uint32_t addr, uint8_t value) { emulatorDMG->managerMMU->write8(static_cast<uint16_t>(addr), value, true); },
             [&] (const char* name) -> uint16_t {
-            auto& r = emulatorDMG->managerCPU->Registers;
+                auto& r = emulatorDMG->managerCPU->Registers;
                 if (strcmp(name, "BC") == 0) return r.BC;
                 if (strcmp(name, "DE") == 0) return r.DE;
                 if (strcmp(name, "HL") == 0) return r.HL;
                 if (strcmp(name, "SP") == 0) return r.SP;
                 if (strcmp(name, "PC") == 0) return r.PC;
                 return 0;
-            }
-        );
-        debuggerMemoryEditor->setVRAMBankCallbacks(
-            [&] (uint16_t addr, uint8_t bank) {
-                return emulatorDMG->managerMMU->vramReadBank(addr, bank);
             },
-            [&] (uint16_t addr, uint8_t bank, uint8_t value) {
-                emulatorDMG->managerMMU->vramWriteBank(addr, bank, value);
-            }
+            [&] (uint16_t addr, uint8_t bank) { return emulatorDMG->managerMMU->vramReadBank(addr, bank); },
+            [&] (uint16_t addr, uint8_t bank, uint8_t value) { emulatorDMG->managerMMU->vramWriteBank(addr, bank, value); }
         );
+
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
-        debuggerTileViewer->setVRAMBankCallback(
-            [&] (uint16_t addr, uint8_t bank) {
-                return emulatorDMG->managerMMU->vramReadBank(addr, bank);
-            }
-        );
-        debuggerTileViewer->setPaletteRamCallback(
-            [&] (bool isOBJ) -> const uint8_t* {
-                return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
-            }
+        
+        debuggerTileViewer->setCallbacks(
+            [&] (uint16_t addr, uint8_t bank) { return emulatorDMG->managerMMU->vramReadBank(addr, bank); },
+            [&] (bool isOBJ) -> const uint8_t* { return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data(); }
         );
         debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
-        debuggerTilemapViewer->setVRAMBankCallback(
-            [&] (uint16_t addr, uint8_t bank) {
-                return emulatorDMG->managerMMU->vramReadBank(addr, bank);
-            }
-        );
-        debuggerTilemapViewer->setPaletteRamCallback(
-            [&] (bool isOBJ) -> const uint8_t* {
-                return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
-            }
+        
+        debuggerTilemapViewer->setCallbacks(
+            [&] (uint16_t addr, uint8_t bank) { return emulatorDMG->managerMMU->vramReadBank(addr, bank); },
+            [&] (bool isOBJ) -> const uint8_t* { return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data(); }
         );
         debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
-        debuggerSpriteViewer->setVRAMBankCallback(
-            [&] (uint16_t addr, uint8_t bank) {
-            return emulatorDMG->managerMMU->vramReadBank(addr, bank);
-        }
-        );
-        debuggerSpriteViewer->setPaletteRamCallback(
-            [&] (bool isOBJ) -> const uint8_t* {
-            return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
-        }
-        );
+        
         debuggerSpriteViewer->setCallbacks(
-            [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
-            },
-            [&] (uint32_t addr, uint8_t value) {
-                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true);
-            },
-            [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->getOAMWriteSource(addr);
-            }
+            [&] (uint32_t addr) { return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true); },
+            [&] (uint32_t addr, uint8_t value) { emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true); },
+            [&] (uint32_t addr) { return emulatorDMG->managerMMU->getOAMWriteSource(addr); },
+            [&] (uint16_t addr, uint8_t bank) { return emulatorDMG->managerMMU->vramReadBank(addr, bank); },
+            [&] (bool isOBJ) -> const uint8_t* { return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data(); }
         );
         debuggerSpriteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
+        
         debuggerDebugger->setAPUCallbacks(
             [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel1(); },
             [&] () -> const PulseChannel& { return emulatorDMG->managerAPU->getChannel2(); },
@@ -174,41 +142,19 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
         );
         debuggerDebugger->setRomImage(emulatorDMG->managerCartridge->romImageData(), (uint32_t)emulatorDMG->managerCartridge->romImageSize());
         debuggerDebugger->setCartridgeCallbacks(
-            [&] () {
-                return emulatorDMG->managerCartridge->currentRomBank();
-            },
-            [&] () {
-                return emulatorDMG->managerCartridge->totalRomBanks();
-            }
+            [&] () { return emulatorDMG->managerCartridge->currentRomBank(); },
+            [&] () { return emulatorDMG->managerCartridge->totalRomBanks(); }
         );
         debuggerDebugger->setCallbacks(
-            [&] (uint32_t addr) {
-                return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true);
-            },
-            [&] (uint32_t addr, uint8_t value) {
-                emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true);
-            },
-            [&] (uint8_t flag) {
-                return emulatorDMG->managerCPU->isFlagSet(flag);
-            },
-            [&] (uint8_t flag) {
-                return emulatorDMG->managerInterrupts->isInterruptEnabled(flag);
-            },
-            [&] () {
-                return emulatorDMG->isGameRunning();
-            },
-            [&] () {
-                return emulatorDMG->stopGame();
-            },
-            [&] () {
-                return emulatorDMG->startGame();
-            },
-            [&] (bool val) {
-                return emulatorDMG->logCPUCalls(val);
-            },
-            [&] () {
-                emulatorDMG->managerCPU->step();
-            }
+            [&] (uint32_t addr) { return emulatorDMG->managerMMU->read8(static_cast<uint16_t>(addr), true); },
+            [&] (uint32_t addr, uint8_t value) { emulatorDMG->managerMMU->write16(static_cast<uint16_t>(addr), value, true); },
+            [&] (uint8_t flag) { return emulatorDMG->managerCPU->isFlagSet(flag); },
+            [&] (uint8_t flag) { return emulatorDMG->managerInterrupts->isInterruptEnabled(flag); },
+            [&] () { return emulatorDMG->isGameRunning(); },
+            [&] () { return emulatorDMG->stopGame(); },
+            [&] () { return emulatorDMG->startGame(); },
+            [&] (bool val) { return emulatorDMG->logCPUCalls(val); },
+            [&] () { emulatorDMG->managerCPU->step(); }
         );
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);
     }

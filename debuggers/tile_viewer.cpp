@@ -37,6 +37,11 @@ void TileViewer::release() {
     settings.Save();
 }
 
+void TileViewer::setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+    funcVramReadBank = vramReadBank;
+    funcGetPaletteRAM = getPaletteRAM;
+}
+
 void TileViewer::setMemory(const char* emulatorType, uint8_t* data, bool isCGB) {
     memoryData = data;
     uint8_t et = -1;
@@ -51,14 +56,6 @@ void TileViewer::setMemory(const char* emulatorType, uint8_t* data, bool isCGB) 
     isCGBLoaded = isCGB;
     if (changed)
         initializeData(et);
-}
-
-void TileViewer::setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank) {
-    funcVramReadBank = vramReadBank;
-}
-
-void TileViewer::setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
-    funcGetPaletteRAM = getPaletteRAM;
 }
 
 void TileViewer::initializeData(uint8_t emulatorType) {

@@ -29,6 +29,18 @@ void MemoryEditor::release() {
     settings.Save();
 }
 
+void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                                std::function<void(uint16_t, uint8_t)> write8,
+                                std::function<uint16_t(const char*)> getRegsiter,
+                                std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                                std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
+    memoryRead = read8;
+    memoryWrite = write8;
+    registerReadFunction = getRegsiter;
+    funcVramBankRead = vramReadBank;
+    funcVramBankWrite = vramWriteBank;
+}
+
 void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size, bool isCGB) {
     if (data != memoryData || size != memorySize) {
         selectedMemoryRegion = nullptr;
@@ -81,11 +93,6 @@ const MemoryRegion* MemoryEditor::getRegion(uint32_t addr) const {
         }
     }
     return nullptr;
-}
-
-void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8) {
-    memoryRead = read8;
-    memoryWrite = write8;
 }
 
 void MemoryEditor::render(bool* windowOpened) {
@@ -153,15 +160,6 @@ void MemoryEditor::render(bool* windowOpened) {
     }
 
     ImGui::End();
-}
-
-void MemoryEditor::setRegsiterCallback(std::function<uint16_t(const char*)> getRegsiter) {
-    registerReadFunction = getRegsiter;
-}
-
-void MemoryEditor::setVRAMBankCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
-    funcVramBankRead = vramReadBank;
-    funcVramBankWrite = vramWriteBank;
 }
 
 void MemoryEditor::renderViewPerspectiveDefault() {

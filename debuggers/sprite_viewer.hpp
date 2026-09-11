@@ -19,12 +19,13 @@ public:
 
     bool init();
     void setMemory(const char* emuType, uint8_t* data, bool isCGB);
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8, std::function<void(uint16_t, uint8_t)> write8, std::function<uint16_t(uint16_t)> oamSource);
+    void setCallbacks(std::function<uint8_t(uint16_t)> read8,
+                      std::function<void(uint16_t, uint8_t)> write8,
+                      std::function<uint16_t(uint16_t)> oamSource,
+                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                      std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
     void release();
     void render(bool* windowOpened);
-
-    void setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank);
-    void setPaletteRamCallback(std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
 
 private:
     Logger& logger;

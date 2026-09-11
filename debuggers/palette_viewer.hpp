@@ -19,7 +19,8 @@ public:
 
     bool init();
     void release();
-    void setMemory(const char* emulatorType, uint8_t bgp, uint8_t obp0, uint8_t obp1);
+    void setCallbacks(std::function<const uint8_t* (bool)> getPaletteRAM);
+    void setMemory(const char* emuType, uint8_t bgp, uint8_t obp0, uint8_t obp1, bool isCGB);
     void render(bool* windowOpened);
 
     PaletteColor getColorPalette(uint8_t colorValue);
@@ -51,6 +52,11 @@ private:
     bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f);
 
     inline static std::string rgbToHex(int r, int g, int b) { char buffer[8]; std::snprintf(buffer, sizeof(buffer), "#%02X%02X%02X", r, g, b); return buffer; }
+
+    bool isCGBLoaded = false;
+    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
+    PaletteColor resolveCGBColor(uint8_t paletteNum, bool isOBJ, uint8_t colorId) const;
+    void renderCGBPaletteButtons(const char* label, uint8_t paletteNum, bool isOBJ);
 };
 
 #endif

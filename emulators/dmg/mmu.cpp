@@ -1,13 +1,13 @@
 #include "mmu.hpp"
 
 #include "utilities/logger.hpp"
-#include "cartridge.hpp"
-#include "cpu.hpp"
-#include "timer.hpp"
-#include "interrupt.hpp"
-#include "ppu.hpp"
-#include "apu.hpp"
-#include "joypad.hpp"
+#include "emulators/dmg/cartridge.hpp"
+#include "emulators/dmg/cpu.hpp"
+#include "emulators/dmg/timer.hpp"
+#include "emulators/dmg/interrupt.hpp"
+#include "emulators/dmg/ppu.hpp"
+#include "emulators/dmg/apu.hpp"
+#include "emulators/dmg/joypad.hpp"
 
 void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad) {
     logger = &log;

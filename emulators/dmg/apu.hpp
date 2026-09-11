@@ -1,6 +1,6 @@
 /*
 
-GameBoy (DMG)
+GameBoy (DMG,CGB)
 
 */
 
@@ -8,8 +8,8 @@ GameBoy (DMG)
 #define VRITA_DMG_APU_INCLUDES
 
 #include <SDL2/SDL.h>
-#include "apu_structs.hpp"
-#include "mmu.hpp"
+#include "emulators/dmg/apu_structs.hpp"
+#include "emulators/dmg/mmu.hpp"
 #include "utilities/logger.hpp"
 
 class DMG_APU {

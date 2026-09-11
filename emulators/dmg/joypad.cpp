@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 
 #include "utilities/logger.hpp"
-#include "interrupt.hpp"
+#include "emulators/dmg/interrupt.hpp"
 
 void DMG_JOYPAD::clearResources() {
     buttonsVal = 0xFF;

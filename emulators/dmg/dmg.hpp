@@ -1,6 +1,6 @@
 /*
 
-GameBoy (DMG)
+GameBoy (DMG,CGB)
 
 */
 
@@ -20,14 +20,14 @@ GameBoy (DMG)
 #include "utilities/logger.hpp"
 #include "utilities/settings.hpp"
 
-#include "apu.hpp"
-#include "cartridge.hpp"
-#include "cpu.hpp"
-#include "interrupt.hpp"
-#include "mmu.hpp"
-#include "ppu.hpp"
-#include "timer.hpp"
-#include "joypad.hpp"
+#include "emulators/dmg/apu.hpp"
+#include "emulators/dmg/cartridge.hpp"
+#include "emulators/dmg/cpu.hpp"
+#include "emulators/dmg/interrupt.hpp"
+#include "emulators/dmg/mmu.hpp"
+#include "emulators/dmg/ppu.hpp"
+#include "emulators/dmg/timer.hpp"
+#include "emulators/dmg/joypad.hpp"
 
 class DMG {
 public:

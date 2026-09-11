@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "interrupt.hpp"
+#include "emulators/dmg/interrupt.hpp"
 #include "utilities/logger.hpp"
 
 void DMG_PPU::setFramebuffer(uint32_t* fb) {

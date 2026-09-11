@@ -1,10 +1,16 @@
+/*
+
+GameBoy (DMG,CGB)
+
+*/
+
 #ifndef VRITA_DMG_INTERRUPT_INCLUDES
 #define VRITA_DMG_INTERRUPT_INCLUDES
 
 #include <stdint.h>
 
-#include "mmu.hpp"
-#include "cpu_registers.hpp"
+#include "emulators/dmg/mmu.hpp"
+#include "emulators/dmg/cpu_registers.hpp"
 
 enum Interrupts { // IF
     INTERRUPT_VBLANK = (1 << 0),

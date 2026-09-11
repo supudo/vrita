@@ -1,17 +1,17 @@
 /*
 
-GameBoy (DMG)
+GameBoy (DMG,CGB)
 
 */
 
 #ifndef VRITA_DMG_PPU_INCLUDES
 #define VRITA_DMG_PPU_INCLUDES
 
-#include "mmu.hpp"
-#include "cpu_registers.hpp"
-#include "palette_presets.hpp"
+#include "emulators/dmg/mmu.hpp"
+#include "emulators/dmg/cpu_registers.hpp"
+#include "emulators/dmg/palette_presets.hpp"
 
-#include "ppu_includes.hpp"
+#include "emulators/dmg/ppu_includes.hpp"
 
 class Logger;
 class DMG_MMU;

@@ -1,6 +1,6 @@
 /*
 
-GameBoy (DMG)
+GameBoy (DMG,CGB)
 
 */
 
@@ -13,10 +13,10 @@ GameBoy (DMG)
 #include <SDL2/SDL.h>
 #include <stdint.h>
 
-#include "cartridge.hpp"
-#include "cpu_registers.hpp"
-#include "interrupt.hpp"
-#include "mmu.hpp"
+#include "emulators/dmg/cartridge.hpp"
+#include "emulators/dmg/cpu_registers.hpp"
+#include "emulators/dmg/interrupt.hpp"
+#include "emulators/dmg/mmu.hpp"
 
 class DMG_CPU {
 public:

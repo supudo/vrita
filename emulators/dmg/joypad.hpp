@@ -1,13 +1,13 @@
 /*
 
-GameBoy (DMG)
+GameBoy (DMG,CGB)
 
 */
 
 #ifndef VRITA_DMG_JOYPAD_INCLUDES
 #define VRITA_DMG_JOYPAD_INCLUDES
 
-#include "mmu.hpp"
+#include "emulators/dmg/mmu.hpp"
 
 class Logger;
 class DMG_MMU;

@@ -1,6 +1,6 @@
 /*
 
-GameBoy (DMG) - shared palette color presets. Both the PPU and the Palette Viewer debugger.
+GameBoy (DMG,CGB) - shared palette color presets. Both the PPU and the Palette Viewer debugger.
 
 */
 

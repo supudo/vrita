@@ -1,7 +1,7 @@
 #include "timer.hpp"
 
-#include "utilities\logger.hpp"
-#include "interrupt.hpp"
+#include "utilities/logger.hpp"
+#include "emulators/dmg/interrupt.hpp"
 
 DMG_TIMER::DMG_TIMER(Logger& logger, DMG_INTERRUPT& managerInterrupts) : logger(logger), managerInterrupts(managerInterrupts) {
     reset();

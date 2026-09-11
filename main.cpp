@@ -74,9 +74,9 @@ static void showMainMenu() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Emulators")) {
-            if (ImGui::MenuItem("GameBoy (DMG, CGB)", NULL, managerEmulators->EMULATORS_SHOW_DMG))
+            if (ImGui::MenuItem("GameBoy", NULL, managerEmulators->EMULATORS_SHOW_DMG))
                 managerEmulators->EMULATORS_SHOW_DMG = !managerEmulators->EMULATORS_SHOW_DMG;
-            if (ImGui::MenuItem("GameBoy Advance (AGB)", NULL, managerEmulators->EMULATORS_SHOW_AGB))
+            if (ImGui::MenuItem("GameBoy Advance", NULL, managerEmulators->EMULATORS_SHOW_AGB))
                 managerEmulators->EMULATORS_SHOW_AGB = !managerEmulators->EMULATORS_SHOW_AGB;
             ImGui::EndMenu();
         }

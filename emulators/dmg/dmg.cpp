@@ -324,7 +324,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         &cd
     );
 
-    ImGui::Begin("GameBoy (DMG, CGB)", windowOpened);
+    ImGui::Begin("GameBoy", windowOpened);
 
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();

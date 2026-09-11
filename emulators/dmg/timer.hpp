@@ -1,6 +1,6 @@
 /*
 
-GameBoy (DMG,CGB)
+GameBoy
 
 */
 

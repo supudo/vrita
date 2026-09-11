@@ -97,14 +97,15 @@ void Debugger::hideThinking() {
     isThinking = false;
 }
 
-void Debugger::setMemory(const char* emulatorType, uint32_t size) {
+void Debugger::setMemory(const char* emuType, uint32_t size, bool isCGB) {
     memorySize = size;
-    if (strcmp(emulatorType, "dmg") == 0)
-        this->emulatorType = 1;
-    else if (strcmp(emulatorType, "agb") == 0)
-        this->emulatorType = 2;
+    isCGBLoaded = isCGB;
+    if (strcmp(emuType, "dmg") == 0)
+        emulatorType = 1;
+    else if (strcmp(emuType, "agb") == 0)
+        emulatorType = 2;
     else
-        this->emulatorType = 0;
+        emulatorType = 0;
 }
 
 void Debugger::render(bool* windowOpened, DMGCpuRegisters& registers) {
@@ -260,9 +261,11 @@ void Debugger::renderRestMemory() {
     ImVec2 buttonSize(140, 0);
     if (emulatorType == 1) {
         ImGui::BeginChild("Memory Regions", paneSize);
-        for (size_t r = 0; r < MemoryMap_DMG_Default.size(); r++) {
-            if (ImGui::Selectable(MemoryMap_DMG_Default.data()[r].region, selectedMemoryRegion == r, 0, buttonSize)) {
-                ImGui::SetItemTooltip(MemoryMap_DMG_Default.data()[r].notes);
+        const MemoryRegion* memMapData = isCGBLoaded ? MemoryMap_CGB_Default.data() : MemoryMap_DMG_Default.data();
+        size_t memMapSize = isCGBLoaded ? MemoryMap_CGB_Default.size() : MemoryMap_DMG_Default.size();
+        for (size_t r = 0; r < memMapSize; r++) {
+            if (ImGui::Selectable(memMapData[r].region, selectedMemoryRegion == r, 0, buttonSize)) {
+                ImGui::SetItemTooltip(memMapData[r].notes);
                 selectedMemoryRegion = (int)r;
             }
         }
@@ -287,7 +290,7 @@ void Debugger::renderRestOverlays() {}
 void Debugger::renderMemoryRegion() {
     if (!funcMemoryRead)
         ImGui::TextDisabled("N/A");
-    MemoryRegion region = MemoryMap_DMG_Default.data()[selectedMemoryRegion];
+    MemoryRegion region = (isCGBLoaded ? MemoryMap_CGB_Default.data() : MemoryMap_DMG_Default.data())[selectedMemoryRegion];
     uint32_t regionStart = region.range.start;
     uint32_t regionEnd = region.range.end;
     if (regionStart >= memorySize)

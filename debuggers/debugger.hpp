@@ -41,7 +41,7 @@ public:
                          std::function<const WaveChannel&()> channelWave,
                          std::function<const NoiseChannel&()> channelNoise,
                          std::function<uint8_t(uint8_t)> channelOutput);
-    void setMemory(const char* emulatorType, uint32_t size);
+    void setMemory(const char* emuType, uint32_t size, bool isCGB);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
     void pushCPUFrameTime(float ms);
@@ -81,6 +81,7 @@ private:
     const uint8_t* romBuffer = nullptr;
     uint32_t romBufferSize = 0;
     uint8_t readROMByte(uint16_t bank, uint16_t addr) const;
+    bool isCGBLoaded = false;
 
     uint32_t memorySize = 0;
     uint8_t emulatorType = 0;

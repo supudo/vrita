@@ -156,14 +156,14 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             [&] (bool val) { return emulatorDMG->logCPUCalls(val); },
             [&] () { emulatorDMG->managerCPU->step(); }
         );
-        debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize);
+        debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize, emulatorDMG->managerMMU->isCGBMode());
     }
     else {
         debuggerMemoryEditor->setMemory("agb", nullptr, 0, false);
         debuggerTileViewer->setMemory("agb", nullptr, false);
         debuggerTilemapViewer->setMemory("agb", nullptr, false);
         debuggerSpriteViewer->setMemory("agb", nullptr, false);
-        debuggerDebugger->setMemory("agb", 0);
+        debuggerDebugger->setMemory("agb", 0, false);
         debuggerDebugger->setRomImage(nullptr, 0);
     }
 

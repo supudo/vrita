@@ -117,6 +117,7 @@ struct DebuggerRegisterTreeNode {
     uint16_t Value;
     bool isOpenedByDefault;
     bool isRoot;
+    bool CGBOnly;
 };
 
 struct DebuggerBreakpoint {

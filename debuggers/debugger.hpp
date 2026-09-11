@@ -172,6 +172,7 @@ private:
     void renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type);
     void renderWavePattern(DebuggerRegisterTreeNode* node);
     void renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop);
+    void renderKEY1Speed(DebuggerRegisterTreeNode* node);
 
     static constexpr int cpuLoadHistorySize = 90;
     float cpuLoadHistory[cpuLoadHistorySize] = {};

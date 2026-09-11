@@ -17,9 +17,12 @@ public:
     TileViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
-    void setMemory(const char* emulatorType, uint8_t* data);
+    void setMemory(const char* emulatorType, uint8_t* data, bool isCGB);
     void release();
     void render(bool* windowOpened);
+
+    void setVRAMBankCallback(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank);
+    void setPaletteRamCallback(std::function<const uint8_t*(bool isOBJ)> getPaletteRAM);
 
 private:
     Logger& logger;
@@ -58,6 +61,14 @@ private:
     void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
     int pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count);
+
+    bool isCGBLoaded = false;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;
+    std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
+    int cgbBank = 0;
+    int cgbPaletteIndex = 0;
+    bool cgbUseObjPalette = false;
+    PaletteColor resolveCGBColor(uint8_t colorId) const;
 };
 
 #endif

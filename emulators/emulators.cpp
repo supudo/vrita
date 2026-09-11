@@ -121,7 +121,17 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             }
         );
         debuggerPaletteViewer->setMemory("dmg", emulatorDMG->managerMMU->memory[0xFF47], emulatorDMG->managerMMU->memory[0xFF48], emulatorDMG->managerMMU->memory[0xFF49]);
-        debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
+        debuggerTileViewer->setVRAMBankCallback(
+            [&] (uint16_t addr, uint8_t bank) {
+                return emulatorDMG->managerMMU->vramReadBank(addr, bank);
+            }
+        );
+        debuggerTileViewer->setPaletteRamCallback(
+            [&] (bool isOBJ) -> const uint8_t* {
+                return isOBJ ? emulatorDMG->managerMMU->getOBJPaletteRAM().data() : emulatorDMG->managerMMU->getBGPaletteRAM().data();
+            }
+        );
+        debuggerTileViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data(), emulatorDMG->managerMMU->isCGBMode());
         debuggerTilemapViewer->setMemory("dmg", emulatorDMG->managerMMU->memory.data());
         debuggerSpriteViewer->setCallbacks(
             [&] (uint32_t addr) {

@@ -135,6 +135,7 @@ std::string DMG::loadROM(const char* path) {
     logger.log("[DMG] ROM read into memory. Type byte @ 0x147: 0x%02X", managerMMU->memory[0x147]);
     CartridgeGBType gbType = managerCartridge->loadROM(isCGBMode(), size);
     setCGBMode(gbType == CartridgeGBType::GB_CGB);
+    managerCPU->clearResources();
     managerMMU->resetRegisters();
     logger.log("[DMG] Hardware registers restored. ROM loaded.");
     ROMFileLoaded = true;

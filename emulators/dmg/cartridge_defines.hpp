@@ -24,4 +24,9 @@ struct CartridgeHeader {
     std::string manufacturerCode;
 };
 
+enum CartridgeGBType : uint8_t {
+    GB_DMG = 0,
+    GB_CGB = 1
+};
+
 #endif

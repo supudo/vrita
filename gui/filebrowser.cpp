@@ -58,10 +58,8 @@ void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulato
 		if (ImGui::Selectable(entity.title.c_str(), selected == i, ImGuiSelectableFlags_SpanAllColumns)) {
 			selected = i;
 			if (entity.isFile) {
-				if (emulatorType == "dmg")
+				if (emulatorType == "dmg" || emulatorType == "cgb")
 					settings.Set("DMG - Recent Files", entity.path, entity.title);
-				if (emulatorType == "cgb")
-					settings.Set("CGB - Recent Files", entity.path, entity.title);
 				if (emulatorType == "agb")
 					settings.Set("AGB - Recent Files", entity.path, entity.title);
 				settings.Save();

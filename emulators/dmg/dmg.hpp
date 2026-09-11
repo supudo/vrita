@@ -81,9 +81,6 @@ private:
     bool emulatorIsCGB = false;
     SDL_AudioDeviceID audioDevice = 0;
 
-    const char* getGBType() const;
-    bool effectiveCGBMode() const;
-
     bool initAudio();
     void stepAll();
 

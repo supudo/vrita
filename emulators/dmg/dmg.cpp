@@ -35,7 +35,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerTimer = std::make_shared<DMG_TIMER>(logger, *managerInterrupts);
     managerCPU = std::make_shared<DMG_CPU>(logger, *managerMMU, *managerInterrupts);
     managerPPU = std::make_shared<DMG_PPU>(logger, *managerMMU, *managerInterrupts);
-    managerPPU->setCGBMode(effectiveCGBMode());
+    managerPPU->setCGBMode(isCGBMode());
     managerPPU->setFramebuffer(gFramebuffer);
     managerAPU = std::make_shared<DMG_APU>(logger, *managerMMU);
     managerCartridge = std::make_shared<DMG_CARTRIDGE>(logger, *managerMMU);
@@ -46,10 +46,10 @@ bool DMG::initialize(int x, int y, int width, int height) {
     managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
     managerInterrupts->setCPURegisters(managerCPU->Registers);
 
-    managerAPU->setUserVolume((uint8_t)settings.GetInt(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "volume", 100));
-    managerAPU->setMuted(settings.GetBool(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "muted", false));
+    managerAPU->setUserVolume((uint8_t)settings.GetInt("Emulators - DMG", "volume", 100));
+    managerAPU->setMuted(settings.GetBool("Emulators - DMG", "muted", false));
 
-    paletteChoicesSelected = settings.GetInt(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "palette", 0);
+    paletteChoicesSelected = settings.GetInt("Emulators - DMG", "palette", 0);
     managerPPU->setPalette(paletteChoicesSelected);
 
     initAudio();
@@ -62,19 +62,11 @@ void DMG::setCGBMode(bool isCGB) {
     if (managerMMU)
         managerMMU->setCGBMode(isCGB);
     if (managerPPU)
-        managerPPU->setCGBMode(effectiveCGBMode());
+        managerPPU->setCGBMode(isCGB);
 }
 
 bool DMG::isCGBMode() const {
     return emulatorIsCGB;
-}
-
-const char* DMG::getGBType() const {
-    return isCGBMode() ? "cgb" : "dmg";
-}
-
-bool DMG::effectiveCGBMode() const {
-    return isCGBMode() && ROMFileLoaded && managerCartridge && managerCartridge->supportsCGB();
 }
 
 bool DMG::initAudio() {
@@ -141,7 +133,8 @@ std::string DMG::loadROM(const char* path) {
     }
     file.close();
     logger.log("[%s] ROM read into memory. Type byte @ 0x147: 0x%02X", isCGBMode() ? "CGB" : "DMG", managerMMU->memory[0x147]);
-    managerCartridge->loadROM(isCGBMode(), size);
+    CartridgeGBType gbType = managerCartridge->loadROM(isCGBMode(), size);
+    setCGBMode(gbType == CartridgeGBType::GB_CGB);
     managerMMU->resetRegisters();
     logger.log("[%s] Hardware registers restored. ROM loaded.", isCGBMode() ? "CGB" : "DMG");
     ROMFileLoaded = true;
@@ -231,7 +224,7 @@ void DMG::setVolume(uint8_t volume) {
     if (volume > 100)
         volume = 100;
     managerAPU->setUserVolume(volume);
-    settings.Set(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "volume", (int)volume);
+    settings.Set("Emulators - DMG", "volume", (int)volume);
     settings.Save();
 }
 
@@ -241,7 +234,7 @@ uint8_t DMG::getVolume() const {
 
 void DMG::setMuted(bool muted) {
     managerAPU->setMuted(muted);
-    settings.Set(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "muted", muted);
+    settings.Set("Emulators - DMG", "muted", muted);
     settings.Save();
 }
 
@@ -331,16 +324,13 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         &cd
     );
 
-    if (isCGBMode())
-        ImGui::Begin("GameBoy Color (CGB)", windowOpened);
-    else
-        ImGui::Begin("GameBoy (DMG)", windowOpened);
+    ImGui::Begin("GameBoy (DMG, CGB)", windowOpened);
 
     lastWindowPosition = ImGui::GetWindowPos();
     lastWindowSize = ImGui::GetWindowSize();
     
     if (ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows))
-        onFocused(getGBType());
+        onFocused("dmg");
 
     if (ImGui::Button(ICON_FA_BOX_ARCHIVE, ImVec2(40, 32)))
         ImGui::OpenPopup("recentFiles");
@@ -348,7 +338,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::SameLine();
 
     if (ImGui::BeginPopupContextItem("recentFiles")) {
-        for (const auto& [key, value] : settings.GetSection(isCGBMode() ? "CGB - Recent Files" : "DMG - Recent Files")) {
+        for (const auto& [key, value] : settings.GetSection("DMG - Recent Files")) {
             if (ImGui::Selectable(value.c_str()))
                 loadROM(key.c_str());
             ImGui::SetItemTooltip(key.c_str());
@@ -357,7 +347,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     }
 
     if (ImGui::Button(ICON_FA_ARROWS_DOWN_TO_LINE, ImVec2(40, 32)))
-        showFileBrowser(getGBType());
+        showFileBrowser("dmg");
     ImGui::SetItemTooltip("Load ROM file");
     ImGui::SameLine();
 
@@ -404,7 +394,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     ImGui::SetNextItemWidth(240);
     static const char* paletteChoices[] = { "Default", "DMG", "CGB", "MGB", "MGL" };
     if (ImGui::Combo("##palettedmg", &paletteChoicesSelected, paletteChoices, IM_ARRAYSIZE(paletteChoices))) {
-        settings.Set(isCGBMode() ? "Emulators - CGB" : "Emulators - DMG", "palette", paletteChoicesSelected);
+        settings.Set("Emulators - DMG", "palette", paletteChoicesSelected);
         settings.Save();
         managerPPU->setPalette(paletteChoicesSelected);
     }

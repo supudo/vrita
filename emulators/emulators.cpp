@@ -14,7 +14,6 @@ void Emulators::init(Settings& settings) {
     int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
     int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);
     int dmgWindowSizeHeight = settings.GetInt("Emulators - DMG", "height", 300);
-    emulatorDMG->setCGBMode(false);
     emulatorDMG->initialize(dmgWindowPositionX, dmgWindowPositionY, dmgWindowSizeWidth, dmgWindowSizeHeight);
 
     emulatorAGB = std::make_shared<AGB>(logger);
@@ -25,7 +24,6 @@ void Emulators::init(Settings& settings) {
     emulatorAGB->initialize(agbWindowPositionX, agbWindowPositionY, agbWindowSizeWidth, agbWindowSizeHeight);
 
     EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
-    EMULATORS_SHOW_CGB = settings.GetBool("Emulators", "show_cgb", false);
     EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
 
     debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger, settings);
@@ -66,36 +64,27 @@ bool Emulators::createTexture() {
 }
 
 void Emulators::generateTestPattern(float time) {
-    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
+    if (EMULATORS_SHOW_DMG)
         emulatorDMG->generateTestPattern(time);
     if (EMULATORS_SHOW_AGB)
         emulatorAGB->generateTestPattern(time);
 }
 
 void Emulators::uploadFramebufferToTexture() {
-    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
+    if (EMULATORS_SHOW_DMG)
         emulatorDMG->uploadFramebufferToTexture();
     if (EMULATORS_SHOW_AGB)
         emulatorAGB->uploadFramebufferToTexture();
 }
 
 void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
-    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB) {
+    if (EMULATORS_SHOW_DMG) {
         EMULATORS_SHOW_AGB = false;
         emulatorAGB->clear();
-        emulatorDMG->setCGBMode(EMULATORS_SHOW_CGB);
-        if (EMULATORS_SHOW_DMG) {
-            EMULATORS_SHOW_CGB = false;
-            emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
-        }
-        if (EMULATORS_SHOW_CGB) {
-            EMULATORS_SHOW_DMG = false;
-            emulatorDMG->run(&EMULATORS_SHOW_CGB, showFileBrowser, onFocused);
-        }
+        emulatorDMG->run(&EMULATORS_SHOW_DMG, showFileBrowser, onFocused);
     }
     if (EMULATORS_SHOW_AGB) {
         EMULATORS_SHOW_DMG = false;
-        EMULATORS_SHOW_CGB = false;
         emulatorDMG->clear();
         emulatorAGB->run(&EMULATORS_SHOW_AGB, showFileBrowser, onFocused);
     }
@@ -207,7 +196,6 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
 
 void Emulators::release(Settings& settings) {
     settings.Set("Emulators", "show_dmg", EMULATORS_SHOW_DMG);
-    settings.Set("Emulators", "show_cgb", EMULATORS_SHOW_CGB);
     settings.Set("Emulators", "show_agb", EMULATORS_SHOW_AGB);
 
     ImVec2 dmg_position = emulatorDMG->getWindowPosition();
@@ -245,7 +233,7 @@ void Emulators::release(Settings& settings) {
 
 std::string Emulators::loadROM(const char* romFilePath) {
     std::string result = "";
-    if (EMULATORS_SHOW_DMG || EMULATORS_SHOW_CGB)
+    if (EMULATORS_SHOW_DMG)
         result = emulatorDMG->loadROM(romFilePath);
     if (EMULATORS_SHOW_AGB)
         result = emulatorAGB->loadROM(romFilePath);

@@ -15,7 +15,6 @@
 
 class Settings;
 class DMG;
-class CGB;
 class AGB;
 
 class Emulators {
@@ -23,7 +22,6 @@ public:
     Emulators(Logger& logger) : logger(logger) {}
 
     bool EMULATORS_SHOW_DMG = false;
-    bool EMULATORS_SHOW_CGB = false;
     bool EMULATORS_SHOW_AGB = false;
 
     void init(Settings& settings);
@@ -58,7 +56,6 @@ private:
     Logger& logger;
 
     std::shared_ptr<DMG> emulatorDMG;
-    std::shared_ptr<CGB> emulatorCGB;
     std::shared_ptr<AGB> emulatorAGB;
 };
 

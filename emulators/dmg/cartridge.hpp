@@ -18,7 +18,7 @@ public:
 
     void clearResources();
 
-    void loadROM(bool isCGB, std::streamsize size); // isCGB is the gui var, not the rom value
+    CartridgeGBType loadROM(bool isCGB, std::streamsize size); // isCGB is the gui var, not the rom value
     uint8_t read(uint16_t addr);
     void write(uint16_t addr, uint8_t value);
 

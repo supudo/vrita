@@ -1,6 +1,8 @@
 #include "cartridge.hpp"
 
-void DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
+CartridgeGBType DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
+    CartridgeGBType gbType = CartridgeGBType::GB_DMG;
+
     romImage.assign(mmu.memory.data(), mmu.memory.data() + size);
     uint8_t type = mmu.memory[addressCartridgeType]; // cartridge number
     logger.log("[%s-CARTRIDGE] Cartridge type byte: 0x%02X", isCGB ? "CGB" : "DMG", type);
@@ -9,6 +11,10 @@ void DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
     ramBanksCount = getRamBanksCount(isCGB, mmu.memory[0x149]);
 
     romHeader.cgbFlag = mmu.memory[0x143];
+    
+    if (supportsCGB())
+        gbType = CartridgeGBType::GB_CGB;
+
     if (isCGBOnly() && !isCGB)
         logger.log("[%s-CARTRIDGE] ROM requires CGB, forced DMG.", isCGB ? "CGB" : "DMG");
     if (!supportsCGB() && isCGB)
@@ -81,6 +87,7 @@ void DMG_CARTRIDGE::loadROM(bool isCGB, std::streamsize size) {
         default:
             logger.log("[%s-CARTRIDGE] Unsupported cartridge type 0x%02X", isCGB ? "CGB" : "DMG", type);
     }
+    return gbType;
 }
 
 bool DMG_CARTRIDGE::supportsCGB() const {

@@ -76,6 +76,7 @@ struct MemoryRegion {
     AddressRange range;
     uint32_t color;
     bool editable;
+    int vramBankOverride = -1;
 };
 
 using MemoryCategory = std::vector<MemoryRegion>;

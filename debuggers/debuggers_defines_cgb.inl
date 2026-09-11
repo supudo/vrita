@@ -13,8 +13,8 @@ inline std::array<MemoryRegion, 14> MemoryMap_CGB_Default = { {
     {"Boot ROM", "Only when Boot ROM is enabled", {0x0000, 0x00FF}, 0xFAAAAA, false},
     {"ROM Bank 0", "Fixed cartridge ROM bank", {0x0000, 0x3FFF}, 0xAAAAAA, false},
     {"ROM Bank N", "Switchable ROM bank", {0x4000, 0x7FFF}, 0x888888, false},
-    {"VRAM Bank 0", "Video RAM bank 0", {0x8000, 0x9FFF}, 0x00FF00, true},
-    {"VRAM Bank 1", "Video RAM bank 1 (CGB only)", {0x8000, 0x9FFF}, 0x00CC00, true},
+    {"VRAM Bank 0", "Video RAM bank 0", {0x8000, 0x9FFF}, 0x00FF00, true, 0},
+    {"VRAM Bank 1", "Video RAM bank 1 (CGB only)", {0x8000, 0x9FFF}, 0x00CC00, true, 1},
     {"External RAM", "Cartridge RAM", {0xA000, 0xBFFF}, 0x00AAAA, true},
     {"WRAM Bank 0", "Work RAM bank 0", {0xC000, 0xCFFF}, 0x0000FF, true},
     {"WRAM Bank 1", "Work RAM bank 1 (CGB only)", {0xD000, 0xDFFF}, 0x0000CC, true},
@@ -26,7 +26,7 @@ inline std::array<MemoryRegion, 14> MemoryMap_CGB_Default = { {
     {"HRAM + IE", "High RAM + IE register", {0xFF80, 0xFFFF}, 0xFF8800, true}
 } };
 
-inline MemoryTree MemoryMap_CGBByUnitTree = {
+inline MemoryTree MemoryMap_CGB_ByUnitTree = {
     {"MMU", {
         {"ROM", {
             {"Boot ROM", "DMG/CGB bootstrap ROM", {0x0000, 0x00FF}, 0xFFD700, false},
@@ -51,8 +51,8 @@ inline MemoryTree MemoryMap_CGBByUnitTree = {
             {"BG Map 1", "Background map 1", {0x9C00, 0x9FFF}, 0x008800, true},
         }},
         {"VRAM Banks (CGB)", {
-            {"VRAM Bank 0", "Base VRAM bank", {0x8000, 0x9FFF}, 0x00FF00, true},
-            {"VRAM Bank 1", "Extra VRAM bank", {0x8000, 0x9FFF}, 0x00CC00, true},
+            {"VRAM Bank 0", "Base VRAM bank", {0x8000, 0x9FFF}, 0x00FF00, true, 0},
+            {"VRAM Bank 1", "Extra VRAM bank", {0x8000, 0x9FFF}, 0x00CC00, true, 1},
         }},
         {"OAM", {
             {"OAM", "Sprite attribute table", {0xFE00, 0xFE9F}, 0xFF00FF, true}

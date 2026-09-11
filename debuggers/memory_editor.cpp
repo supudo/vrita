@@ -29,7 +29,7 @@ void MemoryEditor::release() {
     settings.Save();
 }
 
-void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size) {
+void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size, bool isCGB) {
     if (data != memoryData || size != memorySize) {
         selectedMemoryRegion = nullptr;
         if (data && size > 0) {
@@ -43,32 +43,31 @@ void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
     }
     memoryData = data;
     memorySize = size;
+    isCGBLoaded = isCGB;
     if (strcmp(emulatorType, "dmg") == 0) {
         switch (viewPerspective) {
             case 0:
-                memoryRegions = MemoryMap_DMG_Default.data();
-                memoryRegionCount = MemoryMap_DMG_Default.size();
-                break;
-            case 1:
-                memoryRegions = nullptr;
-                memoryRegionCount = 0;
+                memoryRegions = isCGB ? MemoryMap_CGB_Default.data() : MemoryMap_DMG_Default.data();
+                memoryRegionCount = isCGB ? MemoryMap_CGB_Default.size() : MemoryMap_DMG_Default.size();
                 break;
             default:
                 memoryRegions = nullptr;
                 memoryRegionCount = 0;
-                selectedMemoryRegion = nullptr;
                 break;
         }
+        activeTree = isCGB ? &MemoryMap_CGB_ByUnitTree : &MemoryMap_DMG_ByUnitTree;
         this->emulatorType = 1;
     }
     else if (strcmp(emulatorType, "agb") == 0) {
         memoryRegions = MemoryMap_AGB_Default.data();
         memoryRegionCount = MemoryMap_AGB_Default.size();
+        activeTree = nullptr;
         this->emulatorType = 2;
     }
     else {
         memoryRegions = nullptr;
         memoryRegionCount = 0;
+        activeTree = nullptr;
         this->emulatorType = 0;
     }
 }
@@ -145,15 +144,11 @@ void MemoryEditor::render(bool* windowOpened) {
     ImGui::Separator();
     switch (viewPerspective) {
         case 0:
-            memoryRegions = MemoryMap_DMG_Default.data();
-            memoryRegionCount = MemoryMap_DMG_Default.size();
             renderViewPerspectiveDefault();
             break;
         case 1:
-            memoryRegions = nullptr;
-            memoryRegionCount = 0;
-            if (emulatorType == 1)
-                renderViewPerspectiveAdvanced(MemoryMap_DMG_ByUnitTree);
+            if (activeTree)
+                renderViewPerspectiveAdvanced(*activeTree);
             break;
     }
 
@@ -162,6 +157,11 @@ void MemoryEditor::render(bool* windowOpened) {
 
 void MemoryEditor::setRegsiterCallback(std::function<uint16_t(const char*)> getRegsiter) {
     registerReadFunction = getRegsiter;
+}
+
+void MemoryEditor::setVRAMBankCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
+    funcVramBankRead = vramReadBank;
+    funcVramBankWrite = vramWriteBank;
 }
 
 void MemoryEditor::renderViewPerspectiveDefault() {
@@ -353,7 +353,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                         else if (ct > 0.0f)
                             ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(180, 60, 60, (int)(ct * 160)));
                         
-                        uint8_t b = memoryData[addr + col];
+                        uint8_t b = (region.vramBankOverride >= 0 && funcVramBankRead) ? funcVramBankRead(addr + col, (uint8_t)region.vramBankOverride) : memoryData[addr + col];
                         if (is_followed)
                             ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.78f, 0.16f, 0.16f, 1.0f));
                         if (region.editable) {
@@ -363,8 +363,12 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                             uint8_t value = b;
                             ImGui::SetNextItemWidth(28);
                             if (ImGui::InputScalar("##byte", ImGuiDataType_U8, &value, nullptr, nullptr, "%02X", ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_AutoSelectAll)) {
-                                memoryWrite(addr + col, value);
-                                memoryData[addr + col] = value;
+                                if (region.vramBankOverride >= 0 && funcVramBankWrite)
+                                    funcVramBankWrite(addr + col, (uint8_t)region.vramBankOverride, value);
+                                else {
+                                    memoryWrite(addr + col, value);
+                                    memoryData[addr + col] = value;
+                                }
                             }
                             if (ImGui::IsItemFocused())
                                 activeAddress = (int)(addr + col);
@@ -376,7 +380,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                             ImGui::TextColored(is_followed ? ImVec4(1, 1, 1, 1) : color, "%02X", b);
                         if (is_followed)
                             ImGui::PopStyleColor();
-                        uint8_t final_b = memoryData[addr + col];
+                        uint8_t final_b = (region.vramBankOverride >= 0 && funcVramBankRead) ? funcVramBankRead(addr + col, (uint8_t)region.vramBankOverride) : memoryData[addr + col];
                         ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
                     }
                 }
@@ -390,7 +394,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                         uint32_t current_addr = addr + col;
                         if (current_addr >= memorySize)
                             break;
-                        uint8_t value = memoryData[current_addr];
+                        uint8_t value = (region.vramBankOverride >= 0 && funcVramBankRead) ? funcVramBankRead(current_addr, (uint8_t)region.vramBankOverride) : memoryData[current_addr];
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';
@@ -407,8 +411,13 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
                         ImGui::PushID(current_addr);
                         ImGui::SetNextItemWidth(12);
                         if (ImGui::InputText("##char", c, sizeof(c), ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_AutoSelectAll)) {
-                            memoryWrite(current_addr, static_cast<uint8_t>(c[0]));
-                            memoryData[current_addr] = static_cast<uint8_t>(c[0]);
+                            uint8_t newValue = static_cast<uint8_t>(c[0]);
+                            if (region.vramBankOverride >= 0 && funcVramBankWrite)
+                                funcVramBankWrite(current_addr, (uint8_t)region.vramBankOverride, newValue);
+                            else {
+                                memoryWrite(current_addr, newValue);
+                                memoryData[current_addr] = newValue;
+                            }
                         }
                         if (ImGui::IsItemFocused())
                             activeAddress = (int)current_addr;

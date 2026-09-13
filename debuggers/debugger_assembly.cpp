@@ -216,6 +216,23 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
         funcLogCPUCalls(logCPUCalls);
     }
     ImGui::SetItemTooltip("Log CPU calls");
+
+    if (isCGBLoaded) {
+        // separator
+        ImGui::SameLine();
+        {
+            float spacing = 8.0f;
+            float lineHeight = ImGui::GetFrameHeight();
+            ImVec2 p = ImGui::GetCursorScreenPos();
+            float lineX = p.x + spacing * 0.5f;
+            ImGui::GetWindowDrawList()->AddLine(ImVec2(lineX, p.y), ImVec2(lineX, p.y + lineHeight), ImGui::GetColorU32(ImGuiCol_Separator), 1.0f);
+            ImGui::Dummy(ImVec2(spacing, lineHeight));
+        }
+        ImGui::SameLine();
+        const bool doubleSpeed = funcMemoryRead && (funcMemoryRead(0xFF4D) & 0x80) != 0;
+        ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "CGB \xC2\xB7 %s", doubleSpeed ? "2x" : "1x");
+    }
+
     ImGui::PopStyleColor(3);
     ImGui::PopFont();
 

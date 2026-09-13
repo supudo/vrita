@@ -157,7 +157,9 @@ void Emulators::run(const std::function<void(const char*)>& loadRom, const std::
             [&] () { return emulatorDMG->stopGame(); },
             [&] () { return emulatorDMG->startGame(); },
             [&] (bool val) { return emulatorDMG->logCPUCalls(val); },
-            [&] () { emulatorDMG->managerCPU->step(); }
+            [&] () { emulatorDMG->managerCPU->step(); },
+            [&] (uint16_t addr, uint8_t bank) { return emulatorDMG->managerMMU->vramReadBank(addr, bank); },
+            [&] (uint16_t addr, uint8_t bank, uint8_t value) { emulatorDMG->managerMMU->vramWriteBank(addr, bank, value); }
         );
         debuggerDebugger->setMemory("dmg", emulatorDMG->managerMMU->memorySize, emulatorDMG->managerMMU->isCGBMode());
     }

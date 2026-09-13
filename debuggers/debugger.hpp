@@ -35,7 +35,9 @@ public:
                       std::function<void()> stopGame,
                       std::function<void()> startGame,
                       std::function<void(bool)> logCPUCalls,
-                      std::function<void()> stepInstruction);
+                      std::function<void()> stepInstruction,
+                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                      std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
     void setAPUCallbacks(std::function<const PulseChannel&()> channelPulse1,
                          std::function<const PulseChannel&()> channelPulse2,
                          std::function<const WaveChannel&()> channelWave,
@@ -69,6 +71,8 @@ private:
     std::function<void()> funcStartGame;
     std::function<void(bool)> funcLogCPUCalls;
     std::function<void()> funcStepInstruction;
+    std::function<uint8_t(uint16_t, uint8_t)> funcVramBankRead;
+    std::function<void(uint16_t, uint8_t, uint8_t)> funcVramBankWrite;
 
     std::function<const PulseChannel& ()> funcAPUChannel1;
     std::function<const PulseChannel& ()> funcAPUChannel2;

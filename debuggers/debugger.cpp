@@ -43,7 +43,9 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                             std::function<void()> stopGame,
                             std::function<void()> startGame,
                             std::function<void(bool)> logCPUCalls,
-                            std::function<void()> stepInstruction) {
+                            std::function<void()> stepInstruction,
+                            std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
+                            std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcCpuGetFlag = getFlag;
@@ -53,6 +55,8 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcStartGame = startGame;
     funcLogCPUCalls = logCPUCalls;
     funcStepInstruction = stepInstruction;
+    funcVramBankRead = vramReadBank;
+    funcVramBankWrite = vramWriteBank;
 }
 
 void Debugger::setRomImage(const uint8_t* data, uint32_t size) {
@@ -334,10 +338,9 @@ void Debugger::renderMemoryRegion() {
                 for (int col = 0; col < 16; col++) {
                     ImGui::TableSetColumnIndex(col + 1);
                     if (addr + col < memorySize) {
-                        uint8_t b = funcMemoryRead(addr + col);
+                        uint8_t b = (region.vramBankOverride >= 0 && funcVramBankRead) ? funcVramBankRead(static_cast<uint16_t>(addr + col), static_cast<uint8_t>(region.vramBankOverride)) : funcMemoryRead(addr + col);
                         ImGui::TextColored(ImVec4(1, 1, 1, 1), "%02X", b);
-                        uint8_t final_b = funcMemoryRead(addr + col);
-                        ascii[col] = (final_b >= 32 && final_b < 127) ? (char)final_b : '.';
+                        ascii[col] = (b >= 32 && b < 127) ? (char)b : '.';
                     }
                 }
 
@@ -350,7 +353,7 @@ void Debugger::renderMemoryRegion() {
                         uint32_t current_addr = addr + col;
                         if (current_addr >= memorySize)
                             break;
-                        uint8_t value = funcMemoryRead(current_addr);
+                        uint8_t value = (region.vramBankOverride >= 0 && funcVramBankRead) ? funcVramBankRead(static_cast<uint16_t>(current_addr), static_cast<uint8_t>(region.vramBankOverride)) : funcMemoryRead(current_addr);
                         char c[2];
                         c[0] = (value >= 32 && value <= 126) ? static_cast<char>(value) : '.';
                         c[1] = '\0';

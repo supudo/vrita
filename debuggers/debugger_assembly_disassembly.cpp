@@ -312,12 +312,23 @@ void Debugger::disassembleWorkDiscovery() {
         ++line;
     };
 
+    auto emitCGBFlagField = [&] (uint16_t bank, uint16_t addr) {
+        const uint8_t val = readROMByte(bank, addr);
+        const char* name = (val == 0xC0) ? "CGB Only" : (val == 0x80) ? "CGB Supported" : "None";
+        char comment[32];
+        snprintf(comment, sizeof(comment), "CGB Flag: %s", name);
+        emitHeaderField(bank, addr, 1, comment);
+    };
+
     auto emitCartridgeHeader = [&] (uint16_t bank) {
         assemblySource += "\n";
         ++line;
         localLineToAddress.push_back(0x0104);
         localLineToBytes.push_back("");
-        assemblySource += "; ==== GameBoy (DMG) Cartridge Header($0104 - $014F) ====\n";
+        if (isCGBLoaded)
+            assemblySource += "; ==== GameBoy (CGB) Cartridge Header($0104 - $014F) ====\n";
+        else
+            assemblySource += "; ==== GameBoy (DMG) Cartridge Header($0104 - $014F) ====\n";
         ++line;
         localLineToAddress.push_back(0x0104);
         localLineToBytes.push_back("");
@@ -326,8 +337,12 @@ void Debugger::disassembleWorkDiscovery() {
         localLineToAddress.push_back(0x0104);
         localLineToBytes.push_back("");
         emitLogoBlock(bank, 0x0104, 48);
-        for (const auto& field : cartridgeHeaderFields)
-            emitHeaderField(bank, field.address, field.length, field.comment);
+        for (const auto& field : cartridgeHeaderFields) {
+            if (field.address == 0x0143)
+                emitCGBFlagField(bank, field.address);
+            else
+                emitHeaderField(bank, field.address, field.length, field.comment);
+        }
     };
 
     auto emitBankSection = [&] (uint16_t bank, uint16_t rangeStart, uint16_t rangeEnd, bool isFallback) {

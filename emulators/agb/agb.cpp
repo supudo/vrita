@@ -45,9 +45,9 @@ bool AGB::createTexture() {
 void AGB::generateTestPattern(float time) {
     for (uint32_t y = 0; y < AGB::HEIGHT; y++) {
         for (uint32_t x = 0; x < AGB::WIDTH; x++) {
-            uint8_t r = (uint8_t)((x + (int)(time * 50.0f)) & 255);
-            uint8_t g = (uint8_t)((y * 2) & 255);
-            uint8_t b = (uint8_t)(128);
+            uint8_t r = static_cast<uint8_t>((x + (int)(time * 50.0f)) & 255);
+            uint8_t g = static_cast<uint8_t>((y * 2) & 255);
+            uint8_t b = static_cast<uint8_t>(128);
             gFramebuffer[y * AGB::WIDTH + x] = (255 << 24) | (b << 16) | (g << 8) | (r);
         }
     }
@@ -63,7 +63,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     float imgW = (float)(AGB::WIDTH * windowScale);
     float imgH = (float)(AGB::HEIGHT * windowScale);
 
-    ImGuiStyle& style = ImGui::GetStyle();
+    const ImGuiStyle& style = ImGui::GetStyle();
     float decorH = ImGui::GetFrameHeight() + style.WindowPadding.y * 2.0f + ImGui::GetFrameHeight() + style.ItemSpacing.y + 1.0f;
     float padX = style.WindowPadding.x * 2.0f;
 

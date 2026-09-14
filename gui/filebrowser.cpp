@@ -36,7 +36,7 @@ void FileBrowser::render(bool* p_opened, std::string const& emulatorType) {
 	ImGui::NextColumn();
 	ImGui::Separator();
 
-	this->drawFiles(this->currentFolder, emulatorType);
+	this->drawFiles(this->currentFolder, emulatorType, p_opened);
 
 	ImGui::Columns(1);
 
@@ -48,7 +48,7 @@ void FileBrowser::render(bool* p_opened, std::string const& emulatorType) {
 	ImGui::End();
 }
 
-void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulatorType) {
+void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulatorType, bool* p_opened) {
 	std::string cFolder = fPath;
 	std::map<std::string, VritaUtils::FBEntity> folderContents = this->getFolderContents(cFolder, emulatorType);
 	int i = 0;
@@ -64,10 +64,12 @@ void FileBrowser::drawFiles(const std::string& fPath, std::string const& emulato
 					settings.Set("AGB - Recent Files", entity.path, entity.title);
 				settings.Save();
 				processFile(entity.path.c_str());
+				if (p_opened)
+					*p_opened = false;
 			}
 			else {
 				try {
-					this->drawFiles(entity.path, emulatorType);
+					this->drawFiles(entity.path, emulatorType, p_opened);
 					this->currentFolder = entity.path;
 				}
 				catch (const fs::filesystem_error&) { }

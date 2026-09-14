@@ -181,8 +181,7 @@ void MemoryEditor::renderViewPerspectiveDefault() {
 }
 
 void MemoryEditor::renderViewPerspectiveAdvanced(const MemoryTree& tree) {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGuiStyle& style = ImGui::GetStyle();
+    const ImGuiStyle& style = ImGui::GetStyle();
 
     float total_width = ImGui::GetContentRegionAvail().x;
 

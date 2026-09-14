@@ -127,25 +127,6 @@ static void renderGUIComponents() {
         ImGui::ShowMetricsWindow(&guiMetricsVisible);
 }
 
-static void loadROM(const char* romFilePath) {
-    guiFileBrowserVisible = false;
-    std::string errorMessage = managerEmulators->loadROM(romFilePath);
-    if (errorMessage != "") {
-        ImGui::OpenPopup("ROM Load Error");
-        ImGui::SetNextWindowPos(ImGui::GetMainViewport()->GetCenter(), ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::BeginPopupModal("ROM Load Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
-            ImGui::Text("%s", errorMessage.c_str());
-            ImGui::Separator();
-            ImGui::SetCursorPosX((ImGui::GetWindowSize().x - 120) * 0.5f);
-            if (ImGui::Button("OK", ImVec2(120, 0))) {
-                errorMessage.clear();
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        }
-    }
-}
-
 static void initComponents() {
     guiMetricsVisible = appSettings.GetBool("Visibility", "gui_metrics_visible", false);
     guiLogVisible = appSettings.GetBool("Visibility", "gui_log_visible", false);
@@ -160,18 +141,20 @@ static void initComponents() {
     managerEmulators->init(appSettings);
 
     guiFileBrowser = std::make_shared<FileBrowser>(appSettings);
-    guiFileBrowser->init(std::bind(&loadROM, std::placeholders::_1));
+    guiFileBrowser->init(std::bind_front(&Emulators::loadROM, managerEmulators));
 }
 
 static void saveAppSettings() {
     appSettings.Set("Visibility", "gui_metrics_visible", guiMetricsVisible);
     appSettings.Set("Visibility", "gui_log_visible", guiLogVisible);
 
-    int width, height;
+    int width;
+    int height;
     SDL_GetWindowSizeInPixels(appWindow, &width, &height);
     appSettings.Set("MainWindow", "width", width);
     appSettings.Set("MainWindow", "height", height);
-    int x, y;
+    int x;
+    int y;
     SDL_GetWindowPosition(appWindow, &x, &y);
     appSettings.Set("MainWindow", "has_position", true);
     appSettings.Set("MainWindow", "x", x);
@@ -279,7 +262,9 @@ static bool initBackend() {
                 printf("[VRITA] GL_VERSION:  %s\n", (const char*)glGetString(GL_VERSION));
                 printf("[VRITA] GL_VENDOR:   %s\n", (const char*)glGetString(GL_VENDOR));
                 printf("[VRITA] GL_RENDERER: %s\n", (const char*)glGetString(GL_RENDERER));
-                int glMajor = 0, glMinor = 0, glProfile = 0;
+                int glMajor = 0;
+                int glMinor = 0;
+                int glProfile = 0;
                 glGetIntegerv(GL_MAJOR_VERSION, &glMajor);
                 glGetIntegerv(GL_MINOR_VERSION, &glMinor);
                 glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &glProfile);
@@ -294,8 +279,7 @@ int main(int argc, char** argv) {
 #ifdef TRACY_ENABLE
     ZoneScoped;
 #endif
-    bool backendInitialized = initBackend();
-    if (!backendInitialized) {
+    if (!initBackend()) {
         printf("[VRITA] Error: Backend not initialized.\n");
         exit(EXIT_FAILURE);
     }
@@ -335,7 +319,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    ImVec4 clear_color = ImVec4(145.0f / 255.0f, 145.0f / 255.0f, 145.0f / 255.0f, 1.00f);
+    const ImVec4 clear_color = ImVec4(145.0f / 255.0f, 145.0f / 255.0f, 145.0f / 255.0f, 1.00f);
 
 #ifdef TRACY_ENABLE
     logger->log("[VRITA] Tracy profiling enabled.");
@@ -367,7 +351,7 @@ int main(int argc, char** argv) {
                 }
                 if (event.type == SDL_DROPCOMPLETE) {
                     if (droppedFiles.size() == 1)
-                        loadROM(droppedFiles[0].c_str());
+                        managerEmulators->loadROM(droppedFiles[0].c_str());
                     else if (droppedFiles.size() > 1)
                         showDropCountError = true;
                     droppedFiles.clear();
@@ -380,7 +364,8 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        int fbW, fbH;
+        int fbW;
+        int fbH;
         SDL_GetWindowSizeInPixels(appWindow, &fbW, &fbH);
         glViewport(0, 0, fbW, fbH);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
@@ -418,7 +403,7 @@ int main(int argc, char** argv) {
 #ifdef TRACY_ENABLE
             ZoneScopedN("Emulators::Run");
 #endif
-            managerEmulators->run(std::bind(&loadROM, std::placeholders::_1), std::bind(&showFileBrowser, std::placeholders::_1), [] (const char* type) { emulatorType = type; });
+            managerEmulators->run(std::bind_front(&showFileBrowser), [] (const char* type) { emulatorType = type; });
         }
 
         if (SHOW_DOTS)

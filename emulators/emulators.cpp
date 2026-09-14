@@ -9,23 +9,6 @@
 #include "debuggers/memory_editor.hpp"
 
 void Emulators::init(Settings& settings) {
-    emulatorDMG = std::make_shared<DMG>(logger, settings);
-    int dmgWindowPositionX = settings.GetInt("Emulators - DMG", "position_x", 44);
-    int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
-    int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);
-    int dmgWindowSizeHeight = settings.GetInt("Emulators - DMG", "height", 300);
-    emulatorDMG->initialize(dmgWindowPositionX, dmgWindowPositionY, dmgWindowSizeWidth, dmgWindowSizeHeight);
-
-    emulatorAGB = std::make_shared<AGB>(logger);
-    int agbWindowPositionX = settings.GetInt("Emulators - AGB", "position_x", 44);
-    int agbWindowPositionY = settings.GetInt("Emulators - AGB", "position_y", 44);
-    int agbWindowSizeWidth = settings.GetInt("Emulators - AGB", "width", 300);
-    int agbWindowSizeHeight = settings.GetInt("Emulators - AGB", "height", 300);
-    emulatorAGB->initialize(agbWindowPositionX, agbWindowPositionY, agbWindowSizeWidth, agbWindowSizeHeight);
-
-    EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
-    EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
-
     debuggerMemoryEditor = std::make_shared<MemoryEditor>(logger, settings);
     debuggerMemoryEditor->init();
     debuggersMemoryEditorVisible = settings.GetBool("Debuggers - Memory Editor", "visible", false);
@@ -49,6 +32,23 @@ void Emulators::init(Settings& settings) {
     debuggerDebugger = std::make_shared<Debugger>(logger, settings);
     debuggerDebugger->init();
     debuggerDebuggerVisible = settings.GetBool("Debuggers - Debugger", "visible", false);
+
+    emulatorDMG = std::make_shared<DMG>(logger, settings);
+    int dmgWindowPositionX = settings.GetInt("Emulators - DMG", "position_x", 44);
+    int dmgWindowPositionY = settings.GetInt("Emulators - DMG", "position_y", 44);
+    int dmgWindowSizeWidth = settings.GetInt("Emulators - DMG", "width", 300);
+    int dmgWindowSizeHeight = settings.GetInt("Emulators - DMG", "height", 300);
+    emulatorDMG->initialize(dmgWindowPositionX, dmgWindowPositionY, dmgWindowSizeWidth, dmgWindowSizeHeight);
+
+    emulatorAGB = std::make_shared<AGB>(logger);
+    int agbWindowPositionX = settings.GetInt("Emulators - AGB", "position_x", 44);
+    int agbWindowPositionY = settings.GetInt("Emulators - AGB", "position_y", 44);
+    int agbWindowSizeWidth = settings.GetInt("Emulators - AGB", "width", 300);
+    int agbWindowSizeHeight = settings.GetInt("Emulators - AGB", "height", 300);
+    emulatorAGB->initialize(agbWindowPositionX, agbWindowPositionY, agbWindowSizeWidth, agbWindowSizeHeight);
+
+    EMULATORS_SHOW_DMG = settings.GetBool("Emulators", "show_dmg", false);
+    EMULATORS_SHOW_AGB = settings.GetBool("Emulators", "show_agb", false);
 }
 
 bool Emulators::createTexture() {
@@ -90,7 +90,7 @@ void Emulators::showEmulators(const std::function<void(const char*)>& showFileBr
     }
 }
 
-void Emulators::run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
+void Emulators::run(const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
     showEmulators(showFileBrowser, onFocused);
 
     if (EMULATORS_SHOW_DMG && emulatorDMG->managerMMU && emulatorDMG->managerCPU && emulatorDMG->ROMFileLoaded) {

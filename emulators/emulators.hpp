@@ -28,7 +28,7 @@ public:
     bool createTexture();
     void generateTestPattern(float time);
     void uploadFramebufferToTexture();
-    void run(const std::function<void(const char*)>& loadRom, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
+    void run(const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
     void release(Settings& settings);
     std::string loadROM(const char* romFilePath);
 

@@ -9,8 +9,7 @@
 #include "emulators/dmg/apu.hpp"
 #include "emulators/dmg/joypad.hpp"
 
-void DMG_MMU::setUnits(Logger& log, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad) {
-    logger = &log;
+void DMG_MMU::setUnits(DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad) {
     managerCartridge = &cartridge;
     managerCPU = &cpu;
     managerTimer = &timer;
@@ -177,7 +176,7 @@ void DMG_MMU::write8(uint16_t address, uint8_t value, bool no_tick) {
     }
     if (address > 0xA000 && address < 0xC000) { // external cartridge RAM
         if (firstRAMWrite) {
-            logger->log("[MMU] First external RAM write @ 0x%04X", address);
+            logger.log("[MMU] First external RAM write @ 0x%04X", address);
             firstRAMWrite = false;
         }
         managerCartridge->write(address, value);

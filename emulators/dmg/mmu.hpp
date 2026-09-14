@@ -22,7 +22,8 @@ class DMG_TIMER;
 
 class DMG_MMU {
 public:
-    void setUnits(Logger& logger, DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad);
+    explicit DMG_MMU(Logger& logger) : logger(logger) {}
+    void setUnits(DMG_CARTRIDGE& cartridge, DMG_CPU& cpu, DMG_TIMER& timer, DMG_INTERRUPT& interrupts, DMG_PPU& ppu, DMG_APU& apu, DMG_JOYPAD& joypad);
     void clearMemory();
     void clearResources();
     void resetRegisters();
@@ -60,7 +61,7 @@ public:
 private:
     uint8_t rawRead(uint16_t address);
 
-    Logger* logger = nullptr;
+    Logger& logger;
     DMG_CARTRIDGE* managerCartridge = nullptr;
     DMG_CPU* managerCPU = nullptr;
     DMG_TIMER* managerTimer = nullptr;

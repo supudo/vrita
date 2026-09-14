@@ -22,7 +22,7 @@ public:
 private:
     std::map<std::string, VritaUtils::FBEntity> getFolderContents(std::string const& filePath, std::string const& emulatorType);
     std::function<void(const char*)> processFile;
-    void drawFiles(const std::string& fPath, std::string const& emulatorType);
+    void drawFiles(const std::string& fPath, std::string const& emulatorType, bool* p_opened);
     const std::string convertToString(double num) const;
     const std::string convertSize(size_t size) const;
 

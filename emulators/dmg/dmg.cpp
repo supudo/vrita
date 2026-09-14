@@ -27,7 +27,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     windowWidth = width;
     windowHeight = height;
 
-    managerMMU = std::make_shared<DMG_MMU>();
+    managerMMU = std::make_shared<DMG_MMU>(logger);
     managerMMU->setCGBMode(isCGBMode());
     managerMMU->clearResources();
 
@@ -43,7 +43,7 @@ bool DMG::initialize(int x, int y, int width, int height) {
     
     managerTimer->reset();
 
-    managerMMU->setUnits(logger, *managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
+    managerMMU->setUnits(*managerCartridge, *managerCPU, *managerTimer, *managerInterrupts, *managerPPU, *managerAPU, *managerJoypad);
     managerInterrupts->setCPURegisters(managerCPU->Registers);
 
     managerAPU->setUserVolume((uint8_t)settings.GetInt("Emulators - DMG", "volume", 100));
@@ -105,7 +105,7 @@ void DMG::stepAll() {
         uint64_t before = managerMMU->totalCycles;
         if (!managerInterrupts->checkForInterrupts())
             stepCPU();
-        uint32_t elapsed = (uint32_t)(managerMMU->totalCycles - before);
+        uint32_t elapsed = static_cast<uint32_t>(managerMMU->totalCycles - before);
         uint32_t realTimeElapsed = managerMMU->doubleSpeed ? elapsed / 2 : elapsed;
         stepPPU(realTimeElapsed);
         stepAPU(realTimeElapsed);
@@ -280,10 +280,10 @@ void DMG::generateTestPattern(float time) {
     if (ROMFileLoaded) return;
     for (uint32_t y = 0; y < DMG::HEIGHT; y++) {
         for (uint32_t x = 0; x < DMG::WIDTH; x++) {
-            uint8_t r = (uint8_t)((x + (int)(time * 50.0f)) & 255);
-            uint8_t g = (uint8_t)((y * 2) & 255);
-            uint8_t b = (uint8_t)(128);
-            gFramebuffer[y * DMG::WIDTH + x] = (255 << 24) | (b << 16) | (g << 8) | (r);
+            uint8_t r = static_cast<uint8_t>((x + (int)(time * 50.0f)) & 255);
+            uint8_t g = static_cast<uint8_t>((y * 2) & 255);
+            uint8_t b = static_cast<uint8_t>(128);
+            gFramebuffer[y * DMG::WIDTH + x] = (255 << 24) | (b << 16) | (g << 8) | r;
         }
     }
 }
@@ -298,7 +298,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
     float imgW = (float)(DMG::WIDTH * windowScale);
     float imgH = (float)(DMG::HEIGHT * windowScale);
 
-    ImGuiStyle& style = ImGui::GetStyle();
+    const ImGuiStyle& style = ImGui::GetStyle();
     static float lastDecorH = 150.0f;
     static float lastBelowImageH = 300.0f;
     float decorH = lastDecorH;
@@ -443,7 +443,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
                 ZoneScopedN("DMG::EmulateFrame");
 #endif
                 uint64_t frameStart = managerMMU->totalCycles;
-                uint32_t cyclesPerFrame = managerMMU->doubleSpeed ? managerTimer->CYCLES_PER_FRAME * 2 : managerTimer->CYCLES_PER_FRAME;
+                uint32_t cyclesPerFrame = managerMMU->doubleSpeed ? DMG_TIMER::CYCLES_PER_FRAME * 2 : DMG_TIMER::CYCLES_PER_FRAME;
                 while ((managerMMU->totalCycles - frameStart) < cyclesPerFrame)
                     stepAll();
             }
@@ -612,7 +612,6 @@ void DMG::renderJoypadUI() {
     DrawPill("START", origin + V(260, 190), "START", DMG_JOYPAD::JOYPAD_START);
 
     // speaker lines
-
     //ImVec2 dirRaw(18.0f, 6.0f);
     //float dirLen = sqrtf(dirRaw.x * dirRaw.x + dirRaw.y * dirRaw.y);
     //ImVec2 dirUnit(dirRaw.x / dirLen, dirRaw.y / dirLen);

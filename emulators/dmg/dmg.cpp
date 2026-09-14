@@ -70,6 +70,10 @@ bool DMG::isCGBMode() const {
 }
 
 bool DMG::initAudio() {
+    if (audioDevice) {
+        SDL_CloseAudioDevice(audioDevice);
+        audioDevice = 0;
+    }
     SDL_AudioSpec audioSpec{};
     audioSpec.format = AUDIO_S16SYS;
     audioSpec.channels = 2;
@@ -115,7 +119,8 @@ std::string DMG::loadROM(const char* path) {
         return "Failed to open ROM";
     }
     clear();
-    initAudio();
+    if (!audioDevice)
+        initAudio();
     for (uint32_t i = 0; i < DMG::WIDTH * DMG::HEIGHT; i++)
         gFramebuffer[i] = DMG_PackForFramebuffer(DMG_PALETTE_DEFAULT[0]);
     std::streamsize size = file.tellg();
@@ -166,10 +171,6 @@ void DMG::clear() {
     managerTimer->reset();
     managerCartridge->clearResources();
     managerJoypad->clearResources();
-    if (audioDevice) {
-        SDL_CloseAudioDevice(audioDevice);
-        audioDevice = 0;
-    }
 }
 
 void DMG::stepCPU() const {
@@ -249,6 +250,10 @@ void DMG::handleKey(uint32_t type, uint32_t key) const {
 }
 
 void DMG::release() {
+    if (audioDevice) {
+        SDL_CloseAudioDevice(audioDevice);
+        audioDevice = 0;
+    }
     if (gTexture) {
         glDeleteTextures(1, &gTexture);
         gTexture = 0;

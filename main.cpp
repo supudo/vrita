@@ -74,36 +74,36 @@ static void showMainMenu() {
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Emulators")) {
-            if (ImGui::MenuItem("GameBoy", NULL, managerEmulators->EMULATORS_SHOW_DMG))
+            if (ImGui::MenuItem("GameBoy", nullptr, managerEmulators->EMULATORS_SHOW_DMG))
                 managerEmulators->EMULATORS_SHOW_DMG = !managerEmulators->EMULATORS_SHOW_DMG;
-            if (ImGui::MenuItem("GameBoy Advance", NULL, managerEmulators->EMULATORS_SHOW_AGB))
+            if (ImGui::MenuItem("GameBoy Advance", nullptr, managerEmulators->EMULATORS_SHOW_AGB))
                 managerEmulators->EMULATORS_SHOW_AGB = !managerEmulators->EMULATORS_SHOW_AGB;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Debuggers")) {
-            if (ImGui::MenuItem("Memory Editor", NULL, managerEmulators->debuggersMemoryEditorVisible))
+            if (ImGui::MenuItem("Memory Editor", nullptr, managerEmulators->debuggersMemoryEditorVisible))
                 managerEmulators->debuggersMemoryEditorVisible = !managerEmulators->debuggersMemoryEditorVisible;
-            if (ImGui::MenuItem("Tile Viewer (Tiles)", NULL, managerEmulators->debuggerTileViewerVisible))
+            if (ImGui::MenuItem("Tile Viewer (Tiles)", nullptr, managerEmulators->debuggerTileViewerVisible))
                 managerEmulators->debuggerTileViewerVisible = !managerEmulators->debuggerTileViewerVisible;
-            if (ImGui::MenuItem("Tilemap Viewer (BG)", NULL, managerEmulators->debuggerTilemapViewerVisible))
+            if (ImGui::MenuItem("Tilemap Viewer (BG)", nullptr, managerEmulators->debuggerTilemapViewerVisible))
                 managerEmulators->debuggerTilemapViewerVisible = !managerEmulators->debuggerTilemapViewerVisible;
-            if (ImGui::MenuItem("Sprite Viewer (OAM)", NULL, managerEmulators->debuggerSpriteViewerVisible))
+            if (ImGui::MenuItem("Sprite Viewer (OAM)", nullptr, managerEmulators->debuggerSpriteViewerVisible))
                 managerEmulators->debuggerSpriteViewerVisible = !managerEmulators->debuggerSpriteViewerVisible;
-            if (ImGui::MenuItem("Palette Viewer (Palettes)", NULL, managerEmulators->debuggerPaletteViewerVisible))
+            if (ImGui::MenuItem("Palette Viewer (Palettes)", nullptr, managerEmulators->debuggerPaletteViewerVisible))
                 managerEmulators->debuggerPaletteViewerVisible = !managerEmulators->debuggerPaletteViewerVisible;
-            if (ImGui::MenuItem("Debugger", NULL, managerEmulators->debuggerDebuggerVisible))
+            if (ImGui::MenuItem("Debugger", nullptr, managerEmulators->debuggerDebuggerVisible))
                 managerEmulators->debuggerDebuggerVisible = !managerEmulators->debuggerDebuggerVisible;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Eyecandy")) {
-            if (ImGui::MenuItem("Dots", NULL, SHOW_DOTS))
+            if (ImGui::MenuItem("Dots", nullptr, SHOW_DOTS))
                 SHOW_DOTS = !SHOW_DOTS;
             ImGui::EndMenu();
         }
         if (ImGui::BeginMenu("Tools")) {
-            if (ImGui::MenuItem("Style", NULL, guiStyleOptionsVisible))
+            if (ImGui::MenuItem("Style", nullptr, guiStyleOptionsVisible))
                 guiStyleOptionsVisible = !guiStyleOptionsVisible;
-            if (ImGui::MenuItem("Metrics", NULL, guiMetricsVisible))
+            if (ImGui::MenuItem("Metrics", nullptr, guiMetricsVisible))
                 guiMetricsVisible = !guiMetricsVisible;
             ImGui::EndMenu();
         }
@@ -400,7 +400,7 @@ int main(int argc, char** argv) {
         }
         ImVec2 dropErrorCenter = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(dropErrorCenter, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-        if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
             ImGui::Text("Please, drop only one file at a time.");
             ImGui::Dummy(ImVec2(0.0f, 10.0f));
             float okButtonWidth = 120.0f;

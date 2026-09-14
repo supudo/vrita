@@ -41,13 +41,13 @@ void Log::render(bool* p_opened) {
         ImGui::LogToClipboard();
 
     if (this->Filter.IsActive()) {
-        const char* buf_begin = this->Buf.begin();
+        const auto* buf_begin = this->Buf.begin();
         const char* line = buf_begin;
-        for (int line_no = 0; line != NULL; line_no++) {
-            const char* line_end = (line_no < this->LineOffsets.Size) ? buf_begin + this->LineOffsets[line_no] : NULL;
+        for (int line_no = 0; line != nullptr; line_no++) {
+            const char* line_end = (line_no < this->LineOffsets.Size) ? buf_begin + this->LineOffsets[line_no] : nullptr;
             if (this->Filter.PassFilter(line, line_end))
                 ImGui::TextUnformatted(line, line_end);
-            line = line_end && line_end[1] ? line_end + 1 : NULL;
+            line = line_end && line_end[1] ? line_end + 1 : nullptr;
         }
     }
     else

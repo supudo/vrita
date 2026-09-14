@@ -14,7 +14,7 @@ public:
     ImGuiTextBuffer Buf;
     ImGuiTextFilter Filter;
     ImVector<int> LineOffsets;
-    bool ScrollToBottom;
+    bool ScrollToBottom = true;
 };
 
 #endif

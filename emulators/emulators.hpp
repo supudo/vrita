@@ -50,13 +50,15 @@ public:
     std::shared_ptr<Debugger> debuggerDebugger;
     bool debuggerDebuggerVisible = false;
 
-    void handleKey(uint32_t type, uint32_t key);
+    void handleKey(uint32_t type, uint32_t key) const;
 
 private:
     Logger& logger;
 
     std::shared_ptr<DMG> emulatorDMG;
     std::shared_ptr<AGB> emulatorAGB;
+
+    void showEmulators(const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
 };
 
 #endif

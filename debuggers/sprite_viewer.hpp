@@ -19,11 +19,11 @@ public:
 
     bool init();
     void setMemory(const char* emuType, uint8_t* data, bool isCGB);
-    void setCallbacks(std::function<uint8_t(uint16_t)> read8,
-                      std::function<void(uint16_t, uint8_t)> write8,
-                      std::function<uint16_t(uint16_t)> oamSource,
-                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                      std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
+    void setCallbacks(std::function<uint8_t(uint16_t)> const& read8,
+                      std::function<void(uint16_t, uint8_t)> const& write8,
+                      std::function<uint16_t(uint16_t)> const& oamSource,
+                      std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                      std::function<const uint8_t* (bool isOBJ)> const& getPaletteRAM);
     void release();
     void render(bool* windowOpened);
 
@@ -59,15 +59,15 @@ private:
     SpriteItem hoveredSprite;
     SpriteItem selectedSprite;
 
-    void initializeData(uint8_t emulatorType);
-    void decodeTile(const uint8_t* tileData, TileItem& tile);
+    void initializeData(uint8_t emuType);
+    void decodeTile(const uint8_t* tileData, TileItem& tile) const;
     void renderSprites(float height);
     void drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize);
-    int pickHoveredSlot(ImVec2 start, float tileStep);
+    int pickHoveredSlot(ImVec2 start, float tileStep) const;
     bool isSpriteOffScreen(const SpriteItem& sprite) const;
-    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder = true);
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder = true) const;
     void renderInfo();
-    void textRightAligned(const char* text);
+    void textRightAligned(const char* text) const;
 
     float lastInfoHeight = 0.0f;
 

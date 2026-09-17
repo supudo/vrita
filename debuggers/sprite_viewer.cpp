@@ -29,11 +29,11 @@ void SpriteViewer::release() {
     settings.Save();
 }
 
-void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> read8,
-                                std::function<void(uint16_t, uint8_t)> write8,
-                                std::function<uint16_t(uint16_t)> oamSource,
-                                std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                                std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+void SpriteViewer::setCallbacks(std::function<uint8_t(uint16_t)> const& read8,
+                                std::function<void(uint16_t, uint8_t)> const& write8,
+                                std::function<uint16_t(uint16_t)> const& oamSource,
+                                std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                                std::function<const uint8_t* (bool isOBJ)> const& getPaletteRAM) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcOAMSource = oamSource;
@@ -57,8 +57,8 @@ void SpriteViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
         initializeData(et);
 }
 
-void SpriteViewer::initializeData(uint8_t emulatorType) {
-    if (emulatorType == 1) {
+void SpriteViewer::initializeData(uint8_t emuType) {
+    if (emuType == 1) {
         isSprite8x16 = funcMemoryRead(DMG_Address_LCDC) & 0x04;
 
         if (isCGBLoaded) {
@@ -102,7 +102,7 @@ void SpriteViewer::initializeData(uint8_t emulatorType) {
     }
 }
 
-void SpriteViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
+void SpriteViewer::decodeTile(const uint8_t* tileData, TileItem& tile) const {
     if (emulatorType == 1) {
         for (uint8_t y = 0; y < 8; y++) {
             uint8_t low = tileData[y * 2];
@@ -196,7 +196,7 @@ void SpriteViewer::renderSprites(float height) {
     ImGui::EndChild();
 }
 
-int SpriteViewer::pickHoveredSlot(ImVec2 start, float tileStep) {
+int SpriteViewer::pickHoveredSlot(ImVec2 start, float tileStep) const {
     if (!ImGui::IsItemHovered())
         return -1;
     ImVec2 mouse = ImGui::GetIO().MousePos;
@@ -249,10 +249,9 @@ void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite,
     }
 }
 
-void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder) {
+void SpriteViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder) const {
     bool flipX = Flags & 0x20;
     bool flipY = Flags & 0x40;
-    bool useOBP1 = Flags & 0x10;
     bool objPriority = Flags & 0x80;
     // transparency background
     for (int y = 0; y < 8; y++) {
@@ -291,8 +290,7 @@ void SpriteViewer::renderInfo() {
 
     ImGui::Dummy(ImVec2(0, infoPaddingY));
 
-    ImGuiTableFlags table_flags = ImGuiTableFlags_NoBordersInBody;
-    if (ImGui::BeginTable("Settings", 2, table_flags)) {
+    if (ImGui::BeginTable("Settings", 2, ImGuiTableFlags_NoBordersInBody)) {
         ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 140.0f);
         ImGui::TableSetupColumn("Control", ImGuiTableColumnFlags_WidthStretch);
 
@@ -419,7 +417,7 @@ void SpriteViewer::renderInfo() {
     lastInfoHeight = ImGui::GetCursorPosY() - infoStartY;
 }
 
-void SpriteViewer::textRightAligned(const char* text) {
+void SpriteViewer::textRightAligned(const char* text) const {
     float textWidth = ImGui::CalcTextSize(text).x;
     float avail = ImGui::GetContentRegionAvail().x;
     if (avail > textWidth)

@@ -17,8 +17,8 @@ bool TileViewer::init() {
     windowHeight = settings.GetInt("Debuggers - Tile Viewer", "height", 300);
     zoomPerPixel = settings.GetFloat("Debuggers - Tile Viewer", "zoom_per_pixel", 2.0f);
     previewSize = settings.GetFloat("Debuggers - Tile Viewer", "preview_size", 40.0f);
-    autoRefresh = settings.GetFloat("Debuggers - Tile Viewer", "auto_refresh", true);
-    showGrid = settings.GetFloat("Debuggers - Tile Viewer", "show_grid", true);
+    autoRefresh = settings.GetBool("Debuggers - Tile Viewer", "auto_refresh", true);
+    showGrid = settings.GetBool("Debuggers - Tile Viewer", "show_grid", true);
     tileSize = settings.GetInt("Debuggers - Tile Viewer", "tile_size", 0);
     return true;
 }
@@ -37,29 +37,29 @@ void TileViewer::release() {
     settings.Save();
 }
 
-void TileViewer::setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+void TileViewer::setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank, std::function<const uint8_t* (bool isOBJ)> const& getPaletteRAM) {
     funcVramReadBank = vramReadBank;
     funcGetPaletteRAM = getPaletteRAM;
 }
 
-void TileViewer::setMemory(const char* emulatorType, uint8_t* data, bool isCGB) {
+void TileViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
     memoryData = data;
     uint8_t et = -1;
-    if (strcmp(emulatorType, "dmg") == 0)
+    if (strcmp(emuType, "dmg") == 0)
         et = 1;
-    else if (strcmp(emulatorType, "agb") == 0)
+    else if (strcmp(emuType, "agb") == 0)
         et = 2;
     else
         et = 0;
-    bool changed = et != this->emulatorType || isCGB != isCGBLoaded;
-    this->emulatorType = et;
+    bool changed = et != emulatorType || isCGB != isCGBLoaded;
+    emulatorType = et;
     isCGBLoaded = isCGB;
     if (changed)
         initializeData(et);
 }
 
-void TileViewer::initializeData(uint8_t emulatorType) {
-    if (emulatorType == 1 && !isCGBLoaded) {
+void TileViewer::initializeData(uint8_t emuType) {
+    if (emuType == 1 && !isCGBLoaded) {
         tiles.clear();
         tiles.reserve(DMG_TilesCount);
         const uint8_t* vram = memoryData + DMG_Address_TileStart;
@@ -71,7 +71,7 @@ void TileViewer::initializeData(uint8_t emulatorType) {
             tiles.push_back(tile);
         }
     }
-    else if (emulatorType == 1 && isCGBLoaded) {
+    else if (emuType == 1 && isCGBLoaded) {
         tiles.clear();
         tiles.reserve(CGB_TilesCount);
         for (int i = 0; i < CGB_TilesCount; i++) {
@@ -88,7 +88,7 @@ void TileViewer::initializeData(uint8_t emulatorType) {
     }
 }
 
-void TileViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
+void TileViewer::decodeTile(const uint8_t* tileData, TileItem& tile) const {
     if (emulatorType == 1) {
         for (uint8_t y = 0; y < 8; y++) {
             uint8_t low = tileData[y * 2];
@@ -196,7 +196,7 @@ void TileViewer::render(bool* windowOpened) {
     ImGui::End();
 }
 
-int TileViewer::pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count) {
+int TileViewer::pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count) const {
     if (!ImGui::IsItemHovered())
         return -1;
     ImVec2 mouse = ImGui::GetIO().MousePos;
@@ -383,7 +383,7 @@ void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const 
     }
 }
 
-void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
+void TileViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) const {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
             PaletteColor color = isCGBLoaded ? resolveCGBColor(tile.Pixels[x][y]) : paletteViewer.getColorPalette(tile.Pixels[x][y]);

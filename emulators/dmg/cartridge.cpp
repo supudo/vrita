@@ -98,7 +98,7 @@ bool DMG_CARTRIDGE::isCGBOnly() const {
     return romHeader.cgbFlag == CONST_CGBFlagOnly;
 }
 
-std::string DMG_CARTRIDGE::readHeaderString(const std::vector<uint8_t>& rom, size_t offset, size_t length) {
+std::string DMG_CARTRIDGE::readHeaderString(const std::vector<uint8_t>& rom, size_t offset, size_t length) const {
     std::string result;
     for (size_t i = 0; i < length; ++i) {
         uint8_t c = rom[offset + i];
@@ -109,7 +109,7 @@ std::string DMG_CARTRIDGE::readHeaderString(const std::vector<uint8_t>& rom, siz
     return result;
 }
 
-size_t DMG_CARTRIDGE::getRamSize(uint8_t ramSizeCode) {
+size_t DMG_CARTRIDGE::getRamSize(uint8_t ramSizeCode) const {
     switch (ramSizeCode) {
         case 0x00: return 0;
         case 0x01: return 0x0800;

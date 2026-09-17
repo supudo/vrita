@@ -48,8 +48,8 @@ private:
     int getRamBanksCount(bool isCGB, uint8_t type);
     void printCartridgeInfo(bool isCGB);
 
-    size_t getRamSize(uint8_t ramSizeCode);
-    std::string readHeaderString(const std::vector<uint8_t>& rom, size_t offset, size_t length);
+    size_t getRamSize(uint8_t ramSizeCode) const;
+    std::string readHeaderString(const std::vector<uint8_t>& rom, size_t offset, size_t length) const;
 };
 
 #endif

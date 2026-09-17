@@ -23,14 +23,14 @@ public:
     AGB(Logger& logger) : logger(logger) {}
 
     bool initialize(int x, int y, int width, int height);
-    ImVec2 getWindowPosition();
-    ImVec2 getWindowSize();
+    ImVec2 getWindowPosition() const;
+    ImVec2 getWindowSize() const;
 
     // rendering
     bool createTexture();
     void generateTestPattern(float time);
-    void uploadFramebufferToTexture();
-    void run(bool *windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
+    void uploadFramebufferToTexture() const;
+    void run(bool *windowOpened, std::function<void(const char*)> const& showFileBrowser, std::function<void(const char*)> const& onFocused);
     void release();
     void clear();
 

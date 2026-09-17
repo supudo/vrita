@@ -11,11 +11,11 @@ bool AGB::initialize(int x, int y, int width, int height) {
     return true;
 }
 
-ImVec2 AGB::getWindowPosition() {
+ImVec2 AGB::getWindowPosition() const {
     return lastWindowPosition;
 }
 
-ImVec2 AGB::getWindowSize() {
+ImVec2 AGB::getWindowSize() const {
     return lastWindowSize;
 }
 
@@ -53,13 +53,13 @@ void AGB::generateTestPattern(float time) {
     }
 }
 
-void AGB::uploadFramebufferToTexture() {
+void AGB::uploadFramebufferToTexture() const {
     glBindTexture(GL_TEXTURE_2D, gTexture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, AGB::WIDTH, AGB::HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, gFramebuffer);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
+void AGB::run(bool* windowOpened, std::function<void(const char*)> const& showFileBrowser, std::function<void(const char*)> const& onFocused) {
     float imgW = (float)(AGB::WIDTH * windowScale);
     float imgH = (float)(AGB::HEIGHT * windowScale);
 
@@ -83,7 +83,7 @@ void AGB::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         ImVec2(padX + AGB::WIDTH, decorH + AGB::HEIGHT),
         ImVec2(FLT_MAX, FLT_MAX),
         [] (ImGuiSizeCallbackData* data) {
-            auto* c = (ConstraintData*)data->UserData;
+            const auto* c = (ConstraintData*)data->UserData;
             float contentW = data->DesiredSize.x - c->padX;
             data->DesiredSize.y = contentW / c->aspect + c->decorH;
         },

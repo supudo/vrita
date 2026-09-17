@@ -213,7 +213,7 @@ void DMG_PPU::renderSprites(uint8_t ly) {
     bool masterPriority = (lcdc & 0x01) != 0;
 
     for (int i = count - 1; i >= 0; i--) {
-        Sprite& s = visible[i];
+        const Sprite& s = visible[i];
         int screenX = (int)s.x - 8;
         int screenY = (int)s.y - 16;
         int pixelRow = (int)ly - screenY;
@@ -236,7 +236,8 @@ void DMG_PPU::renderSprites(uint8_t ly) {
         int row = pixelRow;
         if (row >= 8) { tileAddr += 16; row -= 8; }
 
-        uint8_t low, high;
+        uint8_t low;
+        uint8_t high;
         if (cgbMode) {
             low = mmu.vramReadBank(tileAddr + row * 2, cgbBank);
             high = mmu.vramReadBank(tileAddr + row * 2 + 1, cgbBank);
@@ -254,8 +255,7 @@ void DMG_PPU::renderSprites(uint8_t ly) {
             uint8_t colorId = (((high >> bit) & 1) << 1) | ((low >> bit) & 1);
             if (colorId == 0)
                 continue;
-            bool bgWins = cgbMode ? (masterPriority && scanlineBGColorId[px] != 0 && (oamBgPriority || scanlineBGPriority[px])) : (oamBgPriority && scanlineBGColorId[px] != 0);
-            if (bgWins)
+            if (cgbMode ? (masterPriority && scanlineBGColorId[px] != 0 && (oamBgPriority || scanlineBGPriority[px])) : (oamBgPriority && scanlineBGColorId[px] != 0))
                 continue;
             if (cgbMode)
                 framebuffer[ly * 160 + px] = applyCGBPalette(mmu.getOBJPaletteRAM(), cgbPaletteNum, colorId);

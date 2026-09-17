@@ -294,7 +294,7 @@ void DMG::uploadFramebufferToTexture() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused) {
+void DMG::run(bool* windowOpened, std::function<void(const char*)> const& showFileBrowser, std::function<void(const char*)> const& onFocused) {
     float imgW = (float)(DMG::WIDTH * windowScale);
     float imgH = (float)(DMG::HEIGHT * windowScale);
 
@@ -323,7 +323,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         ImVec2(padX + DMG::WIDTH, decorH + DMG::HEIGHT),
         ImVec2(FLT_MAX, FLT_MAX),
         [] (ImGuiSizeCallbackData* data) {
-            auto* c = (ConstraintData*)data->UserData;
+            const auto* c = (ConstraintData*)data->UserData;
             float contentW = data->DesiredSize.x - c->padX;
             data->DesiredSize.y = contentW / c->aspect + c->decorH;
         },
@@ -383,8 +383,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
             setMuted(!isMuted());
         ImGui::Separator();
         ImGui::PushStyleVar(ImGuiStyleVar_GrabMinSize, 40);
-        int sliderVolume = (int)getVolume();
-        if (ImGui::VSliderInt("##volume", ImVec2(40, 160), &sliderVolume, 0, 100, "%d%%"))
+        if (int sliderVolume = (int)getVolume(); ImGui::VSliderInt("##volume", ImVec2(40, 160), &sliderVolume, 0, 100, "%d%%"))
             setVolume((uint8_t)sliderVolume);
         ImGui::PopStyleVar();
         ImGui::EndPopup();
@@ -417,8 +416,7 @@ void DMG::run(bool* windowOpened, const std::function<void(const char*)>& showFi
         dispH = avail.y - belowImageH;
         dispW = dispH * aspect;
     }
-    float offX = (avail.x - dispW) * 0.5f;
-    if (offX > 0.0f)
+    if (float offX = (avail.x - dispW) * 0.5f; offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
     if (ROMFileLoaded && !gameIsPaused) {
@@ -519,8 +517,7 @@ void DMG::renderJoypadUI() {
 
     ImVec2 size(JOYPAD_UI_WIDTH * scale, JOYPAD_UI_HEIGHT * scale);
 
-    float offX = (ImGui::GetContentRegionAvail().x - size.x) * 0.5f;
-    if (offX > 0.0f)
+    if (float offX = (ImGui::GetContentRegionAvail().x - size.x) * 0.5f; offX > 0.0f)
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offX);
 
     ImGui::BeginChild("##joypad", size, ImGuiChildFlags_None);

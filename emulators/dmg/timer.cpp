@@ -35,6 +35,10 @@ void DMG_TIMER::tick(uint32_t cycles) {
         case 1: frequencyCycles = 16; break; // 262144 Hz
         case 2: frequencyCycles = 64; break; // 65536 Hz
         case 3: frequencyCycles = 256; break; // 16384 Hz
+        default: 
+            logger.log("[DMG-TIMER] Tick doesn't have correct frequency cycle, fallback to 4096 Hz!"); 
+            frequencyCycles = 1024;
+            break;
     }
 
     internalTimerCounter += cycles;
@@ -78,6 +82,9 @@ void DMG_TIMER::write(uint16_t address, uint8_t value) {
             break;
         case addressTAC:
             registerTAC = value & 0x07;
+            break;
+        default:
+            logger.log("[DMG-TIMER] Address to write is incorrect!");
             break;
     }
 }

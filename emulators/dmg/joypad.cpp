@@ -59,6 +59,8 @@ void DMG_JOYPAD::handleKey(uint32_t type, uint32_t key) {
         case SDLK_DOWN:
             setButton(JOYPAD_DOWN, type == SDL_KEYDOWN);
             break;
+        default:
+            break;
     }
 }
 
@@ -72,8 +74,6 @@ void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
     else
         buttonsVal |= mask;
 
-    bool isPressed = !(buttonsVal & mask);
-
     stateDPad = buttonsVal & 0x0F;
     stateButtons = (buttonsVal >> 4) & 0x0F;
 
@@ -81,6 +81,7 @@ void DMG_JOYPAD::setButton(uint8_t button, bool keyDown) {
     if (oldLow & ~newLow & 0x0F)
         managerInterrupts.setInterruptFlag(INTERRUPT_JOYPAD);
 
+    //bool isPressed = !(buttonsVal & mask);
     //if (wasPressed != isPressed)
     //    switch (button) {
     //        case JOYPAD_START: logger.log("[JOYPAD] START %s.", (keyDown ? "pressed" : "released")); break;

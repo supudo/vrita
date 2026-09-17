@@ -43,7 +43,7 @@ public:
     bool createTexture();
     void generateTestPattern(float time);
     void uploadFramebufferToTexture() const;
-    void run(bool* windowOpened, const std::function<void(const char*)>& showFileBrowser, const std::function<void(const char*)>& onFocused);
+    void run(bool* windowOpened, std::function<void(const char*)> const& showFileBrowser, std::function<void(const char*)> const& onFocused);
     void release();
     void clear();
 

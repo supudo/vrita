@@ -118,7 +118,8 @@ public:
 class DMG_MBC7 : public DMG_MBC {
 private:
     uint16_t romBank = 1;
-    bool ramEnabledA = false, ramEnabledB = false;
+    bool ramEnabledA = false;
+    bool ramEnabledB = false;
 
     // accelerometer
     static constexpr uint16_t TILT_NEUTRAL = 0x8000;

@@ -122,12 +122,15 @@ void Debugger::stepOver(DMGCpuRegisters& registers) {
 }
 
 void Debugger::stepBack() {
+    // TODO
 }
 
 void Debugger::stepReturn() {
+    // TODO
 }
 
 void Debugger::advanceFrame() {
+    // TODO
 }
 
 void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {

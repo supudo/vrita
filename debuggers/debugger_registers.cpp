@@ -6,6 +6,7 @@
 #include "debuggers_defines_dmg.inl"
 
 void Debugger::initRegisters() {
+    // TODO - fininsh the rest of the items visualization
     registerNodes = {
         // Registers
         { nullptr, "Registers", 0, 1, 8, NDT_None, NVS_None, 0, false, true },
@@ -15,8 +16,8 @@ void Debugger::initRegisters() {
         { nullptr, "AF", 0, -1, 0, NDT_Hex16, NVS_RegAF, 0, false },
         { nullptr, "SP", 0, -1, 0, NDT_Hex16, NVS_RegSP, 0, false },
         { nullptr, "PC", 0, -1, 0, NDT_Hex16, NVS_RegPC, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderFlags(n); }, "Flags", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterrupts(n); }, "Interrupts", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderFlags(); }, "Flags", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterrupts(n); }, "Interrupts", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // PPU
         { nullptr, "PPU", 0, 10, 23, NDT_Hex8, NVS_None, 0, false, true },
@@ -32,7 +33,7 @@ void Debugger::initRegisters() {
         { nullptr, "OBP1 ($FF49)", 0xFF49, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "WY ($FF4A)", 0xFF4A, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "WX ($FF4B)", 0xFF4B, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderKEY1Speed(n); }, "KEY1 ($FF4D)", 0xFF4D, 47, 1, NDT_Hex8, NVS_Memory, 0, false, false, true },
+        { [this](const DebuggerRegisterTreeNode*) { renderKEY1Speed(); }, "KEY1 ($FF4D)", 0xFF4D, 47, 1, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "VBK ($FF4F)", 0xFF4F, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "BCPS ($FF68)", 0xFF68, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "BCPD ($FF69)", 0xFF69, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
@@ -46,23 +47,23 @@ void Debugger::initRegisters() {
         { nullptr, "RP ($FF56)", 0xFF56, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
 
         // LCDC children
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 7); }, "Bit 7 - LCD display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 6); }, "Bit 6 - Window tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 5); }, "Bit 5 - Window display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 4); }, "Bit 4 - BG & Window tile data select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 3); }, "Bit 3 - BG tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 2); }, "Bit 2 - OBJ (Sprite) size", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 1); }, "Bit 1 - OBJ (Sprite) display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 7); }, "Bit 7 - LCD display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 6); }, "Bit 6 - Window tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 5); }, "Bit 5 - Window display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 4); }, "Bit 4 - BG & Window tile data select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 3); }, "Bit 3 - BG tile map display select", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 2); }, "Bit 2 - OBJ (Sprite) size", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 1); }, "Bit 1 - OBJ (Sprite) display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // STAT children (41-46, content unchanged, was 29-34)
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 3); }, "Bit 3 - Mode 0 H-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 2); }, "Bit 2 - Coincidence flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderKEY1Speed(n); }, "Bit 7 - Speed", 0xFF4D, -1, 0, NDT_Custom, NVS_None, 0, false, false, true },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 3); }, "Bit 3 - Mode 0 H-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 2); }, "Bit 2 - Coincidence flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 1); }, "Bit 1 - Mode flag", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderKEY1Speed(); }, "Bit 7 - Speed", 0xFF4D, -1, 0, NDT_Custom, NVS_None, 0, false, false, true },
 
         // APU
         { nullptr, "APU", 0, 49, 28, NDT_None, NVS_None, 0, false, true },
@@ -90,7 +91,7 @@ void Debugger::initRegisters() {
         { nullptr, "NR44 ($FF23)", 0xFF23, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "PCM12 ($FF76)", 0xFF76, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "PCM34 ($FF77)", 0xFF77, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
-        { [this](DebuggerRegisterTreeNode* n) { renderWavePattern(n); }, "Wave pattern", 0, 79, 16, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderWavePattern(); }, "Wave pattern", 0, 79, 16, NDT_Custom, NVS_None, 0, false },
         { nullptr, "Channel 1 (SQ1)", 0, 95, 10, NDT_None, NVS_None, 0, false },
         { nullptr, "Channel 2 (SQ2)", 0, 105, 7, NDT_None, NVS_None, 0, false },
         { nullptr, "Channel 3 (WAV)", 0, 112, 5, NDT_None, NVS_None, 0, false },
@@ -119,59 +120,59 @@ void Debugger::initRegisters() {
         { nullptr, "[$FF3F]", 0xFF3F, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
 
         // Channel 1 children
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 7); }, "Sweep Frequency", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 8); }, "Sweep Addend", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 9); }, "Cycles to next sweep", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 7); }, "Sweep Frequency", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 8); }, "Sweep Addend", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 9); }, "Cycles to next sweep", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 2 children
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 3 children
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 4 children
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 1); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 2); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 3); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 4); }, "Envelope direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 5); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 6); }, "LSFR", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 1); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 2); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 3); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 4); }, "Envelope direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 5); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 6); }, "LSFR", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Cartridge
         { nullptr, "Cartridge", 0, 126, 14, NDT_None, NVS_None, 0, true, true },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 0); }, "Title", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 1); }, "Manufactuter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 2); }, "CGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 3); }, "New Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 4); }, "SGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 5); }, "Type", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 6); }, "ROM Bank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 7); }, "ROM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 8); }, "RAM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 9); }, "Destination", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 10); }, "Old Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 11); }, "Mask ROM ver", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 12); }, "Header checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderCartridgeData(n, 13); }, "Global checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(0); }, "Title", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(1); }, "Manufactuter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(2); }, "CGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(3); }, "New Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(4); }, "SGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(5); }, "Type", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(6); }, "ROM Bank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(7); }, "ROM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(8); }, "RAM Size", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(9); }, "Destination", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(10); }, "Old Licensee", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(11); }, "Mask ROM ver", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(12); }, "Header checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(13); }, "Global checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // GameBoy
         { nullptr, "GameBoy", 0, 141, 11, NDT_None, NVS_None, 0, false, true },
@@ -189,28 +190,28 @@ void Debugger::initRegisters() {
         { nullptr, "SVBK ($FF70)", 0xFF70, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true }, // 151
 
         // Input children
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 0); }, "A", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 1); }, "B", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 2); }, "SELECT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, true, 3); }, "START", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 0); }, "RIGHT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 1); }, "LEFT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 2); }, "UP", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInput(n, false, 3); }, "DOWN", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(true, 0); }, "A", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(true, 1); }, "B", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(true, 2); }, "SELECT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(true, 3); }, "START", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(false, 0); }, "RIGHT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(false, 1); }, "LEFT", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(false, 2); }, "UP", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderInput(false, 3); }, "DOWN", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // IE children
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 0); }, "V-Blank Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 1); }, "LCD STAT Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 2); }, "Timer Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 3); }, "Serial Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 4); }, "Joypad Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 0); }, "V-Blank Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 1); }, "LCD STAT Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 2); }, "Timer Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 3); }, "Serial Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, true, 4); }, "Joypad Interrupt", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // IF children
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 0); }, "V-Blank Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 1); }, "LCD STAT Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 2); }, "Timer Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 3); }, "Serial Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 4); }, "Joypad Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 0); }, "V-Blank Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 1); }, "LCD STAT Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 2); }, "Timer Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 3); }, "Serial Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode* n) { renderInterruptBit(n, false, 4); }, "Joypad Interrupt", 0xFF0F, -1, 0, NDT_Custom, NVS_None, 0, false },
     };
 
     if (settings.GetBool("Debuggers - Debugger", "tree_state_saved", false)) {
@@ -230,7 +231,7 @@ void Debugger::initRegisters() {
     }
 }
 
-void Debugger::renderWavePattern(DebuggerRegisterTreeNode* node) {
+void Debugger::renderWavePattern() const {
     if (!funcAPUChannelWave) {
         ImGui::Text("n/a");
         return;
@@ -269,11 +270,11 @@ void Debugger::renderWavePattern(DebuggerRegisterTreeNode* node) {
     draw_list->PopClipRect();
 }
 
-void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> channelPulse1,
-                               std::function<const PulseChannel& ()> channelPulse2,
-                               std::function<const WaveChannel& ()> channelWave,
-                               std::function<const NoiseChannel& ()> channelNoise,
-                               std::function<uint8_t(uint8_t)> channelOutput) {
+void Debugger::setAPUCallbacks(const std::function<const PulseChannel& ()> channelPulse1,
+                               const std::function<const PulseChannel& ()> channelPulse2,
+                               const std::function<const WaveChannel& ()> channelWave,
+                               const std::function<const NoiseChannel& ()> channelNoise,
+                               const std::function<uint8_t(uint8_t)> channelOutput) {
     funcAPUChannel1 = channelPulse1;
     funcAPUChannel2 = channelPulse2;
     funcAPUChannelWave = channelWave;
@@ -281,7 +282,7 @@ void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> channelPuls
     funcAPUChannelOutput = channelOutput;
 }
 
-void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) {
+void Debugger::renderAPUChannelData(const DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) const {
     if (!funcAPUChannel1) {
         ImGui::Text("n/a");
         return;
@@ -328,6 +329,9 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
             case 9: // Cycles to next sweep
                 ImGui::Text("%d", funcAPUChannel1().sweep.remaining);
                 break;
+            default:
+                ImGui::Text("");
+                break;
         }
     }
     else if (channel == 1) { // channel 2 (SQ2)
@@ -359,6 +363,9 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
                 else
                     ImGui::Text("%d", funcAPUChannel2().envelope.timer.remaining);
                 break;
+            default:
+                ImGui::Text("");
+                break;
         }
     }
     else if (channel == 2) { // channel 3 (WAV)
@@ -380,6 +387,9 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
                 ImGui::Text("%d%%", volumePercent[funcAPUChannelWave().volumeCode & 0x03]);
                 break;
             }
+            default:
+                ImGui::Text("");
+                break;
         }
     }
     else if (channel == 3) { // channel 4 (NOI)
@@ -420,11 +430,14 @@ void Debugger::renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t chan
             case 7: // Noise counter
                 ImGui::Text("%d", funcAPUChannelNoise().timer);
                 break;
+            default:
+                ImGui::Text("");
+                break;
         }
     }
 }
 
-void Debugger::renderRegisterValue(DebuggerRegisterTreeNode* node) {
+void Debugger::renderRegisterValue(DebuggerRegisterTreeNode* node) const {
     if (node->Type == NDT_Custom && node->renderCustom)
         node->renderCustom(node);
     else {
@@ -471,7 +484,7 @@ void Debugger::renderRegisterNode(DebuggerRegisterTreeNode* node, bool isRoot) {
     }
 }
 
-void Debugger::renderRegisters(DMGCpuRegisters& registers) {
+void Debugger::renderRegisters(const DMGCpuRegisters& registers) {
     float TEXT_BASE_WIDTH = ImGui::CalcTextSize("A").x;
     ImGuiTableFlags table_flags = ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_NoBordersInBody;
 
@@ -507,7 +520,7 @@ uint8_t Debugger::getAddressValue8(uint32_t address) const {
     return funcMemoryRead(address);
 }
 
-void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {
+void Debugger::renderFlags() const {
     if (!funcCpuGetFlag) { 
         ImGui::TextDisabled("N/A"); 
         return; 
@@ -519,7 +532,7 @@ void Debugger::renderFlags(DebuggerRegisterTreeNode* node) {
     ImGui::Text("%s %s %s %s", (is_zero ? "Z" : "-"), (is_substract ? "S" : "-"), (is_half_carry ? "H" : "-"), (is_carry ? "C" : "-"));
 }
 
-void Debugger::renderInterrupts(DebuggerRegisterTreeNode* node) {
+void Debugger::renderInterrupts(const DebuggerRegisterTreeNode* node) const {
     if (!funcInterruptsEnabled) { 
         ImGui::TextDisabled("N/A");
         return; 
@@ -528,7 +541,7 @@ void Debugger::renderInterrupts(DebuggerRegisterTreeNode* node) {
     ImGui::Text("%s", interrupt_enabled ? "Enabled" : "Disabled");
 }
 
-void Debugger::renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
+void Debugger::renderLCDCBit(const DebuggerRegisterTreeNode* node, uint8_t bit) const {
     uint8_t addressValue = funcMemoryRead(node->Address);
     uint8_t bitValue = (addressValue & (1 << bit));
     switch (bit) {
@@ -556,10 +569,13 @@ void Debugger::renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
         case 0:
             ImGui::Text("%s", bitValue == 0 ? "Off" : "On");
             break;
+        default:
+            ImGui::Text("");
+            break;
     }
 }
 
-void Debugger::renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
+void Debugger::renderLCDSBit(const DebuggerRegisterTreeNode* node, uint8_t bit) const {
     uint8_t addressValue = funcMemoryRead(node->Address);
     uint8_t bitValue = (addressValue & (1 << bit));
     switch (bit) {
@@ -589,12 +605,18 @@ void Debugger::renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit) {
                 case 0:
                     ImGui::Text("Mode 0 (H-Blank)");
                     break;
+                default:
+                    ImGui::Text("");
+                    break;
             }
+            break;
+        default:
+            ImGui::Text("");
             break;
     }
 }
 
-void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit) {
+void Debugger::renderInput(bool isButton, uint8_t bit) const {
     uint8_t orig = funcMemoryRead(0xFF00);
     uint8_t select = isButton ? ((orig | 0x10) & ~0x20) : ((orig | 0x20) & ~0x10);
     funcMemoryWrite(0xFF00, select);
@@ -608,7 +630,7 @@ void Debugger::renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_
     ImGui::EndDisabled();
 }
 
-void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) {
+void Debugger::renderInterruptBit(const DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) const {
     uint8_t addressValue = funcMemoryRead(node->Address);
     bool set = (addressValue & (1 << bit)) != 0;
     if (isIE)
@@ -617,7 +639,7 @@ void Debugger::renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uin
         ImGui::Text("%s", set ? "Requested" : "Not requested");
 }
 
-void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type) {
+void Debugger::renderCartridgeData(uint8_t type) const {
     switch (type) {
         case 0: { // Title
             char title[17];
@@ -720,7 +742,7 @@ void Debugger::renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type)
     }
 }
 
-void Debugger::renderKEY1Speed(DebuggerRegisterTreeNode* node) {
+void Debugger::renderKEY1Speed() const {
     uint8_t key1 = funcMemoryRead(0xFF4D);
     ImGui::Text("%s", (key1 & 0x80) ? "Double (8.39 MHz)" : "Normal (4.19 MHz)");
 }

@@ -288,8 +288,11 @@ void Debugger::renderRestMemory() {
 }
 
 void Debugger::renderRestCustomExpression() {
+    // TODO
 }
-void Debugger::renderRestOverlays() {}
+void Debugger::renderRestOverlays() {
+    // TODO
+}
 
 void Debugger::renderMemoryRegion() {
     if (!funcMemoryRead)

@@ -38,11 +38,11 @@ public:
                       std::function<void()> stepInstruction,
                       std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
                       std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
-    void setAPUCallbacks(std::function<const PulseChannel&()> channelPulse1,
-                         std::function<const PulseChannel&()> channelPulse2,
-                         std::function<const WaveChannel&()> channelWave,
-                         std::function<const NoiseChannel&()> channelNoise,
-                         std::function<uint8_t(uint8_t)> channelOutput);
+    void setAPUCallbacks(const std::function<const PulseChannel&()> channelPulse1,
+                         const std::function<const PulseChannel&()> channelPulse2,
+                         const std::function<const WaveChannel&()> channelWave,
+                         const std::function<const NoiseChannel&()> channelNoise,
+                         const std::function<uint8_t(uint8_t)> channelOutput);
     void setMemory(const char* emuType, uint32_t size, bool isCGB);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -161,22 +161,22 @@ private:
     void renderMemoryRegion();
 
     void initRegisters();
-    void renderRegisters(DMGCpuRegisters& registers);
+    void renderRegisters(const DMGCpuRegisters& registers);
     void renderRegisterNode(DebuggerRegisterTreeNode* node, bool isRoot = false);
-    void renderRegisterValue(DebuggerRegisterTreeNode* node);
+    void renderRegisterValue(DebuggerRegisterTreeNode* node) const;
 
     std::vector<DebuggerRegisterTreeNode> registerNodes;
     uint8_t getAddressValue8(uint32_t address) const;
-    void renderFlags(DebuggerRegisterTreeNode* node);
-    void renderInterrupts(DebuggerRegisterTreeNode* node);
-    void renderLCDCBit(DebuggerRegisterTreeNode* node, uint8_t bit);
-    void renderLCDSBit(DebuggerRegisterTreeNode* node, uint8_t bit);
-    void renderInput(DebuggerRegisterTreeNode* node, bool isButton, uint8_t bit);
-    void renderInterruptBit(DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit);
-    void renderCartridgeData(DebuggerRegisterTreeNode* node, uint8_t type);
-    void renderWavePattern(DebuggerRegisterTreeNode* node);
-    void renderAPUChannelData(DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop);
-    void renderKEY1Speed(DebuggerRegisterTreeNode* node);
+    void renderFlags() const;
+    void renderInterrupts(const DebuggerRegisterTreeNode* node) const;
+    void renderLCDCBit(const DebuggerRegisterTreeNode* node, uint8_t bit) const;
+    void renderLCDSBit(const DebuggerRegisterTreeNode* node, uint8_t bit) const;
+    void renderInput(bool isButton, uint8_t bit) const;
+    void renderInterruptBit(const DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) const;
+    void renderCartridgeData(uint8_t type) const;
+    void renderWavePattern() const;
+    void renderAPUChannelData(const DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) const;
+    void renderKEY1Speed() const;
 
     static constexpr int cpuLoadHistorySize = 90;
     float cpuLoadHistory[cpuLoadHistorySize] = {};

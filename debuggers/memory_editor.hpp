@@ -22,12 +22,12 @@ public:
     void release();
     void render(bool* windowOpened);
     
-    void setMemory(const char* emulatorType, uint8_t* data, uint32_t size, bool isCGB);
+    void setMemory(const char* emuType, uint8_t* data, uint32_t size, bool isCGB);
     void setCallbacks(std::function<uint8_t(uint16_t)> read8,
                       std::function<void(uint16_t, uint8_t)> write8,
-                      std::function<uint16_t(const char*)> getRegsiter,
-                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                      std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
+                      std::function<uint16_t(const char*)> const& getRegsiter,
+                      std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                      std::function<void(uint16_t, uint8_t, uint8_t)> const& vramWriteBank);
 
 private:
     Logger& logger;
@@ -66,7 +66,7 @@ private:
     int followRegister = 0;
     int followAddress = -1;
 
-    void renderMemoryRegion(MemoryRegion region);
+    void renderMemoryRegion(MemoryRegion const& region);
     const MemoryRegion* getRegion(uint32_t addr) const;
 
 

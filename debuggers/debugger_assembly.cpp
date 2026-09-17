@@ -23,19 +23,19 @@ void Debugger::initEditor() {
     editorOptionSyntaxHighlight = settings.GetInt("Debuggers - Editor", "editor_option_syntax_highlight", true);
     editorOptionShowMiniMap = settings.GetInt("Debuggers - Editor", "editor_option_show_minimap", false);
 
-    editorAssembly.SetTextContextMenuCallback([this] (TextEditor::PopupData& data) {
+    editorAssembly.SetTextContextMenuCallback([this] (const TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
         showContextMenu(line, addr);
     });
 
-    editorAssembly.SetLineNumberContextMenuCallback([this] (TextEditor::PopupData& data) {
+    editorAssembly.SetLineNumberContextMenuCallback([this] (const TextEditor::PopupData& data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
         showContextMenu(line, addr);
     });
 
-    editorAssembly.SetTextHoverCallback([&] (TextEditor::PopupData data) {
+    editorAssembly.SetTextHoverCallback([&] (const TextEditor::PopupData data) {
         const int32_t line = static_cast<int32_t>(data.pos.line);
         const uint32_t addr = (line >= 0 && static_cast<size_t>(line) < lineToAddress.size()) ? lineToAddress[line] : 0;
         std::string lineContent = editorAssembly.GetLineText(data.pos.line);
@@ -81,7 +81,7 @@ void Debugger::showContextMenu(const int32_t line, const uint32_t addr) {
 
 void Debugger::updateLineDecorator() {
     const size_t widthGlyphs = CONST_TriangleMarkerGlyphs + (editorOptionShowAddress ? CONST_AddressColumnsGlyphs : 0) + (editorOptionShowByteCode  ? CONST_ByteCodeColumnsGlyphs : 0);
-    editorAssembly.SetLineDecorator(widthGlyphs, [this] (TextEditor::Decorator& decorator) {
+    editorAssembly.SetLineDecorator(widthGlyphs, [this] (const TextEditor::Decorator& decorator) {
         const bool hasData = decorator.line < lineToBytes.size()&&!lineToBytes[decorator.line].empty();
         const ImVec2 p0 = ImGui::GetCursorScreenPos();
         float x = p0.x;
@@ -112,9 +112,10 @@ void Debugger::updateLineDecorator() {
 }
 
 void Debugger::stepIn() {
+    // TODO
 }
 
-void Debugger::stepOver(DMGCpuRegisters& registers) {
+void Debugger::stepOver(const DMGCpuRegisters& registers) {
     if (gameIsRunning || !funcStepInstruction)
         return;
     funcStepInstruction();
@@ -251,8 +252,7 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
             editorAssembly.AddMarker(static_cast<size_t>(bpLine), breakpointsDisabled ? IM_COL32(255, 0, 0, 100) : IM_COL32(255, 0, 0, 255), 0, "", "Breakpoint");
     }
 
-    ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-    if (ImGui::BeginTabBar("tabsEditor", tab_bar_flags)) {
+    if (ImGui::BeginTabBar("tabsEditor", ImGuiTabBarFlags_None)) {
         if (ImGui::BeginTabItem("Editor")) {
             if (editorSourceSet) {
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(255, 0, 0, 255));
@@ -267,13 +267,11 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
                 const float decorationOffset = lineNumberRightOffset + editorAssembly.GetDecorationLeftMargin() * glyphWidth;
                 const float textLeftOffset = decorationOffset + (static_cast<float>(decoratorGlyphs) + editorAssembly.GetTextLeftMargin()) * glyphWidth;
 
-                float cursorX = lineNumberLeftOffset;
-
                 if (editorOptionShowLineNumbers) {
-                    ImGui::SameLine(cursorX + 24.0f);
+                    ImGui::SameLine(lineNumberLeftOffset + 24.0f);
                     ImGui::Text("#");
                 }
-                cursorX = decorationOffset + CONST_TriangleMarkerGlyphs * glyphWidth;
+                float cursorX = lineNumberLeftOffset + decorationOffset + CONST_TriangleMarkerGlyphs * glyphWidth;
                 if (editorOptionShowAddress) {
                     ImGui::SameLine(cursorX);
                     ImGui::Text("Address");
@@ -296,7 +294,8 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
                     && ImGui::IsKeyDown(ImGuiMod_Ctrl) && ImGui::IsKeyDown(ImGuiMod_Shift)
                     && editorAssembly.IsMousePosOverGlyph(ImGui::GetMousePos())) {
                     const std::string word = editorAssembly.GetWordAtMousePos(ImGui::GetMousePos());
-                    uint16_t bank = 0, addr = 0;
+                    uint16_t bank = 0;
+                    uint16_t addr = 0;
                     if (parseLabelIdentifier(word, bank, addr))
                         scrollToBankAddress(bank, addr);
                 }
@@ -401,12 +400,13 @@ void Debugger::renderRestBreakpoints() {
         breakpoints.erase(*breakpointToRemove);
 }
 
-bool Debugger::parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address) {
+bool Debugger::parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address) const {
     for (auto prefix : ASM_prefixes) {
         if (word.compare(0, prefix.size(), prefix) != 0)
             continue;
         const std::string rest = word.substr(prefix.size());
-        unsigned bb = 0, addr = 0;
+        unsigned bb = 0;
+        unsigned addr = 0;
         if (sscanf(rest.c_str(), "%2x_%4x", &bb, &addr) == 2) {
             bank = static_cast<uint16_t>(bb);
             address = static_cast<uint16_t>(addr);

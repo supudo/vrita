@@ -128,7 +128,7 @@ private:
 
     int32_t resolveBankAddressLine(uint16_t bank, uint16_t address);
     void scrollToBankAddress(uint16_t bank, uint16_t address);
-    bool parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address);
+    bool parseLabelIdentifier(const std::string& word, uint16_t& bank, uint16_t& address) const;
 
     std::array<int32_t, 0x10000> addressToLine {};
     std::vector<std::string> lineToBytes;
@@ -143,7 +143,7 @@ private:
     void renderAssembly(DMGCpuRegisters& registers, float height);
     void disassemblySource(DMGCpuRegisters& registers);
     void stepIn();
-    void stepOver(DMGCpuRegisters& registers);
+    void stepOver(const DMGCpuRegisters& registers);
     void stepBack();
     void stepReturn();
     void advanceFrame();

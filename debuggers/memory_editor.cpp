@@ -31,9 +31,9 @@ void MemoryEditor::release() {
 
 void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                                 std::function<void(uint16_t, uint8_t)> write8,
-                                std::function<uint16_t(const char*)> getRegsiter,
-                                std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                                std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
+                                std::function<uint16_t(const char*)> const& getRegsiter,
+                                std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                                std::function<void(uint16_t, uint8_t, uint8_t)> const& vramWriteBank) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcRegisterReadFunction = getRegsiter;
@@ -41,7 +41,7 @@ void MemoryEditor::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcVramBankWrite = vramWriteBank;
 }
 
-void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t size, bool isCGB) {
+void MemoryEditor::setMemory(const char* emuType, uint8_t* data, uint32_t size, bool isCGB) {
     if (data != memoryData || size != memorySize) {
         selectedMemoryRegion = nullptr;
         if (data && size > 0) {
@@ -56,31 +56,29 @@ void MemoryEditor::setMemory(const char* emulatorType, uint8_t* data, uint32_t s
     memoryData = data;
     memorySize = size;
     isCGBLoaded = isCGB;
-    if (strcmp(emulatorType, "dmg") == 0) {
-        switch (viewPerspective) {
-            case 0:
-                memoryRegions = isCGB ? MemoryMap_CGB_Default.data() : MemoryMap_DMG_Default.data();
-                memoryRegionCount = isCGB ? MemoryMap_CGB_Default.size() : MemoryMap_DMG_Default.size();
-                break;
-            default:
-                memoryRegions = nullptr;
-                memoryRegionCount = 0;
-                break;
+    if (strcmp(emuType, "dmg") == 0) {
+        if (viewPerspective == 0) {
+            memoryRegions = isCGB ? MemoryMap_CGB_Default.data() : MemoryMap_DMG_Default.data();
+            memoryRegionCount = isCGB ? MemoryMap_CGB_Default.size() : MemoryMap_DMG_Default.size();
+        }
+        else {
+            memoryRegions = nullptr;
+            memoryRegionCount = 0;
         }
         activeTree = isCGB ? &MemoryMap_CGB_ByUnitTree : &MemoryMap_DMG_ByUnitTree;
-        this->emulatorType = 1;
+        emulatorType = 1;
     }
-    else if (strcmp(emulatorType, "agb") == 0) {
+    else if (strcmp(emuType, "agb") == 0) {
         memoryRegions = MemoryMap_AGB_Default.data();
         memoryRegionCount = MemoryMap_AGB_Default.size();
         activeTree = nullptr;
-        this->emulatorType = 2;
+        emulatorType = 2;
     }
     else {
         memoryRegions = nullptr;
         memoryRegionCount = 0;
         activeTree = nullptr;
-        this->emulatorType = 0;
+        emulatorType = 0;
     }
 }
 
@@ -157,6 +155,8 @@ void MemoryEditor::render(bool* windowOpened) {
             if (activeTree)
                 renderViewPerspectiveAdvanced(*activeTree);
             break;
+        default:
+            break;
     }
 
     ImGui::End();
@@ -181,10 +181,6 @@ void MemoryEditor::renderViewPerspectiveDefault() {
 }
 
 void MemoryEditor::renderViewPerspectiveAdvanced(const MemoryTree& tree) {
-    const ImGuiStyle& style = ImGui::GetStyle();
-
-    float total_width = ImGui::GetContentRegionAvail().x;
-
     // left
     ImGui::BeginChild("leftPanel", ImVec2(150, 0), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX);
     ImGui::Text("Sections");
@@ -269,7 +265,7 @@ void MemoryEditor::renderViewPerspectiveTreeRegion(const MemoryRegion& region) {
     ImGui::PopID();
 }
 
-void MemoryEditor::renderMemoryRegion(MemoryRegion region) {
+void MemoryEditor::renderMemoryRegion(MemoryRegion const& region) {
     uint32_t regionStart = region.range.start;
     uint32_t regionEnd = region.range.end;
     if (regionStart >= memorySize)

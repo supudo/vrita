@@ -30,7 +30,7 @@ void TilemapViewer::release() {
     settings.Save();
 }
 
-void TilemapViewer::setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<const uint8_t* (bool isOBJ)> getPaletteRAM) {
+void TilemapViewer::setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank, std::function<const uint8_t* (bool isOBJ)> const& getPaletteRAM) {
     funcVramReadBank = vramReadBank;
     funcGetPaletteRAM = getPaletteRAM;
 }
@@ -49,8 +49,8 @@ void TilemapViewer::setMemory(const char* emuType, uint8_t* data, bool isCGB) {
         initializeData(et);
 }
 
-void TilemapViewer::initializeData(uint8_t emulatorType) {
-    if (emulatorType == 1) {
+void TilemapViewer::initializeData(uint8_t emuType) {
+    if (emuType == 1) {
         if (isCGBLoaded) {
             tiles.clear();
             tiles.reserve(CGB_TilesCount);
@@ -136,7 +136,7 @@ void TilemapViewer::initializeData(uint8_t emulatorType) {
     }
 }
 
-void TilemapViewer::decodeTile(const uint8_t* tileData, TileItem& tile) {
+void TilemapViewer::decodeTile(const uint8_t* tileData, TileItem& tile) const {
     if (emulatorType == 1) {
         for (uint8_t y = 0; y < 8; y++) {
             uint8_t low = tileData[y * 2];
@@ -218,8 +218,7 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
         int ty = t / tilesPerRow;
         ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
 
-        const TileItem* tile = mapTiles[t].Tile;
-        if (tile) {
+        if (const TileItem* tile = mapTiles[t].Tile) {
             for (int y = 0; y < 8; y++) {
                 for (int x = 0; x < 8; x++) {
                     uint8_t px = mapTiles[t].XFlip ? 7 - x : x;
@@ -234,8 +233,7 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
             }
         }
 
-        ImVec2 tileEnd(pos.x + tileSizeZoom, pos.y + tileSizeZoom);
-        if (ImGui::IsMouseHoveringRect(pos, tileEnd))
+        if (ImGui::IsMouseHoveringRect(pos, ImVec2(pos.x + tileSizeZoom, pos.y + tileSizeZoom)))
             hoveredTilemapItem = mapTiles[t];
 
         if (showGrid)
@@ -251,7 +249,7 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
     ImGui::EndChild();
 }
 
-void TilemapViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) {
+void TilemapViewer::drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder) const {
     for (int y = 0; y < 8; y++) {
         for (int x = 0; x < 8; x++) {
             PaletteColor color = paletteViewer.getColorPalette(tile.Pixels[x][y]);
@@ -275,8 +273,7 @@ void TilemapViewer::renderTileMapInfo() {
 
     ImGui::Dummy(ImVec2(0, infoPaddingY));
 
-    ImGuiTableFlags table_flags = ImGuiTableFlags_NoBordersInBody;
-    if (ImGui::BeginTable("Settings", 2, table_flags)) {
+    if (ImGui::BeginTable("Settings", 2, ImGuiTableFlags_NoBordersInBody)) {
         ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 140.0f);
         ImGui::TableSetupColumn("Control", ImGuiTableColumnFlags_WidthStretch);
 
@@ -405,7 +402,7 @@ void TilemapViewer::renderTileMapInfo() {
     lastInfoHeight = ImGui::GetCursorPosY() - infoStartY;
 }
 
-void TilemapViewer::textRightAligned(const char* text) {
+void TilemapViewer::textRightAligned(const char* text) const {
     float textWidth = ImGui::CalcTextSize(text).x;
     float avail = ImGui::GetContentRegionAvail().x;
     if (avail > textWidth)

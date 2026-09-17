@@ -18,7 +18,7 @@ public:
     TilemapViewer(Logger& logger, Settings& settings, PaletteViewer& paletteViewer) : logger(logger), settings(settings), paletteViewer(paletteViewer) {}
 
     bool init();
-    void setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> vramReadBank, std::function<const uint8_t* (bool isOBJ)> getPaletteRAM);
+    void setCallbacks(std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank, std::function<const uint8_t* (bool isOBJ)> const& getPaletteRAM);
     void setMemory(const char* emuType, uint8_t* data, bool isCGB);
     void release();
     void render(bool* windowOpened);
@@ -53,12 +53,12 @@ private:
     TilemapItem hoveredTilemapItem;
     TilemapItem selectedTilemapItem;
 
-    void initializeData(uint8_t emulatorType);
-    void decodeTile(const uint8_t* tileData, TileItem& tile);
+    void initializeData(uint8_t emuType);
+    void decodeTile(const uint8_t* tileData, TileItem& tile) const;
     void renderTileMap(float height, ImVector<TilemapItem> mapTiles);
     void renderTileMapInfo();
-    void textRightAligned(const char* text);
-    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true);
+    void textRightAligned(const char* text) const;
+    void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true) const;
 
     bool isCGBLoaded = false;
     std::function<uint8_t(uint16_t, uint8_t)> funcVramReadBank;

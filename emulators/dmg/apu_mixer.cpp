@@ -15,6 +15,7 @@ uint8_t DMG_APU::channelOutput(uint8_t channel) const {
         case 1: return pulseOutput(ch2);
         case 2: return waveOutput();
         case 3: return noiseOutput();
+        default: return 0;
     }
     return 0;
 }

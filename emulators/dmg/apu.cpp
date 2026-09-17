@@ -81,7 +81,8 @@ void DMG_APU::step(uint32_t cycles) {
         output.sampleAccumulator += AudioOutput::sampleRate * AudioOutput::oversample;
         if (output.sampleAccumulator >= AudioOutput::cpuClock) {
             output.sampleAccumulator -= AudioOutput::cpuClock;
-            int16_t left, right;
+            int16_t left;
+            int16_t right;
             mixSample(left, right);
             output.oversampleSumLeft += left;
             output.oversampleSumRight += right;

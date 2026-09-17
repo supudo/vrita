@@ -56,17 +56,17 @@ private:
     void pushAudio();
 
     // pulse
-    void stepPulseChannel(PulseChannel&);
+    void stepPulseChannel(PulseChannel&) const;
 
     template<typename T>
-    void clockLength(T& channel);
+    void clockLength(T& channel) const;
 
     void clockLengthCounters();
     void clockSweep();
     void clockEnvelopes();
 
     template<typename T>
-    void clockEnvelope(T& channel);
+    void clockEnvelope(T& channel) const;
 
     template<typename T>
     void extraClockLengthIfNeeded(T& channel) {

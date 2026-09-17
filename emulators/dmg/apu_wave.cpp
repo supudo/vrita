@@ -30,6 +30,7 @@ uint8_t DMG_APU::waveOutput() const {
         case 1: return sample; // 100%
         case 2: return sample >> 1; // 50%
         case 3: return sample >> 2; // 25%
+        default: return 0;
     }
     return 0;
 }

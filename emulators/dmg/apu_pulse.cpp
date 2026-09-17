@@ -1,6 +1,6 @@
 #include "apu.hpp"
 
-void DMG_APU::stepPulseChannel(PulseChannel& channel) {
+void DMG_APU::stepPulseChannel(PulseChannel& channel) const {
     if (!channel.state.enabled)
         return;
 
@@ -30,7 +30,7 @@ void DMG_APU::clockLengthCounters() {
 }
 
 template<typename T>
-void DMG_APU::clockLength(T& channel) {
+void DMG_APU::clockLength(T& channel) const {
     if (!channel.length.enabled)
         return;
     if (channel.length.counter > 0) {
@@ -47,7 +47,7 @@ void DMG_APU::clockEnvelopes() {
 }
 
 template<typename T>
-void DMG_APU::clockEnvelope(T& channel) {
+void DMG_APU::clockEnvelope(T& channel) const {
     if (!channel.state.enabled || channel.envelope.timer.period == 0)
         return;
     if (--channel.envelope.timer.remaining == 0) {

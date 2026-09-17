@@ -19,11 +19,11 @@ public:
 
     bool init();
     void release();
-    void setCallbacks(std::function<const uint8_t* (bool)> getPaletteRAM);
+    void setCallbacks(std::function<const uint8_t* (bool)> const& getPaletteRAM);
     void setMemory(const char* emuType, uint8_t bgp, uint8_t obp0, uint8_t obp1, bool isCGB);
     void render(bool* windowOpened);
 
-    PaletteColor getColorPalette(uint8_t colorValue);
+    PaletteColor getColorPalette(uint8_t colorValue) const;
 
     int paletteChoicesSelected = 0;
 
@@ -46,11 +46,11 @@ private:
     uint8_t paletteOBP0 = 0;
     uint8_t paletteOBP1 = 0;
 
-    PaletteColor unpackPaletteColor(uint32_t packed);
+    PaletteColor unpackPaletteColor(uint32_t packed) const;
 
-    void renderCenteredCellContent(const char* lbl, float rowHeight = 80.0f);
+    void renderCenteredCellContent(const char* lbl, float rowHeight = 80.0f) const;
     void renderColorButtons(const char* label, uint8_t paletteValue);
-    bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f);
+    bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f) const;
 
     inline static std::string rgbToHex(int r, int g, int b) { char buffer[8]; std::snprintf(buffer, sizeof(buffer), "#%02X%02X%02X", r, g, b); return buffer; }
 

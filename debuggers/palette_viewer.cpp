@@ -32,7 +32,7 @@ void PaletteViewer::release() {
     settings.Save();
 }
 
-void PaletteViewer::setCallbacks(std::function<const uint8_t* (bool)> getPaletteRAM) {
+void PaletteViewer::setCallbacks(std::function<const uint8_t* (bool)> const& getPaletteRAM) {
     funcGetPaletteRAM = getPaletteRAM;
 }
 
@@ -146,7 +146,7 @@ void PaletteViewer::render(bool* windowOpened) {
     ImGui::End();
 }
 
-void PaletteViewer::renderCenteredCellContent(const char* lbl, float rowHeight) {
+void PaletteViewer::renderCenteredCellContent(const char* lbl, float rowHeight) const {
     ImVec2 textSize = ImGui::CalcTextSize(lbl);
     float cellWidth = ImGui::GetContentRegionAvail().x;
     float x = (cellWidth - textSize.x) * 0.5f;
@@ -156,7 +156,7 @@ void PaletteViewer::renderCenteredCellContent(const char* lbl, float rowHeight) 
     ImGui::Text("%s", lbl);
 }
 
-PaletteColor PaletteViewer::getColorPalette(uint8_t colorValue) {
+PaletteColor PaletteViewer::getColorPalette(uint8_t colorValue) const {
     switch (paletteChoicesSelected) {
         case 0:
             return unpackPaletteColor(DMG_PALETTE_DEFAULT[colorValue]);
@@ -171,7 +171,7 @@ PaletteColor PaletteViewer::getColorPalette(uint8_t colorValue) {
     }
 }
 
-PaletteColor PaletteViewer::unpackPaletteColor(uint32_t packed) {
+PaletteColor PaletteViewer::unpackPaletteColor(uint32_t packed) const {
     return {
         ((packed >> 16) & 0xFF) / 255.0f,
         ((packed >> 8) & 0xFF) / 255.0f,
@@ -221,7 +221,7 @@ void PaletteViewer::renderCGBPaletteButtons(const char* label, uint8_t paletteNu
     ImGui::PopID();
 }
 
-bool PaletteViewer::renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color, float border_thickness) {
+bool PaletteViewer::renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color, float border_thickness) const {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImVec2 pos = ImGui::GetCursorScreenPos();
     ImVec2 end_pos = ImVec2(pos.x + size.x, pos.y + size.y);

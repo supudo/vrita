@@ -348,8 +348,7 @@ void TileViewer::renderOBJTab(const char* tabLabel, const char* childId, int ban
     }
     int numRows3 = (count + tilesPerRow - 1) / tilesPerRow;
     ImGui::Dummy(ImVec2(tilesPerRow * tileStepX, numRows3 * tileStepY));
-    int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, count);
-    if (slot >= 0) {
+    if (int slot = pickHoveredSlot(start, tileStepX, tileStepY, tilesPerRow, count) >= 0) {
         uint8_t raw = objTileIndices[slot];
         int objBankOffset = objBankOffsets[slot];
         int topIndex = (stacked ? (raw & 0xFE) : raw) + objBankOffset;
@@ -372,7 +371,7 @@ void TileViewer::renderOBJTab(const char* tabLabel, const char* childId, int ban
     ImGui::EndTabItem();
 }
 
-void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) {
+void TileViewer::drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) const {
     drawTile(draw_list, top, pos, pixelSize, false);
     if (hasBottom)
         drawTile(draw_list, bottom, ImVec2(pos.x, pos.y + pixelSize * 8.0f), pixelSize, false);

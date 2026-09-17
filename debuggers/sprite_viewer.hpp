@@ -62,7 +62,7 @@ private:
     void initializeData(uint8_t emuType);
     void decodeTile(const uint8_t* tileData, TileItem& tile) const;
     void renderSprites(float height);
-    void drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize);
+    void drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) const;
     int pickHoveredSlot(ImVec2 start, float tileStep) const;
     bool isSpriteOffScreen(const SpriteItem& sprite) const;
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, uint8_t Flags, bool drawBorder = true) const;

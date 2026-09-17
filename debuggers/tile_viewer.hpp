@@ -59,7 +59,7 @@ private:
     void renderTiles2Tab(const char* tabLabel, const char* childId, int bankOffset, float tileStepX, float tileStepY, int tilesPerRow, bool stacked);
     void renderOBJTab(const char* tabLabel, const char* childId, int bankFilter, float tileStepX, float tileStepY, int tilesPerRow, bool stacked);
     void renderTilePreview();
-    void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize);
+    void drawTileUnit(ImDrawList* draw_list, const TileItem& top, const TileItem& bottom, bool hasBottom, ImVec2 pos, float pixelSize) const;
     void drawTile(ImDrawList* draw_list, const TileItem& tile, ImVec2 pos, float pixelSize, bool drawBorder = true) const;
     int pickHoveredSlot(ImVec2 start, float tileStepX, float tileStepY, int tilesPerRow, int count) const;
 

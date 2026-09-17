@@ -120,42 +120,42 @@ void Debugger::initRegisters() {
         { nullptr, "[$FF3F]", 0xFF3F, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
 
         // Channel 1 children
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 7); }, "Sweep Frequency", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 8); }, "Sweep Addend", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 0, 9); }, "Cycles to next sweep", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 7); }, "Sweep Frequency", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 8); }, "Sweep Addend", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(0, 9); }, "Cycles to next sweep", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 2 children
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 1, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 5); }, "Envelope Direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(1, 6); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 3 children
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 2, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(2, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(2, 1); }, "Index", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(2, 2); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(2, 3); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(2, 4); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Channel 4 children
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 1); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 2); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 3); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 4); }, "Envelope direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 5); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 6); }, "LSFR", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
-        { [this](const DebuggerRegisterTreeNode* n) { renderAPUChannelData(n, 3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 0); }, "Cycles to next sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 1); }, "Sample", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 2); }, "Cycles until length expires", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 3); }, "Volume", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 4); }, "Envelope direction", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 5); }, "Cycles to next envelope", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 6); }, "LSFR", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Cartridge
         { nullptr, "Cartridge", 0, 126, 14, NDT_None, NVS_None, 0, true, true },
@@ -270,11 +270,11 @@ void Debugger::renderWavePattern() const {
     draw_list->PopClipRect();
 }
 
-void Debugger::setAPUCallbacks(const std::function<const PulseChannel& ()> channelPulse1,
-                               const std::function<const PulseChannel& ()> channelPulse2,
-                               const std::function<const WaveChannel& ()> channelWave,
-                               const std::function<const NoiseChannel& ()> channelNoise,
-                               const std::function<uint8_t(uint8_t)> channelOutput) {
+void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> const& channelPulse1,
+                               std::function<const PulseChannel& ()> const& channelPulse2,
+                               std::function<const WaveChannel& ()> const& channelWave,
+                               std::function<const NoiseChannel& ()> const& channelNoise,
+                               std::function<uint8_t(uint8_t)> const& channelOutput) {
     funcAPUChannel1 = channelPulse1;
     funcAPUChannel2 = channelPulse2;
     funcAPUChannelWave = channelWave;
@@ -282,7 +282,7 @@ void Debugger::setAPUCallbacks(const std::function<const PulseChannel& ()> chann
     funcAPUChannelOutput = channelOutput;
 }
 
-void Debugger::renderAPUChannelData(const DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) const {
+void Debugger::renderAPUChannelData(uint8_t channel, uint8_t prop) const {
     if (!funcAPUChannel1) {
         ImGui::Text("n/a");
         return;

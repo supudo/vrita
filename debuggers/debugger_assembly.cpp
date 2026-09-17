@@ -280,7 +280,6 @@ void Debugger::renderAssembly(DMGCpuRegisters& registers, float height) {
                 if (editorOptionShowByteCode) {
                     ImGui::SameLine(cursorX);
                     ImGui::Text("Bytes");
-                    cursorX += CONST_ByteCodeColumnsGlyphs * glyphWidth;
                 }
                 ImGui::SameLine(textLeftOffset);
                 ImGui::Text("Code");

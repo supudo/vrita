@@ -70,7 +70,7 @@ private:
     const MemoryRegion* getRegion(uint32_t addr) const;
 
 
-    void getPreviewData(int address, char* out_buf, char format);
+    void getPreviewData(int address, char* out_buf, char format) const;
 
     void renderViewPerspectiveDefault();
     void renderViewPerspectiveAdvanced(const MemoryTree& tree);

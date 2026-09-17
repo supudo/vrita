@@ -179,7 +179,7 @@ PaletteColor PaletteViewer::unpackPaletteColor(uint32_t packed) const {
     };
 }
 
-void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) {
+void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) const {
     ImGui::PushID(label);
     uint8_t colorValue0 = paletteValue & 0x03;
     uint8_t colorValue1 = (paletteValue >> 2) & 0x03;
@@ -202,7 +202,7 @@ void PaletteViewer::renderColorButtons(const char* label, uint8_t paletteValue) 
     ImGui::PopID();
 }
 
-void PaletteViewer::renderCGBPaletteButtons(const char* label, uint8_t paletteNum, bool isOBJ) {
+void PaletteViewer::renderCGBPaletteButtons(const char* label, uint8_t paletteNum, bool isOBJ) const {
     ImGui::PushID(label);
 
     PaletteColor color0 = resolveCGBColor(paletteNum, isOBJ, 0);

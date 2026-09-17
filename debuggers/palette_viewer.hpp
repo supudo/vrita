@@ -49,7 +49,7 @@ private:
     PaletteColor unpackPaletteColor(uint32_t packed) const;
 
     void renderCenteredCellContent(const char* lbl, float rowHeight = 80.0f) const;
-    void renderColorButtons(const char* label, uint8_t paletteValue);
+    void renderColorButtons(const char* label, uint8_t paletteValue) const;
     bool renderButtonWithBorder(const char* label, const ImVec2& size, PaletteColor background_color, PaletteColor border_color = { 1.0f, 1.0f, 1.0f }, float border_thickness = 2.0f) const;
 
     inline static std::string rgbToHex(int r, int g, int b) { char buffer[8]; std::snprintf(buffer, sizeof(buffer), "#%02X%02X%02X", r, g, b); return buffer; }
@@ -57,7 +57,7 @@ private:
     bool isCGBLoaded = false;
     std::function<const uint8_t* (bool isOBJ)> funcGetPaletteRAM;
     PaletteColor resolveCGBColor(uint8_t paletteNum, bool isOBJ, uint8_t colorId) const;
-    void renderCGBPaletteButtons(const char* label, uint8_t paletteNum, bool isOBJ);
+    void renderCGBPaletteButtons(const char* label, uint8_t paletteNum, bool isOBJ) const;
 };
 
 #endif

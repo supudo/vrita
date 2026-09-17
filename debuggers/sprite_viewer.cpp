@@ -189,8 +189,7 @@ void SpriteViewer::renderSprites(float height) {
 
     int totalRows = (DMG_SpritesX * DMG_SpritesY + DMG_SpritesX - 1) / DMG_SpritesX;
     ImGui::Dummy(ImVec2(DMG_SpritesX * spriteStep, totalRows * 2 * spriteStep));
-    int slot = pickHoveredSlot(start, spriteStep);
-    if (slot >= 0)
+    if (int slot = pickHoveredSlot(start, spriteStep) >= 0)
         hoveredSprite = spriteItems[slot];
 
     ImGui::EndChild();
@@ -214,7 +213,7 @@ bool SpriteViewer::isSpriteOffScreen(const SpriteItem& sprite) const {
     return sprite.Y == 0 || sprite.Y >= DMG_Height + 16 || sprite.X == 0 || sprite.X >= DMG_Width + 8;
 }
 
-void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) {
+void SpriteViewer::drawTileUnit(ImDrawList* draw_list, const SpriteItem& sprite, ImVec2 pos, float pixelSize) const {
     if (sprite.TileTop)
         drawTile(draw_list, *sprite.TileTop, pos, pixelSize, sprite.Flags, false);
     

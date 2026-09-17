@@ -29,27 +29,27 @@ public:
     bool init();
     void setCallbacks(std::function<uint8_t(uint16_t)> read8,
                       std::function<void(uint16_t, uint8_t)> write8,
-                      std::function<bool(uint8_t)> getFlag,
-                      std::function<bool(uint8_t)> interruptsEnabled,
-                      std::function<bool()> isGameRunning,
-                      std::function<void()> stopGame,
-                      std::function<void()> startGame,
-                      std::function<void(bool)> logCPUCalls,
-                      std::function<void()> stepInstruction,
-                      std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                      std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank);
-    void setAPUCallbacks(const std::function<const PulseChannel&()> channelPulse1,
-                         const std::function<const PulseChannel&()> channelPulse2,
-                         const std::function<const WaveChannel&()> channelWave,
-                         const std::function<const NoiseChannel&()> channelNoise,
-                         const std::function<uint8_t(uint8_t)> channelOutput);
+                      std::function<bool(uint8_t)> const& getFlag,
+                      std::function<bool(uint8_t)> const& interruptsEnabled,
+                      std::function<bool()> const& isGameRunning,
+                      std::function<void()> const& stopGame,
+                      std::function<void()> const& startGame,
+                      std::function<void(bool)> const& loggerCPUCalls,
+                      std::function<void()> const& stepInstruction,
+                      std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                      std::function<void(uint16_t, uint8_t, uint8_t)> const& vramWriteBank);
+    void setAPUCallbacks(std::function<const PulseChannel&()> const& channelPulse1,
+                         std::function<const PulseChannel&()> const& channelPulse2,
+                         std::function<const WaveChannel&()> const& channelWave,
+                         std::function<const NoiseChannel&()> const& channelNoise,
+                         std::function<uint8_t(uint8_t)> const& channelOutput);
     void setMemory(const char* emuType, uint32_t size, bool isCGB);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
     void pushCPUFrameTime(float ms);
 
     void setRomImage(const uint8_t* data, uint32_t size);
-    void setCartridgeCallbacks(std::function<uint16_t()> currentRomBank, std::function<uint16_t()> totalRomBanks);
+    void setCartridgeCallbacks(std::function<uint16_t()> const& currentRomBank, std::function<uint16_t()> const& totalRomBanks);
 
 private:
     Logger& logger;
@@ -175,7 +175,7 @@ private:
     void renderInterruptBit(const DebuggerRegisterTreeNode* node, bool isIE, uint8_t bit) const;
     void renderCartridgeData(uint8_t type) const;
     void renderWavePattern() const;
-    void renderAPUChannelData(const DebuggerRegisterTreeNode* node, uint8_t channel, uint8_t prop) const;
+    void renderAPUChannelData(uint8_t channel, uint8_t prop) const;
     void renderKEY1Speed() const;
 
     static constexpr int cpuLoadHistorySize = 90;

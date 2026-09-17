@@ -440,7 +440,9 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion const& region) {
         ImGui::EndCombo();
     }
 
-    char bufDec[128] = "", bufHex[128] = "", bufBin[128] = "";
+    char bufDec[128] = "";
+    char bufHex[128] = "";
+    char bufBin[128] = "";
     getPreviewData(activeAddress, bufDec, 'd');
     getPreviewData(activeAddress, bufHex, 'x');
     getPreviewData(activeAddress, bufBin, 'b');
@@ -449,7 +451,7 @@ void MemoryEditor::renderMemoryRegion(MemoryRegion const& region) {
     ImGui::Text("Bin"); ImGui::SameLine(); ImGui::TextUnformatted(bufBin);
 }
 
-void MemoryEditor::getPreviewData(int address, char* out_buf, char format) {
+void MemoryEditor::getPreviewData(int address, char* out_buf, char format) const {
     out_buf[0] = '\0';
     if (address < 0 || !memoryData || (uint32_t)address >= memorySize)
         return;

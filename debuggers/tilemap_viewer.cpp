@@ -218,7 +218,7 @@ void TilemapViewer::renderTileMap(float height, ImVector<TilemapItem> mapTiles) 
         int ty = t / tilesPerRow;
         ImVec2 pos(start.x + tx * tileStep, start.y + ty * tileStep);
 
-        if (const TileItem* tile = mapTiles[t].Tile) {
+        if (const TileItem* tile = mapTiles[t].Tile; tile != nullptr) {
             for (int y = 0; y < 8; y++) {
                 for (int x = 0; x < 8; x++) {
                     uint8_t px = mapTiles[t].XFlip ? 7 - x : x;

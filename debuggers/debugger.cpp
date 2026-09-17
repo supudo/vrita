@@ -37,15 +37,15 @@ bool Debugger::init() {
 
 void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
                             std::function<void(uint16_t, uint8_t)> write8,
-                            std::function<bool(uint8_t)> getFlag,
-                            std::function<bool(uint8_t)> interruptsEnabled,
-                            std::function<bool()> isGameRunning,
-                            std::function<void()> stopGame,
-                            std::function<void()> startGame,
-                            std::function<void(bool)> logCPUCalls,
-                            std::function<void()> stepInstruction,
-                            std::function<uint8_t(uint16_t, uint8_t)> vramReadBank,
-                            std::function<void(uint16_t, uint8_t, uint8_t)> vramWriteBank) {
+                            std::function<bool(uint8_t)> const& getFlag,
+                            std::function<bool(uint8_t)> const& interruptsEnabled,
+                            std::function<bool()> const& isGameRunning,
+                            std::function<void()> const& stopGame,
+                            std::function<void()> const& startGame,
+                            std::function<void(bool)> const& loggerCPUCalls,
+                            std::function<void()> const& stepInstruction,
+                            std::function<uint8_t(uint16_t, uint8_t)> const& vramReadBank,
+                            std::function<void(uint16_t, uint8_t, uint8_t)> const& vramWriteBank) {
     funcMemoryRead = read8;
     funcMemoryWrite = write8;
     funcCpuGetFlag = getFlag;
@@ -53,7 +53,7 @@ void Debugger::setCallbacks(std::function<uint8_t(uint16_t)> read8,
     funcIsGameRunning = isGameRunning;
     funcStopGame = stopGame;
     funcStartGame = startGame;
-    funcLogCPUCalls = logCPUCalls;
+    funcLogCPUCalls = loggerCPUCalls;
     funcStepInstruction = stepInstruction;
     funcVramBankRead = vramReadBank;
     funcVramBankWrite = vramWriteBank;
@@ -64,7 +64,7 @@ void Debugger::setRomImage(const uint8_t* data, uint32_t size) {
     romBufferSize = size;
 }
 
-void Debugger::setCartridgeCallbacks(std::function<uint16_t()> currentRomBank, std::function<uint16_t()> totalRomBanks) {
+void Debugger::setCartridgeCallbacks(std::function<uint16_t()> const& currentRomBank, std::function<uint16_t()> const& totalRomBanks) {
     funcCurrentRomBank = currentRomBank;
     funcTotalRomBanks = totalRomBanks;
 }
@@ -305,7 +305,6 @@ void Debugger::renderMemoryRegion() {
     regionEnd = std::min(regionEnd, memorySize - 1);
     uint32_t regionSize = regionEnd - regionStart + 1;
 
-    float previewHeight = ImGui::GetFrameHeightWithSpacing() + ImGui::GetTextLineHeightWithSpacing() * 2.0f + ImGui::GetTextLineHeight() + ImGui::GetStyle().ItemSpacing.y * 2.0f;
     float tableHeight = std::max(ImGui::GetContentRegionAvail().y, ImGui::GetFrameHeightWithSpacing());
 
     ImGuiTableFlags tableFlags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit;

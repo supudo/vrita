@@ -15,6 +15,8 @@ void Debugger::disassemblySource(DMGCpuRegisters& registers) {
         if (disassemblyThread.joinable())
             disassemblyThread.join();
 
+        thinkingPercentage.store(100.0f);
+
         addressToLine = pendingAddressToLine;
         addressToLineByBank = std::move(pendingAddressToLineByBank);
         lineToAddress = std::move(pendingLineToAddress);
@@ -59,6 +61,10 @@ uint8_t Debugger::readROMByte(uint16_t bank, uint16_t addr) const {
 void Debugger::disassembleWorkDiscovery() {
     const auto startTime = std::chrono::steady_clock::now();
 
+    const uint16_t bootBank = funcCurrentRomBank ? funcCurrentRomBank() : 1;
+    const uint16_t totalBanks = funcTotalRomBanks ? funcTotalRomBanks() : 2;
+    const size_t maxInstructions = static_cast<size_t>(totalBanks) * 0x2000;
+
     auto localAddressToLine = std::make_unique<std::array<int32_t, 0x10000>>();
     localAddressToLine->fill(-1);
 
@@ -68,10 +74,10 @@ void Debugger::disassembleWorkDiscovery() {
     std::unordered_map<uint32_t, int32_t> localAddressToLineByBank;
     uint32_t address = 0x0000;
     int line = 0;
-    const int maxInstructions = 0x8000;
-    assemblySource.reserve(static_cast<size_t>(maxInstructions) * 40);
+    assemblySource.reserve(maxInstructions * 40);
     localLineToAddress.reserve(maxInstructions);
     localLineToBytes.reserve(maxInstructions);
+    localAddressToLineByBank.reserve(maxInstructions);
 
     breakpoints.clear();
 
@@ -82,6 +88,9 @@ void Debugger::disassembleWorkDiscovery() {
     std::unordered_set<uint16_t> ramReferences;
     std::unordered_map<uint16_t, std::set<uint16_t>> romDataReferencesByBank;
     std::queue<WorkItem> worklist;
+    visited.reserve(maxInstructions);
+    decoded.reserve(maxInstructions);
+    labelTargets.reserve(maxInstructions / 8);
 
     auto labelRank = [] (LabelKind k) { return k == LabelKind::EntryPoint ? 2 : k == LabelKind::Function ? 1 : 0; };
     auto trackRamReferences = [&] (const DisassembledInstruction& instr) {
@@ -108,9 +117,6 @@ void Debugger::disassembleWorkDiscovery() {
             romDataReferencesByBank[value < 0x4000 ? 0 : bank].insert(value);
         }
     };
-
-    const uint16_t bootBank = funcCurrentRomBank ? funcCurrentRomBank() : 1;
-    const uint16_t totalBanks = funcTotalRomBanks ? funcTotalRomBanks() : 2;
 
     static constexpr uint16_t seeds[] = {
         0x0100, // starting point
@@ -160,7 +166,7 @@ void Debugger::disassembleWorkDiscovery() {
                 worklist.push({ item.bank, static_cast<uint16_t>(next) });
         }
 
-        thinkingPercentage.store(50.0f * static_cast<float>(visited.size()) / static_cast<float>(0x4000 * totalBanks));
+        thinkingPercentage.store((100.0f / 3.0f) * static_cast<float>(visited.size()) / static_cast<float>(0x4000 * totalBanks));
     }
 
     for (uint16_t bank = 1; bank < totalBanks; ++bank) {
@@ -176,6 +182,7 @@ void Debugger::disassembleWorkDiscovery() {
             trackDataReferences(bank, instruction);
             addr = static_cast<uint16_t>(addr + instruction.length);
         }
+        thinkingPercentage.store((100.0f / 3.0f) + (100.0f / 3.0f) * static_cast<float>(bank) / static_cast<float>(totalBanks - 1));
     }
 
     auto emitInstructionLine = [&] (uint16_t bank, uint16_t addr, const DisassembledInstruction& instr) {
@@ -417,7 +424,7 @@ void Debugger::disassembleWorkDiscovery() {
             localLineToBytes.push_back("");
         }
         emitBankSection(bank, 0x4000, 0x8000, fallback);
-        thinkingPercentage.store(50.0f * static_cast<float>(bank) / static_cast<float>(totalBanks));
+        thinkingPercentage.store((200.0f / 3.0f) + (100.0f / 3.0f) * static_cast<float>(bank) / static_cast<float>(totalBanks - 1));
     }
 
     pendingAddressToLine = *localAddressToLine;

@@ -20,10 +20,10 @@ void Debugger::initRegisters() {
         { [this](const DebuggerRegisterTreeNode* n) { renderInterrupts(n); }, "Interrupts", 0xFFFF, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // PPU
-        { nullptr, "PPU", 0, 10, 23, NDT_Hex8, NVS_None, 0, false, true },
+        { nullptr, "PPU", 0, 10, 26, NDT_Hex8, NVS_None, 0, false, true },
 
-        { nullptr, "LCDC ($FF40)", 0xFF40, 33, 8, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "STAT ($FF41)", 0xFF41, 41, 6, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "LCDC ($FF40)", 0xFF40, 36, 8, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "STAT ($FF41)", 0xFF41, 44, 6, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "SCY ($FF42)", 0xFF42, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "SCX ($FF43)", 0xFF43, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "LY ($FF44)", 0xFF44, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -33,7 +33,7 @@ void Debugger::initRegisters() {
         { nullptr, "OBP1 ($FF49)", 0xFF49, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "WY ($FF4A)", 0xFF4A, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "WX ($FF4B)", 0xFF4B, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { [this](const DebuggerRegisterTreeNode*) { renderKEY1Speed(); }, "KEY1 ($FF4D)", 0xFF4D, 47, 1, NDT_Hex8, NVS_Memory, 0, false, false, true },
+        { [this](const DebuggerRegisterTreeNode*) { renderKEY1Speed(); }, "KEY1 ($FF4D)", 0xFF4D, 50, 1, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "VBK ($FF4F)", 0xFF4F, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "BCPS ($FF68)", 0xFF68, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "BCPD ($FF69)", 0xFF69, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
@@ -45,6 +45,9 @@ void Debugger::initRegisters() {
         { nullptr, "HDMA4 ($FF54)", 0xFF54, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "HDMA5 ($FF55)", 0xFF55, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "RP ($FF56)", 0xFF56, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
+        { [this](const DebuggerRegisterTreeNode*) { renderPPUData(0); }, "Window line", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderPPUData(1); }, "Remaining dots in mode", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderPPUData(2); }, "Dots until V-Blank", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // LCDC children
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 7); }, "Bit 7 - LCD display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
@@ -56,7 +59,7 @@ void Debugger::initRegisters() {
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 1); }, "Bit 1 - OBJ (Sprite) display enable", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDCBit(n, 0); }, "Bit 0 - BG/Window display/priority", 0xFF40, -1, 0, NDT_Custom, NVS_None, 0, false },
 
-        // STAT children (41-46, content unchanged, was 29-34)
+        // STAT children
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 6); }, "Bit 6 - LYC=LY coincidence interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 5); }, "Bit 5 - Mode 2 OAM interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](const DebuggerRegisterTreeNode* n) { renderLCDSBit(n, 4); }, "Bit 4 - Mode 1 V-Blank interrupt", 0xFF41, -1, 0, NDT_Custom, NVS_None, 0, false },
@@ -66,10 +69,10 @@ void Debugger::initRegisters() {
         { [this](const DebuggerRegisterTreeNode*) { renderKEY1Speed(); }, "Bit 7 - Speed", 0xFF4D, -1, 0, NDT_Custom, NVS_None, 0, false, false, true },
 
         // APU
-        { nullptr, "APU", 0, 49, 28, NDT_None, NVS_None, 0, false, true },
+        { nullptr, "APU", 0, 52, 28, NDT_None, NVS_None, 0, false, true },
 
         { nullptr, "NR50 ($FF24)", 0xFF24, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "NR51 ($FF25)", 0xFF25, 77, 2, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "NR51 ($FF25)", 0xFF25, 80, 2, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR52 ($FF26)", 0xFF26, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR10 ($FF10)", 0xFF10, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "NR11 ($FF11)", 0xFF11, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -91,11 +94,11 @@ void Debugger::initRegisters() {
         { nullptr, "NR44 ($FF23)", 0xFF23, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "PCM12 ($FF76)", 0xFF76, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
         { nullptr, "PCM34 ($FF77)", 0xFF77, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
-        { [this](const DebuggerRegisterTreeNode*) { renderWavePattern(); }, "Wave pattern", 0, 79, 16, NDT_Custom, NVS_None, 0, false },
-        { nullptr, "Channel 1 (SQ1)", 0, 95, 10, NDT_None, NVS_None, 0, false },
-        { nullptr, "Channel 2 (SQ2)", 0, 105, 7, NDT_None, NVS_None, 0, false },
-        { nullptr, "Channel 3 (WAV)", 0, 112, 5, NDT_None, NVS_None, 0, false },
-        { nullptr, "Channel 4 (NOI)", 0, 117, 8, NDT_None, NVS_None, 0, false },
+        { [this](const DebuggerRegisterTreeNode*) { renderWavePattern(); }, "Wave pattern", 0, 82, 16, NDT_Custom, NVS_None, 0, false },
+        { nullptr, "Channel 1 (SQ1)", 0, 98, 10, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 2 (SQ2)", 0, 108, 7, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 3 (WAV)", 0, 115, 5, NDT_None, NVS_None, 0, false },
+        { nullptr, "Channel 4 (NOI)", 0, 120, 8, NDT_None, NVS_None, 0, false },
 
         // APU STAT children
         { nullptr, "Channels left", 0, -1, 0, NDT_Hex8, NVS_None, 0, false },
@@ -158,7 +161,7 @@ void Debugger::initRegisters() {
         { [this](const DebuggerRegisterTreeNode*) { renderAPUChannelData(3, 7); }, "Noise counter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // Cartridge
-        { nullptr, "Cartridge", 0, 126, 14, NDT_None, NVS_None, 0, true, true },
+        { nullptr, "Cartridge", 0, 129, 14, NDT_None, NVS_None, 0, true, true },
         { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(0); }, "Title", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(1); }, "Manufactuter", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
         { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(2); }, "CGB", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
@@ -175,11 +178,11 @@ void Debugger::initRegisters() {
         { [this](const DebuggerRegisterTreeNode*) { renderCartridgeData(13); }, "Global checksum", 0, -1, 0, NDT_Custom, NVS_None, 0, false },
 
         // GameBoy
-        { nullptr, "GameBoy", 0, 141, 11, NDT_None, NVS_None, 0, false, true },
+        { nullptr, "GameBoy", 0, 144, 11, NDT_None, NVS_None, 0, false, true },
 
-        { nullptr, "Input", 0, 152, 8, NDT_None, NVS_None, 0, false },
-        { nullptr, "IE ($FFFF)", 0xFFFF, 160, 5, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "IF ($FF0F)", 0xFF0F, 165, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "Input", 0, 155, 8, NDT_None, NVS_None, 0, false },
+        { nullptr, "IE ($FFFF)", 0xFFFF, 163, 5, NDT_Hex8, NVS_Memory, 0, false },
+        { nullptr, "IF ($FF0F)", 0xFF0F, 168, 5, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "DIV ($FF04)", 0xFF04, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TIMA ($FF05)", 0xFF05, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "TMA ($FF06)", 0xFF06, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
@@ -187,7 +190,7 @@ void Debugger::initRegisters() {
         { nullptr, "JOYP ($FF00)", 0xFF00, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "SB ($FF01)", 0xFF01, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
         { nullptr, "SC ($FF02)", 0xFF02, -1, 0, NDT_Hex8, NVS_Memory, 0, false },
-        { nullptr, "SVBK ($FF70)", 0xFF70, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true }, // 151
+        { nullptr, "SVBK ($FF70)", 0xFF70, -1, 0, NDT_Hex8, NVS_Memory, 0, false, false, true },
 
         // Input children
         { [this](const DebuggerRegisterTreeNode*) { renderInput(true, 0); }, "A", 0xFF00, -1, 0, NDT_Custom, NVS_None, 0, false },
@@ -280,6 +283,14 @@ void Debugger::setAPUCallbacks(std::function<const PulseChannel& ()> const& chan
     funcAPUChannelWave = channelWave;
     funcAPUChannelNoise = channelNoise;
     funcAPUChannelOutput = channelOutput;
+}
+
+void Debugger::setPPUCallbacks(std::function<uint8_t()> const& windowLine,
+                               std::function<uint32_t()> const& remainingDotsInMode,
+                               std::function<uint32_t()> const& dotsUntilVBlank) {
+    funcPPUWindowLine = windowLine;
+    funcPPURemainingDotsInMode = remainingDotsInMode;
+    funcPPUDotsUntilVBlank = dotsUntilVBlank;
 }
 
 void Debugger::renderAPUChannelData(uint8_t channel, uint8_t prop) const {
@@ -434,6 +445,35 @@ void Debugger::renderAPUChannelData(uint8_t channel, uint8_t prop) const {
                 ImGui::Text("");
                 break;
         }
+    }
+}
+
+void Debugger::renderPPUData(uint8_t prop) const {
+    if (!funcPPUWindowLine) {
+        ImGui::Text("n/a");
+        return;
+    }
+
+    bool lcdOn = (funcMemoryRead(0xFF40) & 0x80) != 0;
+    switch (prop) {
+        case 0: // Window line
+            ImGui::Text("%d", funcPPUWindowLine());
+            break;
+        case 1: // Remaining dots in mode
+            if (lcdOn)
+                ImGui::Text("%u", funcPPURemainingDotsInMode());
+            else
+                ImGui::Text("LCD off");
+            break;
+        case 2: // Dots until V-Blank
+            if (lcdOn)
+                ImGui::Text("%u", funcPPUDotsUntilVBlank());
+            else
+                ImGui::Text("LCD off");
+            break;
+        default:
+            ImGui::Text("");
+            break;
     }
 }
 

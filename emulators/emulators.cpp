@@ -147,6 +147,11 @@ void Emulators::run(const std::function<void(const char*)>& showFileBrowser, con
             [this] () -> const NoiseChannel& { return emulatorDMG->managerAPU->getChannelNoise(); },
             [this] (uint8_t channel) { return emulatorDMG->managerAPU->channelOutput(channel); }
         );
+        debuggerDebugger->setPPUCallbacks(
+            [this] () { return emulatorDMG->managerPPU->getWindowLine(); },
+            [this] () { return emulatorDMG->managerPPU->getRemainingDotsInMode(); },
+            [this] () { return emulatorDMG->managerPPU->getDotsUntilVBlank(); }
+        );
         debuggerDebugger->setRomImage(emulatorDMG->managerCartridge->romImageData(), (uint32_t)emulatorDMG->managerCartridge->romImageSize());
         debuggerDebugger->setCartridgeCallbacks(
             [this] () { return emulatorDMG->managerCartridge->currentRomBank(); },

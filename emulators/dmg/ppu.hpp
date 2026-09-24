@@ -28,6 +28,10 @@ public:
 
     void setCGBMode(bool state) { cgbMode = state; }
 
+    uint8_t getWindowLine() const { return windowLine; }
+    uint32_t getRemainingDotsInMode() const;
+    uint32_t getDotsUntilVBlank() const;
+
 private:
     Logger& logger;
     DMG_MMU& mmu;
@@ -36,6 +40,9 @@ private:
     uint32_t dotCycles = 0;
     uint32_t* framebuffer = nullptr;
     uint8_t windowLine = 0;
+    bool windowYTriggered = false;
+    bool lineStartPending = true;
+    uint32_t mode3End = DOTS_MODE3_END;
 
     // CGB related
     bool cgbMode = false;
@@ -44,9 +51,12 @@ private:
     bool scanlineBGPriority[160] {};
 
     void renderScanline(uint8_t ly);
+    void beginLine(uint8_t ly);
     void renderBackground(uint8_t ly);
     void renderWindow(uint8_t ly);
     void renderSprites(uint8_t ly);
+    int selectSprites(uint8_t ly, OAMSprite out[10]) const;
+    uint32_t computeMode3Length(uint8_t ly) const;
     uint32_t applyPalette(uint8_t paletteReg, uint8_t colorId) const;
     uint8_t tileColorId(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const;
 
@@ -70,6 +80,12 @@ private:
     uint16_t addressTiles1 = 0x9C00;
 
     uint16_t addressVRAMStart = 0x8000;
+
+    static constexpr uint32_t DOTS_PER_LINE = 456;
+    static constexpr uint32_t DOTS_MODE2_END = 80;
+    static constexpr uint32_t DOTS_MODE3_END = 252;
+    static constexpr uint32_t DOTS_MODE3_MIN = 172;
+    static constexpr uint32_t DOTS_MODE3_MAX = 289;
 
     TilePixel tileColorIdCGB(uint16_t tilemapBase, bool signedAddr, uint8_t tileCol, uint8_t tileRow, uint8_t pixelRow, uint8_t pixelCol) const;
     uint32_t applyCGBPalette(const std::array<uint8_t, 64>& paletteRAM, uint8_t paletteNum, uint8_t colorId) const;

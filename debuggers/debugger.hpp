@@ -43,6 +43,9 @@ public:
                          std::function<const WaveChannel&()> const& channelWave,
                          std::function<const NoiseChannel&()> const& channelNoise,
                          std::function<uint8_t(uint8_t)> const& channelOutput);
+    void setPPUCallbacks(std::function<uint8_t()> const& windowLine,
+                         std::function<uint32_t()> const& remainingDotsInMode,
+                         std::function<uint32_t()> const& dotsUntilVBlank);
     void setMemory(const char* emuType, uint32_t size, bool isCGB);
     void release();
     void render(bool* windowOpened, DMGCpuRegisters& registers);
@@ -73,6 +76,9 @@ private:
     std::function<void()> funcStepInstruction;
     std::function<uint8_t(uint16_t, uint8_t)> funcVramBankRead;
     std::function<void(uint16_t, uint8_t, uint8_t)> funcVramBankWrite;
+    std::function<uint8_t()> funcPPUWindowLine;
+    std::function<uint32_t()> funcPPURemainingDotsInMode;
+    std::function<uint32_t()> funcPPUDotsUntilVBlank;
 
     std::function<const PulseChannel& ()> funcAPUChannel1;
     std::function<const PulseChannel& ()> funcAPUChannel2;
@@ -177,6 +183,7 @@ private:
     void renderWavePattern() const;
     void renderAPUChannelData(uint8_t channel, uint8_t prop) const;
     void renderKEY1Speed() const;
+    void renderPPUData(uint8_t prop) const;
 
     static constexpr int cpuLoadHistorySize = 90;
     float cpuLoadHistory[cpuLoadHistorySize] = {};

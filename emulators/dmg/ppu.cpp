@@ -1,6 +1,7 @@
 #include "ppu.hpp"
 
 #include <algorithm>
+#include <climits>
 
 #include "emulators/dmg/interrupt.hpp"
 #include "utilities/logger.hpp"
@@ -15,6 +16,66 @@ void DMG_PPU::clearResources() {
     lastPPUMode = 0xFF;
     mmu.memory[addressLY] = 0; // LY
     mmu.memory[addressSTAT] = (mmu.memory[addressSTAT] & 0xFC) | 2; // STAT
+    windowYTriggered = false;
+    lineStartPending = true;
+    mode3End = DOTS_MODE3_END;
+}
+
+void DMG_PPU::beginLine(uint8_t ly) {
+    if (ly == 0) {
+        windowLine = 0;
+        windowYTriggered = false;
+    }
+    if (ly == mmu.memory[addressWY])
+        windowYTriggered = true;
+    mode3End = (ly < 144) ? DOTS_MODE2_END + computeMode3Length(ly) : DOTS_MODE3_END;
+}
+
+uint32_t DMG_PPU::computeMode3Length(uint8_t ly) const {
+    uint8_t lcdc = mmu.memory[addressLCDC];
+    uint8_t scxFine = mmu.memory[0xFF43] & 7;
+    uint32_t length = DOTS_MODE3_MIN + scxFine;
+
+    int wx = mmu.memory[addressWX];
+    bool windowOnLine = (lcdc & 0x20) && windowYTriggered && wx < 167;
+    if (windowOnLine)
+        length += 6;
+
+    if (lcdc & 0x02) {
+        OAMSprite sprites[10];
+        int count = selectSprites(ly, sprites);
+        std::stable_sort(sprites, sprites + count, [] (const OAMSprite& a, const OAMSprite& b) { return a.x < b.x; });
+
+        int lastTileKey = INT_MIN;
+        for (int i = 0; i < count; i++) {
+            uint8_t x = sprites[i].x;
+            if (x >= 168)
+                continue; // off-screen right
+            if (x == 0) {
+                length += 11;
+                continue;
+            }
+            int screenX = x - 8;
+            int offset;
+            int tileKey;
+            if (windowOnLine && screenX >= wx - 7) {
+                int winX = screenX - (wx - 7);
+                offset = winX & 7;
+                tileKey = 0x10000 + (winX >> 3);
+            }
+            else {
+                int bgX = screenX + scxFine + 8;
+                offset = bgX & 7;
+                tileKey = bgX >> 3;
+            }
+            if (tileKey != lastTileKey) {
+                lastTileKey = tileKey;
+                length += std::max(0, 5 - offset);
+            }
+            length += 6;
+        }
+    }
+    return std::min(length, DOTS_MODE3_MAX);
 }
 
 void DMG_PPU::step(uint32_t cycles) {
@@ -26,12 +87,19 @@ void DMG_PPU::step(uint32_t cycles) {
         mmu.memory[addressSTAT] = mmu.memory[addressSTAT] & 0xF8;
         dotCycles = 0;
         windowLine = 0;
+        windowYTriggered = false;
+        lineStartPending = true;
+        mode3End = DOTS_MODE3_END;
         lastPPUMode = 0xFF;
         return;
     }
+    if (lineStartPending) {
+        lineStartPending = false;
+        beginLine(mmu.memory[addressLY]);
+    }
     dotCycles += cycles;
-    while (dotCycles >= 456) {
-        dotCycles -= 456;
+    while (dotCycles >= DOTS_PER_LINE) {
+        dotCycles -= DOTS_PER_LINE;
         uint8_t ly = mmu.memory[addressLY];
         if (ly < 144 && framebuffer)
             renderScanline(ly);
@@ -39,19 +107,18 @@ void DMG_PPU::step(uint32_t cycles) {
         mmu.memory[addressLY] = ly;
         if (ly == 144)
             interrupts.setInterruptFlag(INTERRUPT_VBLANK);
-        if (ly > 153) {
+        if (ly > 153)
             mmu.memory[addressLY] = 0;
-            windowLine = 0;
-        }
+        beginLine(mmu.memory[addressLY]);
         if (mmu.memory[addressLY] == mmu.memory[addressLYC] && (mmu.memory[addressSTAT] & 0x40))
             interrupts.setInterruptFlag(INTERRUPT_LCD);
     }
     uint8_t mode;
     if (mmu.memory[addressLY] >= 144)
         mode = 1;
-    else if (dotCycles < 80)
+    else if (dotCycles < DOTS_MODE2_END)
         mode = 2;
-    else if (dotCycles < 252)
+    else if (dotCycles < mode3End)
         mode = 3;
     else
         mode = 0;
@@ -118,6 +185,24 @@ void DMG_PPU::renderScanline(uint8_t ly) {
     renderSprites(ly);
 }
 
+uint32_t DMG_PPU::getRemainingDotsInMode() const {
+    if (uint8_t ly = mmu.memory[addressLY]; ly >= 144)
+        return (153 - ly) * DOTS_PER_LINE + (DOTS_PER_LINE - dotCycles);
+    if (dotCycles < DOTS_MODE2_END)
+        return DOTS_MODE2_END - dotCycles;
+    if (dotCycles < mode3End)
+        return mode3End - dotCycles;
+    return DOTS_PER_LINE - dotCycles;
+}
+
+uint32_t DMG_PPU::getDotsUntilVBlank() const {
+    uint8_t ly = mmu.memory[addressLY];
+    uint32_t toLineEnd = DOTS_PER_LINE - dotCycles;
+    if (ly < 144)
+        return (143 - ly) * DOTS_PER_LINE + toLineEnd;
+    return (153 - ly) * DOTS_PER_LINE + toLineEnd + 144 * DOTS_PER_LINE;
+}
+
 void DMG_PPU::renderBackground(uint8_t ly) {
     uint8_t lcdc = mmu.memory[addressLCDC];
     if (!cgbMode && !(lcdc & 0x01)) {
@@ -157,8 +242,7 @@ void DMG_PPU::renderWindow(uint8_t ly) {
     if (!(lcdc & 0x20))
         return;
     
-    uint8_t wy = mmu.memory[addressWY];
-    if (ly < wy)
+    if (!windowYTriggered)
         return;
     
     int wx = (int)mmu.memory[addressWX] - 7;
@@ -191,29 +275,32 @@ void DMG_PPU::renderWindow(uint8_t ly) {
         windowLine++;
 }
 
+int DMG_PPU::selectSprites(uint8_t ly, OAMSprite out[10]) const {
+    uint8_t sprH = (mmu.memory[addressLCDC] & 0x04) ? 16 : 8;
+    int count = 0;
+    for (int i = 0; i < 40 && count < 10; i++) {
+        uint8_t sy = mmu.memory[addressTilesOBJ + i * 4];
+        if (ly + 16 >= sy && ly + 16 < sy + sprH)
+            out[count++] = { sy, mmu.memory[addressTilesOBJ + i * 4 + 1], mmu.memory[addressTilesOBJ + i * 4 + 2], mmu.memory[addressTilesOBJ + i * 4 + 3], i };
+    }
+    return count;
+}
+
 void DMG_PPU::renderSprites(uint8_t ly) {
     uint8_t lcdc = mmu.memory[addressLCDC];
     if (!(lcdc & 0x02)) return;
     uint8_t sprH = (lcdc & 0x04) ? 16 : 8;
 
-    struct Sprite { uint8_t y, x, tile, flags; int oamIndex; };
-    Sprite visible[10];
-    int count = 0;
-
-    for (int i = 0; i < 40 && count < 10; i++) {
-        uint8_t sy = mmu.memory[addressTilesOBJ + i * 4];
-        uint8_t sx = mmu.memory[addressTilesOBJ + i * 4 + 1];
-        if (ly + 16 >= sy && ly + 16 < sy + sprH)
-            visible[count++] = { sy, sx, mmu.memory[addressTilesOBJ + i * 4 + 2], mmu.memory[addressTilesOBJ + i * 4 + 3], i };
-    }
+    OAMSprite visible[10];
+    int count = selectSprites(ly, visible);
 
     if (!cgbMode)
-        std::stable_sort(visible, visible + count, [] (const Sprite& a, const Sprite& b) { return a.x < b.x; }); // X ascending for DMG
+        std::stable_sort(visible, visible + count, [] (const OAMSprite& a, const OAMSprite& b) { return a.x < b.x; }); // X ascending for DMG
 
     bool masterPriority = (lcdc & 0x01) != 0;
 
     for (int i = count - 1; i >= 0; i--) {
-        const Sprite& s = visible[i];
+        const OAMSprite& s = visible[i];
         int screenX = (int)s.x - 8;
         int screenY = (int)s.y - 16;
         int pixelRow = (int)ly - screenY;
